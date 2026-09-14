@@ -1,6 +1,19 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
+
+export const connectDB = async () => {
+    try {
+        console.log("URI đang kết nối:", process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log('MongoDB connected successfully');
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    }
+};
+
+
 const bookCopySchema = new mongoose.Schema({
     status: { type: String, required: true, default: 'Available' } // Available, Borrowed, Damaged
 });
@@ -57,14 +70,3 @@ export const Librarians = mongoose.model('Librarian', librarianSchema);
 export const Readers = mongoose.model('Reader', readerSchema);
 export const BorrowCards = mongoose.model('BorrowCard', borrowCardSchema);
 export const Fines = mongoose.model('Fine', fineSchema);
-
-export const connectDB = async () => {
-    try {
-        console.log("URI đang kết nối:", process.env.MONGODB_URI); // Thêm dòng này để kiểm tra
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log('MongoDB connected successfully');
-    } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-        process.exit(1);
-    }
-};

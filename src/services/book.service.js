@@ -1,9 +1,11 @@
 import * as db from '../models/init.js';
 import * as apiError from '../utils/api-error.js';
 
+
 const getAllBooks = async () => {
     return await db.Books.find({}).sort({ createdAt: -1 });
 };
+
 
 const getBookById = async (bookId) => {
     const bookItem = await db.Books.findById(bookId);
@@ -15,6 +17,7 @@ const getBookById = async (bookId) => {
     return bookItem;
 };
 
+
 const createBook = async (bookData) => {
     return await db.Books.create({
         title: bookData.title,
@@ -23,6 +26,7 @@ const createBook = async (bookData) => {
         category: bookData.category
     });
 };
+
 
 const updateBook = async (bookId, bookData) => {
     const bookItem = await getBookById(bookId);
