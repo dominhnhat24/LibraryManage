@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
-import bookRoutes from './src/routes/bookRoutes.js';
+import bookRouter from './src/routes/book.route.js';
+import bookCopiesRouter from './src/routes/bookCopies.route.js';
+import readerRouter from './src/routes/reader.route.js';
 import { connectDB } from './src/models/init.js';
 //import { notFoundHandler, errorHandler } from './middleware/errorHandlers.js';
 
@@ -21,11 +23,10 @@ app.get('/', (req, res) => {
     });
 });
 
-// Main challenge routes. Use /api prefix to keep API URLs organized.
-app.use('/api/books', bookRoutes);
+app.use('/api/v1/books', bookRouter);
+app.use('/api/v1/book-copies', bookCopiesRouter);
+app.use('/api/v1/readers', readerRouter);
 
-// Temporary aliases keep your old URLs working while you learn the /api convention.
-app.use('/books', bookRoutes);
 
 //app.use(notFoundHandler);
 //app.use(errorHandler);

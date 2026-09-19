@@ -15,15 +15,24 @@ export const connectDB = async () => {
 
 
 const bookCopySchema = new mongoose.Schema({
-    status: { type: String, required: true, default: 'Available' } // Available, Borrowed, Damaged
-});
+    bookId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Book', // Trỏ tới bảng Books
+        required: true 
+    },
+    status: { 
+        type: String, 
+        required: true, 
+        default: 'Available' // 'Available', 'Borrowed', 'Damaged', v.v.
+    }
+}, { timestamps: true });
+
 
 const bookSchema = new mongoose.Schema({
     title: { type: String, required: true },
     author: { type: String, required: true },
     publish_year: { type: Number },
     category: { type: String },
-    copies: [bookCopySchema] // Mảng chứa các bản sao vật lý của sách
 }, { timestamps: true });
 
 const librarianSchema = new mongoose.Schema({
@@ -66,6 +75,7 @@ const fineSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export const Books = mongoose.model('Book', bookSchema);
+export const BookCopy = mongoose.model('BookCopy', bookCopySchema);
 export const Librarians = mongoose.model('Librarian', librarianSchema); 
 export const Readers = mongoose.model('Reader', readerSchema);
 export const BorrowCards = mongoose.model('BorrowCard', borrowCardSchema);
