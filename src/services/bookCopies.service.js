@@ -4,10 +4,11 @@ import apiError from '../utils/api-error.js';
 // 1. Lấy tất cả bản sao
 export const getAllBookCopies = async () => {
     const copies = await db.BookCopy.find().populate('bookId');
+    /* .populate là một tính năng join dùng để kết nối các value của một dữ liệu theo id trong một trường 
+       dữ liệu */
     return copies;
 };
 
-// 2. Lấy bản sao theo ID (Dòng 22 lỗi nằm ở đây)
 export const getBookCopyById = async (copyId) => {
     const copy = await db.BookCopy.findById(copyId).populate('bookId');
     if (!copy) {

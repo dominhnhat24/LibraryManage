@@ -11,6 +11,7 @@ const bookMustExist = async (bookId) => {
     // Nếu dùng Mongoose (MongoDB): db.Books.findById(bookId)
     // Nếu dùng Sequelize (SQL): db.Books.findByPk(bookId)
     const book = await db.Books.findByPk(bookId);
+    
     if (!book) {
         throw new Error('bookId không tồn tại trên hệ thống');
     }
@@ -31,6 +32,17 @@ export const validateCreateBook = [
 export const validateUpdateBook = [
     // Bắt buộc phải truyền ít nhất 1 trường hợp lệ trong allowedBookFields
     body()
+        // value là object req.body (lớp JSON mà client gửi lên)
+        //field là tên của trường dữ liệu đang được xét tới trong mản allowedBookFields
+        //hasOwnProperty(field): Dùng để kiểm tra xem value có thực sự chứa trực tiếp thuộc tính field đó hay không.
+        //Object.prototype là một hàm kế thừa của JS mà mọi Object đều có thể sử dụng
+        //trong Object.prototype có hàm hasOwnProperty
+        //hàm hasOwnProperty và some 
+        //some quét qua các field có trong mảng của allowedBookFields 
+
+        /*hasOwnProperty sẽ kiểm tra các field đó 
+        có thật sự tồn tại không khi some quét qua và trả về kiểu dữ liệu Bool */
+        
         .custom((value) => allowedBookFields.some((field) => Object.prototype.hasOwnProperty.call(value, field)))
         .withMessage('At least one book field must be provided'),
 
