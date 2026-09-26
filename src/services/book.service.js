@@ -1,69 +1,95 @@
-const db = require('../../models');
-const ApiError = require('../utils/api-error');
+import * as db from '../models/init.js';
+import apiError from '../utils/api-error.js';
+import { getPaginationAndFilter } from '../utils/apiFeatures.js';
 
-const getAllBooks = async () => {
-    return await db.Books.findAll({
-        order: [['book_id', 'ASC']]
-    });
-};
+// queryParams gồm có: filter, skip, limit, page, sort
+const getAllBooks = async (queryParams) => {
+    // Chỉ định các trường cho phép tìm kiếm trong bảng Books
+    const { filter, skip, limit, page, sort } = getPaginationAndFilter(queryParams, ['title', 'author']);
 
-const getBookById = async (bookId) => {
-    const bookItem = await db.Books.findByPk(bookId);
-
-    if (!bookItem) {
-        throw new ApiError(404, 'Book not found');
+    if (queryParams.category) {
+        filter.category = queryParams.category;
     }
 
+    const [books, total] = await Promise.all([
+        db.Books.find(filter).sort(sort).skip(skip).limit(limit).lean(),
+        db.Books.countDocuments(filter)
+    ]);
+
+    return {
+        data: books,
+        pagination: {
+            totalItems: total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+            limit: limit
+        }
+    };
+};
+
+
+const getBookById = async (bookId) => {
+    const bookItem = await db.Books.findById(bookId).populate('copies');
+    if (!bookItem) {
+        throw new apiError(404, 'Book not found');
+    }
     return bookItem;
 };
 
+
 const createBook = async (bookData) => {
     return await db.Books.create({
-        book_name: bookData.book_name,
+        title: bookData.title,
         author: bookData.author,
-        isbn: bookData.isbn
+        publish_year: bookData.publish_year,
+        category: bookData.category
     });
 };
 
+
 const updateBook = async (bookId, bookData) => {
     const bookItem = await getBookById(bookId);
-    const updateData = {};
 
-    if (Object.prototype.hasOwnProperty.call(bookData, 'book_name')) {
-        updateData.book_name = bookData.book_name;
+    if (Object.prototype.hasOwnProperty.call(bookData, 'title')) {
+        bookItem.title = bookData.title;
     }
 
     if (Object.prototype.hasOwnProperty.call(bookData, 'author')) {
-        updateData.author = bookData.author;
+        bookItem.author = bookData.author;
     }
 
-    if (Object.prototype.hasOwnProperty.call(bookData, 'isbn')) {
-        updateData.isbn = bookData.isbn;
+    if (Object.prototype.hasOwnProperty.call(bookData, 'publish_year')) {
+        bookItem.publish_year = bookData.publish_year;
     }
 
-    await bookItem.update(updateData);
+    if (Object.prototype.hasOwnProperty.call(bookData, 'category')) {
+        bookItem.category = bookData.category;
+    }
+
+    await bookItem.save();
 
     return bookItem;
 };
 
 const deleteBook = async (bookId) => {
-    const bookItem = await getBookById(bookId);
-    await bookItem.destroy();
-};
+    // 1. Kiểm tra xem đầu sách có tồn tại không (hàm getBookById đã lo việc này và ném lỗi 404 nếu không thấy)
+    await getBookById(bookId);
 
-    if (enrollmentCount > 0) {
-        throw new ApiError(409, 'Cannot delete book because it still has enrollments');
+    // 2. Dùng countDocuments để kiểm tra xem bảng BookCopy còn bản sao nào của sách này không
+    const copyCount = await db.BookCopy.countDocuments({ bookId: bookId });
+    
+    if (copyCount > 0) {
+        throw new apiError(409, 'Cannot delete book because it still has physical copies in inventory');
     }
 
-    await bookItem.destroy();
+    // 3. Nếu không còn bản sao nào, tiến hành xóa đầu sách
+    await db.Books.findByIdAndDelete(bookId);
 };
 
-
-
-module.exports = {
+export default {
     getAllBooks,
     getBookById,
     createBook,
     updateBook,
     deleteBook
-}
+};
