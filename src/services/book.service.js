@@ -5,7 +5,7 @@ import { getPaginationAndFilter } from '../utils/apiFeatures.js';
 // queryParams gồm có: filter, skip, limit, page, sort
 const getAllBooks = async (queryParams) => {
     // Chỉ định các trường cho phép tìm kiếm trong bảng Books
-    const { filter, skip, limit, page, sort } = getPaginationAndFilter(queryParams, ['title', 'author']);
+    const { filter, skip, limit, page, sort } = getPaginationAndFilter(queryParams, ['title', 'author', 'category']);
 
     if (queryParams.category) {
         filter.category = queryParams.category;
@@ -39,10 +39,12 @@ const getBookById = async (bookId) => {
 
 const createBook = async (bookData) => {
     return await db.Books.create({
+        isbn: bookData.isbn,
         title: bookData.title,
         author: bookData.author,
         publish_year: bookData.publish_year,
-        category: bookData.category
+        category: bookData.category,
+        description: bookData.description
     });
 };
 
@@ -50,20 +52,10 @@ const createBook = async (bookData) => {
 const updateBook = async (bookId, bookData) => {
     const bookItem = await getBookById(bookId);
 
-    if (Object.prototype.hasOwnProperty.call(bookData, 'title')) {
-        bookItem.title = bookData.title;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(bookData, 'author')) {
-        bookItem.author = bookData.author;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(bookData, 'publish_year')) {
-        bookItem.publish_year = bookData.publish_year;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(bookData, 'category')) {
-        bookItem.category = bookData.category;
+    for (const field of ['isbn', 'title', 'author', 'publish_year', 'category', 'description']) {
+        if (Object.prototype.hasOwnProperty.call(bookData, field)) {
+            bookItem[field] = bookData[field];
+        }
     }
 
     await bookItem.save();

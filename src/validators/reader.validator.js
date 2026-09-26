@@ -9,6 +9,8 @@ export const validateReaderQuery = [
 export const validateCreateReader = [
     body('full_name').trim().isLength({ min: 2, max: 150 }),
     body('email').isEmail(),
+    body('password').isString().isLength({ min: 6, max: 128 })
+        .withMessage('Password must be between 6 and 128 characters long'),
     body('phone').optional().isString().trim(),
     body('address').optional().isString().trim()
 ];

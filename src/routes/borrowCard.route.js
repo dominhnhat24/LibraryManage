@@ -7,7 +7,7 @@ import validateRequest from '../middlewares/validate-request.js';
 
 const router = express.Router();
 router.use(loginRequired, checkRole('reader', 'librarian'));
-router.post('/', checkRole('reader'), validateCreateBorrowCard, validateRequest, controller.createBorrowCard);
+router.post('/', validateCreateBorrowCard, validateRequest, controller.createBorrowCard);
 router.get('/', validateBorrowCardQuery, validateRequest, controller.listBorrowCards);
 router.get('/:id', validateBorrowCardId, validateRequest, controller.getBorrowCard);
 router.patch('/:id/cancel', checkRole('reader'), validateBorrowCardId, validateRequest, controller.cancelBorrowCard);

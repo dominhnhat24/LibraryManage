@@ -5,7 +5,9 @@ import * as service from '../services/borrowCard.service.js';
 export const createBorrowCard = asyncHandler(async (req, res) => successResponse(res, {
     statusCode: 201, message: 'Borrow card created successfully',
     data: await service.createBorrowCard({
-        readerId: req.user.sub || req.user.id,
+        readerId: ['librarian', 'admin'].includes(String(req.user.role || req.user.roll || '').toLowerCase())
+            ? req.body.readerId
+            : req.user.sub || req.user.id,
         copyIds: req.body.copyIds,
         dueDate: req.body.dueDate
     })

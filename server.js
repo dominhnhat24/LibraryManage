@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import bookRouter from './src/routes/book.route.js';
@@ -12,9 +13,29 @@ import borrowCardRouter from './src/routes/borrowCard.route.js';
 import fineRouter from './src/routes/fine.route.js';
 import apiError from './src/utils/api-error.js';
 import librarianRouter from './src/routes/librarian.route.js';
+import dashboardRouter from './src/routes/dashboard.route.js';
 
 export const app = express();
 const PORT = process.env.PORT || 5001;
+const configuredOrigins = new Set(
+    (process.env.CORS_ORIGINS || '')
+        .split(',')
+        .map(origin => origin.trim())
+        .filter(Boolean)
+);
+
+app.use(cors({
+    origin(origin, callback) {
+        const isLocalDevelopmentOrigin = typeof origin === 'string'
+            && /^http:\/\/(?:localhost|127(?:\.\d{1,3}){3}|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}):\d+$/.test(origin);
+        const isAllowed = !origin
+            || configuredOrigins.has(origin)
+            || (process.env.NODE_ENV !== 'production' && isLocalDevelopmentOrigin);
+        callback(null, isAllowed);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware để đọc dữ liệu JSON từ request body
 app.use(express.json());
@@ -35,6 +56,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/borrow-cards', borrowCardRouter);
 app.use('/api/v1/fines', fineRouter);
 app.use('/api/v1/librarians', librarianRouter);
+app.use('/api/v1/dashboard', dashboardRouter);
 
 app.use((req, res, next) => next(new apiError(404, `Route not found: ${req.method} ${req.originalUrl}`)));
 app.use(errorHandler);

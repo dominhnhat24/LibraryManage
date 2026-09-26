@@ -1,7 +1,7 @@
 import { body, query, param } from 'express-validator';
 import * as db from '../models/init.js';
 
-const allowedBookFields = ['title', 'author', 'publish_year', 'category'];
+const allowedBookFields = ['isbn', 'title', 'author', 'publish_year', 'category', 'description'];
 
 // Hàm kiểm tra sách có tồn tại trong DB không
 const bookMustExist = async (bookId) => {
@@ -17,6 +17,7 @@ const bookMustExist = async (bookId) => {
 // 1. Validate TẠO SÁCH MỚI (POST /api/books)
 // Note: Không validate book_id vì ID do Database tự sinh
 export const validateCreateBook = [
+    body('isbn').optional({ values: 'falsy' }).trim().isLength({ max: 32 }),
     body('title')
         .exists({ checkFalsy: true })
         .withMessage('title is required')
@@ -24,7 +25,9 @@ export const validateCreateBook = [
         .isLength({ min: 2, max: 255 })
         .withMessage('title must be between 2 and 255 characters'),
     body('author').exists({ checkFalsy: true }).isLength({ min: 2, max: 255 }),
-    body('publish_year').optional().isInt({ min: 0, max: 3000 })
+    body('publish_year').optional().isInt({ min: 0, max: 3000 }),
+    body('category').optional().isString().trim().isLength({ max: 120 }),
+    body('description').optional().isString().trim().isLength({ max: 5000 })
 ];
 
 // 2. Validate CẬP NHẬT SÁCH (PUT/PATCH /api/books/:id)
@@ -56,6 +59,12 @@ export const validateUpdateBook = [
         .optional()
         .isLength({ min: 2, max: 255 })
         .withMessage('title must be between 2 and 255 characters')
+    ,
+    body('isbn').optional({ values: 'falsy' }).trim().isLength({ max: 32 }),
+    body('author').optional().isLength({ min: 2, max: 255 }),
+    body('publish_year').optional().isInt({ min: 0, max: 3000 }),
+    body('category').optional().isString().trim().isLength({ max: 120 }),
+    body('description').optional().isString().trim().isLength({ max: 5000 })
 ];
 
 // 3. Validate LẤY DẠNH SÁCH SÁCH (GET /api/books?page=1&limit=10)

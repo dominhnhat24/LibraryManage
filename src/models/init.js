@@ -33,10 +33,12 @@ bookCopySchema.index({ bookId: 1, status: 1 });
 
 
 const bookSchema = new mongoose.Schema({
+    isbn: { type: String, trim: true, unique: true, sparse: true },
     title: { type: String, required: true },
     author: { type: String, required: true },
     publish_year: { type: Number },
     category: { type: String },
+    description: { type: String, trim: true },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 bookSchema.virtual('copies', {
     ref: 'BookCopy',

@@ -9,6 +9,7 @@ const getAllBookCopies = asyncHandler(async (req, res) => {
 
     const formattedCopies = copies.map(copy => ({
         copyId: copy._id,
+        bookId: copy.bookId?._id?.toString(),
         bookTitle: copy.bookId?.title || 'Unknown',
         author: copy.bookId?.author || 'Unknown',
         status: copy.status,

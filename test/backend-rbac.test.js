@@ -34,6 +34,15 @@ const request = (path, { role, method = 'GET', body } = {}) => fetch(`${baseUrl}
 test('reader records require authentication and Librarian role', async () => {
     assert.equal((await request('/api/v1/readers')).status, 401);
     assert.equal((await request('/api/v1/readers', { role: 'reader' })).status, 403);
+    assert.equal((await request('/api/v1/readers', { role: 'ADMIN', method: 'POST', body: {} })).status, 400);
+    const missingPassword = await request('/api/v1/readers', {
+        role: 'librarian',
+        method: 'POST',
+        body: { full_name: 'New Reader', email: 'reader@example.com' }
+    });
+    assert.equal(missingPassword.status, 400);
+    const validation = await missingPassword.json();
+    assert.ok(validation.violations.some(({ path }) => path === 'password'));
 });
 
 test('book and book-copy mutations require a Librarian token', async () => {
@@ -58,12 +67,21 @@ test('Librarian management is not accessible to readers', async () => {
     assert.equal((await request('/api/v1/librarians', { role: 'reader' })).status, 403);
 });
 
-test('borrow-card creation and cancellation are Reader-only', async () => {
-    assert.equal((await request('/api/v1/borrow-cards', {
+test('dashboard summary requires an authenticated Librarian', async () => {
+    assert.equal((await request('/api/v1/dashboard')).status, 401);
+    assert.equal((await request('/api/v1/dashboard', { role: 'reader' })).status, 403);
+});
+
+test('borrow-card creation accepts librarian authorization and validates input', async () => {
+    const response = await request('/api/v1/borrow-cards', {
         role: 'librarian',
         method: 'POST',
         body: {}
-    })).status, 403);
+    });
+    assert.equal(response.status, 400);
+    const result = await response.json();
+    assert.equal(result.status, 'error');
+    assert.equal(result.message, 'Request validation failed');
     assert.equal((await request('/api/v1/borrow-cards/507f1f77bcf86cd799439011/cancel', {
         role: 'librarian',
         method: 'PATCH'
