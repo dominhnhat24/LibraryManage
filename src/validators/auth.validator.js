@@ -1,37 +1,27 @@
-const { body, validationResult } = require('express-validator');
-
-// Middleware xử lý kết quả validation chung
-const validateResult = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'Validation Error',
-            errors: errors.array()
-        });
-    }
-    next();
-};
+import { body } from 'express-validator';
 
 // Quy tắc validate cho Đăng ký
 const validateRegister = [
     body('username')
-        .notEmpty().withMessage('Username is required')
-        .isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 80 }).withMessage('Username must be between 3 and 80 characters long'),
+    body('full_name')
+        .if((value, { req }) => !req.body.username)
+        .trim()
+        .notEmpty().withMessage('full_name is required')
+        .isLength({ min: 2, max: 150 }).withMessage('full_name must be between 2 and 150 characters long'),
     body('email')
         .notEmpty().withMessage('Email is required')
+        .trim()
+        .toLowerCase()
         .isEmail().withMessage('Invalid email format'),
     body('password')
         .notEmpty().withMessage('Password is required')
-        .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+        .isLength({ min: 6, max: 128 }).withMessage('Password must be between 6 and 128 characters long'),
     body('phone')
-        .notEmpty().withMessage('Phone number is required')
-        .isMobilePhone('vi-VN').withMessage('Invalid phone number format'),
-    body('cccd')
-        .notEmpty().withMessage('CCCD is required')
-        .isLength({ min: 12, max: 12 }).withMessage('CCCD must be exactly 12 digits')
-        .isNumeric().withMessage('CCCD must contain only numbers'),
-    validateResult
+        .optional()
+        .isMobilePhone('vi-VN').withMessage('Invalid phone number format')
 ];
 
 // Quy tắc validate cho Đăng nhập
@@ -40,11 +30,10 @@ const validateLogin = [
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email format'),
     body('password')
-        .notEmpty().withMessage('Password is required'),
-    validateResult
+        .notEmpty().withMessage('Password is required')
 ];
 
-module.exports = {
+export {
     validateRegister,
     validateLogin
 };

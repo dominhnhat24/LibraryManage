@@ -41,7 +41,8 @@
 * `PUT /api/readers/:id`: Cập nhật thông tin.
 * `DELETE /api/readers/:id`: Xóa/Khóa thẻ độc giả (đổi `status`).
 
-
+### 4.1 Module Librarian (Thủ thư)
+* **
 ### 5. Module Borrow Card (Nghiệp vụ Mượn - Trả sách) - Cốt lõi logic
 * **Mục tiêu:** Xử lý toàn bộ luồng mượn và trả sách, tác động trực tiếp đến kho (`Books_Copies`) và tiền phạt (`Fines`).
 * **Các API cần có:**
@@ -80,10 +81,21 @@
 2. **Module Books & Book Copies:** Viết API quản lý sách, áp dụng chuẩn phân trang, dynamic filter, `Promise.all` như đã phân tích ở phần trước.
 
 ### Bước 4: Triển khai Module Phức tạp nhất (Borrow Card)
-1. Viết logic tạo phiếu mượn (phải dùng **Database Transaction** để đảm bảo nếu lỗi ở một bước thì toàn bộ quá trình mượn sách bị hủy, tránh việc trừ sách trong kho nhưng không tạo được phiếu mượn).
-2. Viết logic trả sách và tự động sinh tiền phạt vào bảng `Fines` nếu quá hạn.
+1. Độc giả tạo phiếu mượn ở trạng thái `Pending`; thủ thư duyệt phiếu bằng transaction, đồng thời chuyển các bản sao khả dụng sang `Borrowed`.
+2. Thủ thư nhận trả toàn bộ hoặc từng phần bằng transaction; cập nhật trạng thái bản sao và phát sinh `Fine` nếu quá hạn, hỏng hoặc mất.
 
 ### Bước 5: Hoàn thiện Module Fines & Test tổng thể
 1. Xử lý API thanh toán tiền phạt.
 2. Dùng Postman test toàn bộ luồng:
 $$\text{Tạo sách} \rightarrow \text{Tạo độc giả} \rightarrow \text{Mượn sách} \rightarrow \text{Trả sách} \rightarrow \text{Phát sinh phạt}$$
+
+## API backend hiện tại
+
+- API được mount dưới tiền tố `/api/v1`; backend dùng MongoDB/Mongoose và ES Modules.
+- `GET /api/v1/readers` và `GET /api/v1/readers/:id` chỉ dành cho Librarian vì dữ liệu trả về có thông tin cá nhân.
+- Độc giả tạo/hủy phiếu mượn; Librarian duyệt/trả phiếu. Các thao tác duyệt/trả chỉ dùng namespace `/api/v1/borrow-cards/:id/approve|return`.
+- Reader chỉ xem BorrowCard/Fine của chính mình; Librarian có thể truy vấn toàn bộ.
+- `npm test` chạy các kiểm thử HTTP/RBAC không cần MongoDB. Để chạy transaction thực tế, cấu hình `MONGODB_URI` trỏ tới MongoDB Replica Set hoặc deployment hỗ trợ transactions.
+- Cần cấu hình `JWT_SECRET` bằng chuỗi bí mật ngẫu nhiên đủ mạnh trước khi chạy server; ứng dụng sẽ từ chối khởi động nếu thiếu biến này.
+- Có thể dùng [.env.example](./.env.example) làm mẫu; thay giá trị `JWT_SECRET` bằng secret riêng trước khi chạy và không commit file `.env`.
+- Chạy kiểm thử luồng MongoDB thật bằng PowerShell: `$env:RUN_DB_INTEGRATION = '1'; npm test`. Test dùng dữ liệu định danh riêng và tự xóa các bản ghi mà nó tạo.

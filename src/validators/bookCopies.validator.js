@@ -1,7 +1,7 @@
-const { body, param } = require('express-validator');
-const db = require('../models'); // Đường dẫn đến file chứa các Mongoose Models của bạn
+import { body, param } from 'express-validator';
+import * as db from '../models/init.js';
 
-const validateCreateBookCopy = [
+export const validateCreateBookCopy = [
     // 1. Kiểm tra bookId có tồn tại và đúng chuẩn MongoDB ObjectId không
     body('bookId')
         .exists({ checkFalsy: true })
@@ -19,14 +19,12 @@ const validateCreateBookCopy = [
             return true;
         }),
 
-    // 2. Kiểm tra status (nếu có gửi lên thì phải đúng danh mục cho phép)
-    body('status')
-        .optional()
-        .isIn(['available', 'borrowed', 'damaged', 'maintenance'])
-        .withMessage('status must be one of: available, borrowed, damaged, maintenance')
+    body('quantity')
+        .isInt({ min: 1 })
+        .withMessage('quantity must be a positive integer')
 ];
 
-const validateUpdateBookCopy = [
+export const validateUpdateBookCopy = [
     // 1. Validate ID truyền trên URL params
     param('id')
         .isMongoId()
@@ -48,8 +46,8 @@ const validateUpdateBookCopy = [
     // 3. Validate chi tiết từng trường nếu nó xuất hiện trong request
     body('status')
         .optional()
-        .isIn(['available', 'borrowed', 'damaged', 'maintenance'])
-        .withMessage('status must be one of: available, borrowed, damaged, maintenance'),
+        .isIn(['Available', 'Borrowed', 'Damaged', 'Lost', 'Maintenance'])
+        .withMessage('Invalid book copy status'),
 
     body('condition')
         .optional()
@@ -59,8 +57,3 @@ const validateUpdateBookCopy = [
         .notEmpty()
         .withMessage('condition cannot be empty')
 ];
-
-module.exports = {
-    validateCreateBookCopy,
-    validateUpdateBookCopy
-};

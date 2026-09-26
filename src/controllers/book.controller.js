@@ -3,7 +3,7 @@ import asyncHandler from '../middlewares/async-handler.js';
 import successResponse  from '../utils/api.response.js';
 
 export const getAllBooks = asyncHandler(async (req, res) => {
-    const books = await BookService.getAllBooks();
+    const books = await BookService.getAllBooks(req.query);
     return successResponse(res, {
         message: 'Books retrieved successfully',
         data: books
@@ -43,4 +43,3 @@ export const deleteBook = asyncHandler(async (req, res) => {
         data: null
     });
 });
-

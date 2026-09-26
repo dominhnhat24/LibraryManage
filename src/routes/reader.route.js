@@ -1,15 +1,20 @@
 import express from 'express';
 import readerController from '../controllers/reader.controller.js';
+import { loginRequired } from '../middlewares/jwt.js';
+import { checkRole } from '../middlewares/checkRole.js';
+import validateRequest from '../middlewares/validate-request.js';
+import { validateCreateReader, validateReaderId, validateReaderQuery, validateUpdateReader } from '../validators/reader.validator.js';
 
 const router = express.Router();
+router.use(loginRequired, checkRole('librarian'));
 
 router.route('/')
-    .get(readerController.getAllReaders)   // Lấy danh sách độc giả
-    .post(readerController.createReader); // Đăng ký tài khoản độc giả mới
+    .get(validateReaderQuery, validateRequest, readerController.getAllReaders)
+    .post(validateCreateReader, validateRequest, readerController.createReader);
 
 router.route('/:id')
-    .get(readerController.getReaderById)    // Xem chi tiết độc giả
-    .put(readerController.updateReader)     // Cập nhật thông tin độc giả
-    .delete(readerController.deleteReader); // Xóa/Khóa tài khoản độc giả
+    .get(validateReaderId, validateRequest, readerController.getReaderById)
+    .put(validateUpdateReader, validateRequest, readerController.updateReader)
+    .delete(validateReaderId, validateRequest, readerController.deleteReader);
 
 export default router;

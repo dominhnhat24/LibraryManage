@@ -1,16 +1,13 @@
 import { body, query, param } from 'express-validator';
 import * as db from '../models/init.js';
-import * as apiError from '../utils/api-error.js';
 
-const allowedBookFields = ['bookId', 'title', 'author', 'publishYear', 'categoryId'];
+const allowedBookFields = ['title', 'author', 'publish_year', 'category'];
 
 // Hàm kiểm tra sách có tồn tại trong DB không
 const bookMustExist = async (bookId) => {
     if (!bookId) return;
     
-    // Nếu dùng Mongoose (MongoDB): db.Books.findById(bookId)
-    // Nếu dùng Sequelize (SQL): db.Books.findByPk(bookId)
-    const book = await db.Books.findByPk(bookId);
+    const book = await db.Books.findById(bookId);
     
     if (!book) {
         throw new Error('bookId không tồn tại trên hệ thống');
@@ -25,7 +22,9 @@ export const validateCreateBook = [
         .withMessage('title is required')
         .bail()
         .isLength({ min: 2, max: 255 })
-        .withMessage('title must be between 2 and 255 characters')
+        .withMessage('title must be between 2 and 255 characters'),
+    body('author').exists({ checkFalsy: true }).isLength({ min: 2, max: 255 }),
+    body('publish_year').optional().isInt({ min: 0, max: 3000 })
 ];
 
 // 2. Validate CẬP NHẬT SÁCH (PUT/PATCH /api/books/:id)
@@ -46,10 +45,10 @@ export const validateUpdateBook = [
         .custom((value) => allowedBookFields.some((field) => Object.prototype.hasOwnProperty.call(value, field)))
         .withMessage('At least one book field must be provided'),
 
-    body('book_id')
+    body('bookId')
         .optional()
         .isMongoId() // Đã bỏ { min: 1 } sai cú pháp
-        .withMessage('book_id must be a valid MongoDB ObjectId')
+        .withMessage('bookId must be a valid MongoDB ObjectId')
         .bail()
         .custom(bookMustExist),
 

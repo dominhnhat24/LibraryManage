@@ -2,8 +2,9 @@ import * as db from '../models/init.js';
 import apiError from '../utils/api-error.js';
 
 // 1. Lấy tất cả bản sao
-export const getAllBookCopies = async () => {
-    const copies = await db.BookCopy.find().populate('bookId');
+export const getAllBookCopies = async (bookId) => {
+    const filter = bookId ? { bookId } : {};
+    const copies = await db.BookCopy.find(filter).populate('bookId');
     /* .populate là một tính năng join dùng để kết nối các value của một dữ liệu theo id trong một trường 
        dữ liệu */
     return copies;
@@ -48,15 +49,16 @@ export const createBookCopy = async (bookId, quantity) => {
 
 // 4. Cập nhật trạng thái bản sao (Ví dụ: available -> borrowed)
 export const updateBookCopy = async (copyId, status) => {
-    const updatedCopy = await db.BookCopy.findByIdAndUpdate(
-        copyId,
-        { status },
-        { new: true, runValidators: true } // Trả về data mới sau khi update và check schema validation
-    );
-
-    if (!updatedCopy) {
-        throw new apiError.default(404, 'Book copy not found');
+    const copy = await db.BookCopy.findById(copyId);
+    if (!copy) {
+        throw new apiError(404, 'Book copy not found');
     }
+    if (copy.status === 'Borrowed') {
+        throw new apiError(409, 'Borrowed book copies can only be changed through the borrow return workflow');
+    }
+
+    copy.status = status;
+    const updatedCopy = await copy.save();
 
     return {
         message: 'Cập nhật trạng thái bản sao thành công',
@@ -66,14 +68,18 @@ export const updateBookCopy = async (copyId, status) => {
 
 // 5. Xóa / Thanh lý bản sao theo ID
 export const deleteBookCopy = async (copyId) => {
-    const deletedCopy = await db.BookCopy.findByIdAndDelete(copyId);
-
-    if (!deletedCopy) {
-        throw new apiError.default(404, 'Book copy not found');
+    const copy = await db.BookCopy.findById(copyId);
+    if (!copy) {
+        throw new apiError(404, 'Book copy not found');
     }
+    if (copy.status === 'Borrowed') {
+        throw new apiError(409, 'Borrowed book copies cannot be deleted');
+    }
+
+    await copy.deleteOne();
 
     return {
         message: 'Đã xóa/thanh lý bản sao sách thành công',
-        deletedCopyId: deletedCopy._id
+        deletedCopyId: copy._id
     };
-}
+};

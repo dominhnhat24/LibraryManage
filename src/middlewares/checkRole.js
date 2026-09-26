@@ -1,22 +1,20 @@
-export const checkRole = (requiredRole) => {
+import apiError from '../utils/api-error.js';
+
+export const checkRole = (...allowedRoles) => {
     return (req, res, next) => {
-        // 1. Kiểm tra xem req.user có tồn tại không (phòng hờ quên gắn LoginRequired trước đó)
+        // Đảm bảo request đã qua loginRequired và có thông tin user
         if (!req.user) {
-            return res.status(401).json({
-                status: "error",
-                message: "Unauthorized: User not authenticated"
-            });
+            return next(new apiError(401, 'Unauthorized: No user information found in request'));
         }
 
-        // 2. So sánh role của user với role được yêu cầu
-        if (req.user.role !== requiredRole) {
-            return res.status(403).json({
-                status: "error",
-                message: `Forbidden: Requires '${requiredRole}' role`
-            });
+        // Kiểm tra role/roll của user có nằm trong danh sách được phép không
+        // (Lưu ý: Kiểm tra key chính xác trong payload token của bạn là 'role' hay 'roll')
+        const userRole = req.user.roll || req.user.role;
+
+        if (!allowedRoles.includes(userRole)) {
+            return next(new apiError(403, 'Forbidden: You do not have permission to access this resource'));
         }
 
-        // 3. Đúng quyền, cho phép đi tiếp
         next();
     };
 };

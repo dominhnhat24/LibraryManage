@@ -1,15 +1,14 @@
-const db = require('../../models'); 
-const bcrypt = require('bcrypt'); 
-const jwt = require('jsonwebtoken'); 
-const ApiError = require('../utils/api-error');
-
-const User = db.users;
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { Readers, Librarians } from '../models/init.js';
+import ApiError from '../utils/api-error.js';
+import { emailInUse, emailLookupPattern, normalizeEmail } from './email-identity.service.js';
 
 export const generateAccessToken = (user) => {
     return jwt.sign(    
         {
-            id: user.id,
-            role: user.role // Đưa role vào đây để middleware checkRole sử dụng!
+            id: user._id,
+            role: user.role
         },
         process.env.JWT_SECRET,
         {
@@ -19,65 +18,70 @@ export const generateAccessToken = (user) => {
 };
 
 export const serviceRegister = async (userData) => { // Nhận vào cả cục userData từ Controller cho gọn
-    const { username, email, password, phone, cccd } = userData;
+    const { username, full_name, email, password, phone, address } = userData;
+    const normalizedEmail = normalizeEmail(email);
 
-    // Kiểm tra trùng email (có thể check thêm username hoặc cccd nếu muốn)
-    const existingUser = await User.findOne({
-        where: { email }
-    });
-
-    if (existingUser) {
+    if (await emailInUse(normalizedEmail)) {
         throw new ApiError(400, 'Email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Tạo user mới kèm theo các trường bổ sung và role mặc định là 'user'
-    const newUser = await User.create({
-        username,
-        email,
-        password: hashedPassword,
+    const newUser = await Readers.create({
+        full_name: full_name || username,
+        email: normalizedEmail,
+        password_hash: hashedPassword,
         phone,
-        cccd,
-        role: 'user' // Mặc định đăng ký qua API là độc giả (user)
+        address
     });
 
-    const accessToken = generateAccessToken(newUser);
+    const accessToken = generateAccessToken({ ...newUser.toObject(), role: 'reader' });
 
     return {
-        id: newUser.id,
-        username: newUser.username,
+        id: newUser._id,
+        full_name: newUser.full_name,
         email: newUser.email,
-        role: newUser.role,
+        role: 'reader',
         accessToken
     };
 };
 
-const serviceLogin = async (email, password) => {
-    const user = await User.findOne({
-        where: { email }
-    });
+export const serviceLogin = async (email, password) => {
+    const normalizedEmail = normalizeEmail(email);
+    const [reader, librarian] = await Promise.all([
+        Readers.findOne({ email: emailLookupPattern(normalizedEmail) }).select('+password_hash'),
+        Librarians.findOne({ email: emailLookupPattern(normalizedEmail) })
+    ]);
+    if (reader && librarian) {
+        throw new ApiError(409, 'Email is associated with multiple accounts; contact support');
+    }
+    const user = reader || librarian;
 
     if (!user) {
         throw new ApiError(401, 'Invalid email or password');
     }
+    if (librarian && librarian.status === 'Blocked') {
+        throw new ApiError(403, 'Librarian account is blocked');
+    }
 
-    const isPasswordValid = await bcrypt.compare(
-        password,
-        user.password
-    );
+    const passwordHash = user.password_hash || user.hash_pass;
+    const isPasswordValid = passwordHash
+        ? await bcrypt.compare(password, passwordHash)
+        : false;
 
     if (!isPasswordValid) {
         throw new ApiError(401, 'Invalid email or password');
     }
 
-    const accessToken = generateAccessToken(user);
+    const role = reader ? 'reader' : 'librarian';
+    const accessToken = generateAccessToken({ ...user.toObject(), role });
 
     return {
-        id: user.id,
-        username: user.username,
+        id: user._id,
+        full_name: user.full_name,
         email: user.email,
-        role: user.role,
+        role,
         accessToken
     };
 };

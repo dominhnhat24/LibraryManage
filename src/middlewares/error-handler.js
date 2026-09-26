@@ -1,6 +1,8 @@
 // Global error handler for MongoDB/Mongoose
 const errorHandler = (error, req, res, next) => {
-    console.error(`[ERROR] ${req.method} ${req.originalUrl}`, error);
+    if (error.name !== 'ApiError' || error.statusCode >= 500) {
+        console.error(`[ERROR] ${req.method} ${req.originalUrl}`, error);
+    }
 
     // 1. Lỗi tự định nghĩa (ApiError)
     if (error.name === 'ApiError') {
@@ -62,4 +64,4 @@ const errorHandler = (error, req, res, next) => {
     });
 };
 
-module.exports = errorHandler;
+export default errorHandler;

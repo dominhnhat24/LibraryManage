@@ -31,7 +31,7 @@ const getAllBooks = async (queryParams) => {
 const getBookById = async (bookId) => {
     const bookItem = await db.Books.findById(bookId).populate('copies');
     if (!bookItem) {
-        throw new apiError.default(404, 'Book not found');
+        throw new apiError(404, 'Book not found');
     }
     return bookItem;
 };
@@ -79,7 +79,7 @@ const deleteBook = async (bookId) => {
     const copyCount = await db.BookCopy.countDocuments({ bookId: bookId });
     
     if (copyCount > 0) {
-        throw new apiError.default(409, 'Cannot delete book because it still has physical copies in inventory');
+        throw new apiError(409, 'Cannot delete book because it still has physical copies in inventory');
     }
 
     // 3. Nếu không còn bản sao nào, tiến hành xóa đầu sách
