@@ -64,6 +64,9 @@ export const serviceLogin = async (email, password) => {
     if (librarian && librarian.status === 'Blocked') {
         throw new ApiError(403, 'Librarian account is blocked');
     }
+    if (reader && reader.status === 'Blocked') {
+        throw new ApiError(403, 'Reader account is blocked');
+    }
 
     const passwordHash = user.password_hash || user.hash_pass;
     const isPasswordValid = passwordHash

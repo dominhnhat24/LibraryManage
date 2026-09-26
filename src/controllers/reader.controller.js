@@ -6,17 +6,9 @@ import successResponse from '../utils/api.response.js';
 const getAllReaders = asyncHandler(async (req, res) => {
     const readers = await readerService.getAllReaders(req.query);
 
-    const formattedReaders = readers.data.map(reader => ({
-        id: reader._id,
-        fullName: reader.full_name,
-        email: reader.email,
-        phone: reader.phone,
-        status: reader.status
-    }));
-
     return successResponse(res, {
         message: 'Lấy danh sách độc giả thành công',
-        data: { ...readers, data: formattedReaders }
+        data: readers
     });
 });
 
@@ -27,6 +19,15 @@ const getReaderById = asyncHandler(async (req, res) => {
 
     return successResponse(res, {
         message: 'Lấy thông tin độc giả thành công',
+        data: reader
+    });
+});
+
+const getMyProfile = asyncHandler(async (req, res) => {
+    const readerId = req.user?.sub || req.user?.id;
+    const reader = await readerService.getReaderById(readerId);
+    return successResponse(res, {
+        message: 'Lấy hồ sơ độc giả thành công',
         data: reader
     });
 });
@@ -66,7 +67,8 @@ const deleteReader = asyncHandler(async (req, res) => {
 export default {
     getAllReaders,
     getReaderById,
+    getMyProfile,
     createReader,
     updateReader,
-    deleteReader
+    deleteReader,
 };

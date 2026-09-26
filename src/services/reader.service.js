@@ -2,6 +2,7 @@ import * as db from '../models/init.js';
 import { BorrowCards } from '../models/init.js';
 import apiError from '../utils/api-error.js';
 import { emailInUse, normalizeEmail } from './email-identity.service.js';
+import bcrypt from 'bcrypt';
 
 // 1. Lấy danh sách tất cả độc giả (sắp xếp mới nhất lên đầu)
 export const getAllReaders = async (query = {}) => {
@@ -28,18 +29,25 @@ export const getReaderById = async (readerId) => {
 
 // 3. Tạo mới một độc giả (Đăng ký thẻ thư viện)
 export const createReader = async (readerData) => {
+    if (typeof readerData.password !== 'string' || readerData.password.length < 6 || readerData.password.length > 128) {
+        throw new apiError(400, 'Password must be between 6 and 128 characters long');
+    }
     const email = normalizeEmail(readerData.email);
     if (await emailInUse(email)) {
         throw new apiError(409, 'Email is already registered by another reader');
     }
 
-    return await db.Readers.create({
+    const password_hash = await bcrypt.hash(readerData.password, 10);
+    const reader = await db.Readers.create({
         full_name: readerData.full_name,
         email,
+        password_hash,
         phone: readerData.phone,
         address: readerData.address,
         status: readerData.status || 'Active' // Trạng thái mặc định là Active
     });
+    reader.password_hash = undefined;
+    return reader;
 };
 
 // 4. Cập nhật thông tin độc giả

@@ -1,6 +1,11 @@
 import { body, param, query } from 'express-validator';
 
 export const validateCreateBorrowCard = [
+    body('readerId')
+        .if((value, { req }) => ['librarian', 'admin'].includes(String(req.user?.role || req.user?.roll || '').toLowerCase()))
+        .isMongoId()
+        .withMessage('readerId is required for librarian-created borrow cards'),
+    body('readerId').optional().isMongoId().withMessage('readerId must be a valid MongoDB ObjectId'),
     body('copyIds').isArray({ min: 1, max: 10 }).withMessage('copyIds must contain 1 to 10 items'),
     body('copyIds.*').isMongoId().withMessage('Each copyId must be a valid MongoDB ObjectId'),
     body('dueDate').isISO8601().withMessage('dueDate must be a valid ISO date')
