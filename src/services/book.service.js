@@ -1,8 +1,10 @@
+// Thực hiện nghiệp vụ đầu sách: tìm kiếm có phân trang, đọc chi tiết, tạo, cập nhật và xóa.
 import * as db from '../models/init.js';
 import apiError from '../utils/api-error.js';
 import { getPaginationAndFilter } from '../utils/apiFeatures.js';
 
 // queryParams gồm có: filter, skip, limit, page, sort
+// Nhận query string; trả danh sách cùng metadata phân trang, chỉ đọc dữ liệu đầu sách.
 const getAllBooks = async (queryParams) => {
     // Chỉ định các trường cho phép tìm kiếm trong bảng Books
     const { filter, skip, limit, page, sort } = getPaginationAndFilter(queryParams, ['title', 'author', 'category']);
@@ -28,6 +30,7 @@ const getAllBooks = async (queryParams) => {
 };
 
 
+// Nhận ID đầu sách; trả bản ghi có populate các bản sao hoặc ném ApiError 404.
 const getBookById = async (bookId) => {
     const bookItem = await db.Books.findById(bookId).populate('copies');
     if (!bookItem) {
@@ -37,6 +40,7 @@ const getBookById = async (bookId) => {
 };
 
 
+// Nhận các trường sách đã được kiểm tra; tạo trong MongoDB và trả tài liệu mới.
 const createBook = async (bookData) => {
     return await db.Books.create({
         isbn: bookData.isbn,
@@ -49,6 +53,8 @@ const createBook = async (bookData) => {
 };
 
 
+// Nhận ID và các trường cập nhật; chỉ gán trường được cung cấp, lưu và trả tài liệu đã sửa.
+// Đọc/ghi MongoDB; ID không tồn tại được báo bởi getBookById.
 const updateBook = async (bookId, bookData) => {
     const bookItem = await getBookById(bookId);
 
@@ -63,6 +69,8 @@ const updateBook = async (bookId, bookData) => {
     return bookItem;
 };
 
+// Nhận ID đầu sách; xóa khi sách tồn tại và không còn bản sao, nếu không ném lỗi phù hợp.
+// Tác dụng phụ là kiểm tra và xóa dữ liệu MongoDB; kết quả thành công không có giá trị trả tường minh.
 const deleteBook = async (bookId) => {
     // 1. Kiểm tra xem đầu sách có tồn tại không (hàm getBookById đã lo việc này và ném lỗi 404 nếu không thấy)
     await getBookById(bookId);

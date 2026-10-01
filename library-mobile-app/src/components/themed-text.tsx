@@ -1,3 +1,4 @@
+// Thành phần Text dùng màu chủ đề và các kiểu chữ chuẩn hóa của ứng dụng.
 import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
@@ -8,7 +9,9 @@ export type ThemedTextProps = TextProps & {
   themeColor?: ThemeColor;
 };
 
+// Văn bản theo chủ đề với các biến thể kiểu chữ và màu có thể chọn qua props.
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+  // Kết hợp màu chủ đề, kiểu chữ được chọn và kiểu bổ sung do nơi gọi truyền vào.
   const theme = useTheme();
 
   return (

@@ -1,3 +1,4 @@
+// Cài đặt hồ sơ thủ thư, đọc dữ liệu hiện tại và lưu các trường đã chỉnh sửa.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -12,13 +13,16 @@ interface LibrarianProfile {
 }
 interface ProfileForm { full_name: string; user_name: string; email: string }
 
+// Màn hình cài đặt cho phép thủ thư xem và cập nhật thông tin hồ sơ cá nhân.
 export default function AdminSettingsScreen() {
+  // Hồ sơ được giữ dưới dạng chuỗi để liên kết trực tiếp với các ô nhập liệu.
   const [profile, setProfile] = useState<ProfileForm>({ full_name: '', user_name: '', email: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    // Đọc thông tin thủ thư hiện tại và chuẩn hóa trường không có thành chuỗi rỗng.
     setLoading(true);
     setError(null);
     try {
@@ -37,6 +41,7 @@ export default function AdminSettingsScreen() {
   }, [load]);
 
   const save = async () => {
+    // Kiểm tra độ dài tên và tên đăng nhập trước khi gửi; email để trống sẽ không đưa vào payload.
     if (profile.full_name.trim().length < 2 || profile.user_name.trim().length < 3) {
       setError('Họ tên phải có ít nhất 2 ký tự và username ít nhất 3 ký tự.');
       return;
@@ -79,6 +84,7 @@ export default function AdminSettingsScreen() {
   );
 }
 
+// Trường biểu mẫu chung chuyển giá trị mới về component quản lý hồ sơ.
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput value={value} onChangeText={onChange} style={styles.input} autoCapitalize="none" /></View>;
 }

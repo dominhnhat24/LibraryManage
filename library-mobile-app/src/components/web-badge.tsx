@@ -1,3 +1,4 @@
+// Hiển thị huy hiệu Expo kèm phiên bản ứng dụng, đổi ảnh theo chế độ sáng/tối.
 import { version } from 'expo/package.json';
 import { Image } from 'expo-image';
 import { useColorScheme, StyleSheet } from 'react-native';
@@ -7,7 +8,9 @@ import { ThemedView } from './themed-view';
 
 import { Spacing } from '@/constants/theme';
 
+// Huy hiệu phiên bản Expo dành cho khu vực web của ứng dụng.
 export function WebBadge() {
+  // Chế độ tối dùng biến thể sáng để giữ độ tương phản của huy hiệu.
   const scheme = useColorScheme();
 
   return (

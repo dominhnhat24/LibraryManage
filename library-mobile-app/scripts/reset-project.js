@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
+// Script khởi tạo lại cấu trúc dự án, hỏi trước khi chuyển hoặc xóa mã nguồn hiện có.
 /**
- * This script is used to reset the project to a blank state.
- * It deletes or moves the /src and /scripts directories to /example based on user input and creates a new /src/app directory with an index.tsx and _layout.tsx file.
- * You can remove the `reset-project` script from package.json and safely delete this file after running it.
+ * Chuyển src và scripts sang example hoặc xóa chúng theo lựa chọn, sau đó tạo lại màn hình và layout gốc.
+ * Có thể gỡ lệnh reset-project khỏi package.json và xóa tệp này sau khi chạy xong.
  */
 
 const fs = require("fs");
@@ -50,12 +50,12 @@ const rl = readline.createInterface({
 const moveDirectories = async (userInput) => {
   try {
     if (userInput === "y") {
-      // Create the app-example directory
+      // Tạo thư mục đích trước khi chuyển các thư mục nguồn hiện có.
       await fs.promises.mkdir(exampleDirPath, { recursive: true });
       console.log(`📁 /${exampleDir} directory created.`);
     }
 
-    // Move old directories to new app-example directory or delete them
+    // Chuyển từng thư mục sang example hoặc xóa đệ quy theo lựa chọn của người dùng.
     for (const dir of oldDirs) {
       const oldDirPath = path.join(root, dir);
       if (fs.existsSync(oldDirPath)) {
@@ -72,17 +72,17 @@ const moveDirectories = async (userInput) => {
       }
     }
 
-    // Create new /src/app directory
+    // Tạo lại thư mục ứng dụng sau khi xử lý các thư mục cũ.
     const newAppDirPath = path.join(root, newAppDir);
     await fs.promises.mkdir(newAppDirPath, { recursive: true });
     console.log("\n📁 New /src/app directory created.");
 
-    // Create index.tsx
+    // Ghi màn hình vào mới làm điểm bắt đầu để người dùng có thể chạy dự án.
     const indexPath = path.join(newAppDirPath, "index.tsx");
     await fs.promises.writeFile(indexPath, indexContent);
     console.log("📄 src/app/index.tsx created.");
 
-    // Create _layout.tsx
+    // Ghi layout Stack tối thiểu cho Expo Router.
     const layoutPath = path.join(newAppDirPath, "_layout.tsx");
     await fs.promises.writeFile(layoutPath, layoutContent);
     console.log("📄 src/app/_layout.tsx created.");

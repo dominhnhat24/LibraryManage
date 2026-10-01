@@ -1,3 +1,4 @@
+// Khối nội dung có thể thu gọn/mở rộng, kèm biểu tượng xoay và hiệu ứng hiện dần.
 import { SymbolView } from 'expo-symbols';
 import { PropsWithChildren, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
@@ -8,7 +9,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+// Khối có tiêu đề bật/tắt phần nội dung con và hiệu ứng mở rộng.
 export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
+  // Trạng thái mở/đóng quyết định việc render nội dung và hướng của biểu tượng.
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
 

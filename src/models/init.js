@@ -1,7 +1,9 @@
+// Khởi tạo kết nối MongoDB và định nghĩa các model dùng chung cho nghiệp vụ thư viện.
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
 
+// Không nhận tham số; kết nối theo MONGODB_URI, ghi trạng thái và thoát tiến trình nếu kết nối thất bại.
 export const connectDB = async () => {
     try {
         if (!process.env.MONGODB_URI) {
@@ -16,6 +18,7 @@ export const connectDB = async () => {
 };
 
 
+// Lược đồ cho từng bản sao vật lý; liên kết đầu sách, trạng thái lưu thông và chỉ mục tra cứu.
 const bookCopySchema = new mongoose.Schema({
     bookId: { 
         type: mongoose.Schema.Types.ObjectId, 
@@ -29,9 +32,11 @@ const bookCopySchema = new mongoose.Schema({
         default: 'Available'
     }
 }, { timestamps: true });
+// Hỗ trợ lọc bản sao theo đầu sách và trạng thái.
 bookCopySchema.index({ bookId: 1, status: 1 });
 
 
+// Lược đồ thông tin đầu sách; virtual copies cho phép populate danh sách bản sao liên quan.
 const bookSchema = new mongoose.Schema({
     isbn: { type: String, trim: true, unique: true, sparse: true },
     title: { type: String, required: true },
@@ -46,6 +51,7 @@ bookSchema.virtual('copies', {
     foreignField: 'bookId'
 });
 
+// Hồ sơ thủ thư lưu tên đăng nhập, email, mật khẩu băm, vai trò và trạng thái tài khoản.
 const librarianSchema = new mongoose.Schema({
     user_name: { type: String, required: true, unique: true },
     email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
@@ -55,6 +61,7 @@ const librarianSchema = new mongoose.Schema({
     status: { type: String, enum: ['Active', 'Blocked'], default: 'Active', required: true }
 }, { timestamps: true });
 
+// Hồ sơ độc giả; mật khẩu băm mặc định không được trả trong truy vấn.
 const readerSchema = new mongoose.Schema({
     full_name: { type: String, required: true },
     email: { type: String, unique: true, lowercase: true, trim: true },
@@ -64,6 +71,7 @@ const readerSchema = new mongoose.Schema({
     status: { type: String, enum: ['Active', 'Blocked'], required: true, default: 'Active' }
 }, { timestamps: true });
 
+// Một dòng chi tiết của phiếu mượn, tham chiếu đầu sách/bản sao và tình trạng khi trả.
 const borrowDetailSchema = new mongoose.Schema({
     bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true },
     copyId: { type: mongoose.Schema.Types.ObjectId, ref: 'BookCopy', required: true },
@@ -71,6 +79,7 @@ const borrowDetailSchema = new mongoose.Schema({
     condition: { type: String, enum: ['Good', 'Damaged', 'Lost'] }
 });
 
+// Phiếu mượn gắn độc giả, thủ thư xử lý, hạn trả, trạng thái và danh sách chi tiết.
 const borrowCardSchema = new mongoose.Schema({
     readerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Reader', required: true },
     librarianId: { type: mongoose.Schema.Types.ObjectId, ref: 'Librarian' },
@@ -84,9 +93,11 @@ const borrowCardSchema = new mongoose.Schema({
     },
     details: { type: [borrowDetailSchema], required: true, validate: v => v.length > 0 }
 }, { timestamps: true });
+// Tăng tốc truy vấn phiếu theo độc giả/trạng thái và theo bản sao/trạng thái.
 borrowCardSchema.index({ readerId: 1, status: 1, createdAt: -1 });
 borrowCardSchema.index({ 'details.copyId': 1, status: 1 });
 
+// Khoản phạt liên kết phiếu, dòng sách và độc giả; mỗi dòng phiếu chỉ có tối đa một khoản phạt.
 const fineSchema = new mongoose.Schema({
     borrowCardId: { type: mongoose.Schema.Types.ObjectId, ref: 'BorrowCard', required: true },
     detailId: { type: mongoose.Schema.Types.ObjectId, required: true },
@@ -98,9 +109,11 @@ const fineSchema = new mongoose.Schema({
     waivedAt: { type: Date },
     waiverReason: { type: String }
 }, { timestamps: true });
+// Các chỉ mục phục vụ tra cứu khoản phạt và ngăn tạo khoản trùng trên cùng dòng chi tiết.
 fineSchema.index({ readerId: 1, status: 1 });
 fineSchema.index({ borrowCardId: 1, detailId: 1 }, { unique: true });
 
+// Đăng ký model với Mongoose và xuất để service, validator cùng dùng chung.
 export const Books = mongoose.model('Book', bookSchema);
 export const BookCopy = mongoose.model('BookCopy', bookCopySchema);
 export const Librarians = mongoose.model('Librarian', librarianSchema); 

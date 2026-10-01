@@ -1,3 +1,4 @@
+// Danh sách tiền phạt hỗ trợ lọc, tìm kiếm và ghi nhận thanh toán hoặc miễn phạt.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -11,18 +12,22 @@ type FineFilter = 'All' | FineStatus;
 
 const filters: FineFilter[] = ['All', 'Pending', 'Paid', 'Waived'];
 
+// Trả về tên độc giả khi tham chiếu đã populate, nếu không dùng nhãn chung.
 function getReaderName(reader: Fine['readerId'] | null): string {
   if (typeof reader === 'string') return 'Độc giả';
   return reader?.full_name ?? 'Độc giả';
 }
 
+// Lấy mã phiếu từ chuỗi ID hoặc đối tượng đã populate.
 function getBorrowCardId(value: unknown): string {
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object' && '_id' in value && typeof value._id === 'string') return value._id;
   return '';
 }
 
+// Màn hình tra cứu và xử lý khoản phạt đang chờ thanh toán.
 export default function AdminFinesScreen() {
+  // Đồng bộ bộ lọc trạng thái với truy vấn API và giữ riêng từ khóa tìm kiếm cục bộ.
   const { search: searchParam } = useLocalSearchParams<{ search?: string }>();
   const [fines, setFines] = useState<Fine[]>([]);
   const [total, setTotal] = useState(0);
@@ -33,6 +38,7 @@ export default function AdminFinesScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (refresh = false) => {
+    // Tải các khoản phạt của trạng thái đã chọn và giữ tổng số từ phân trang của API.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -54,6 +60,7 @@ export default function AdminFinesScreen() {
     return () => clearTimeout(timer);
   }, [load]);
 
+  // Áp dụng truy vấn trên mã phạt, lý do, trạng thái, độc giả và mã phiếu.
   const visibleFines = useMemo(() => {
     const normalized = search.trim().toLocaleLowerCase();
     return fines.filter((fine) => {
@@ -64,6 +71,7 @@ export default function AdminFinesScreen() {
   }, [filter, fines, search]);
 
   const changeStatus = (fine: Fine, action: 'pay' | 'waive') => {
+    // Yêu cầu xác nhận trước thao tác không thể đảo ngược rồi tải lại danh sách sau cập nhật.
     const title = action === 'pay' ? 'Xác nhận đã thanh toán khoản phạt?' : 'Miễn khoản phạt này?';
     Alert.alert(title, `${fine.amount.toLocaleString('vi-VN')}đ · ${fine.reason}`, [
       { text: 'Hủy', style: 'cancel' },

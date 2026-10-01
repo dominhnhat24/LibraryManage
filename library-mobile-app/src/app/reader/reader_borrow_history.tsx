@@ -1,3 +1,4 @@
+// Hiển thị phiếu mượn của độc giả, hỗ trợ tải lại và các trạng thái chờ, lỗi hoặc trống.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,14 +7,19 @@ import { formatDate, readerRequest } from '@/lib/admin-api';
 import type { Book, BookCopy, BorrowCard, BorrowCardStatus } from '@/types/library';
 
 interface BorrowResponse { data: BorrowCard[] }
+// Ánh xạ trạng thái máy chủ sang nhãn tiếng Việt dùng trong thẻ trạng thái.
 const labels: Record<BorrowCardStatus, string> = { Pending: 'Chờ duyệt', Borrowing: 'Đang mượn', PartiallyReturned: 'Trả một phần', Returned: 'Đã trả', Overdue: 'Quá hạn', Cancelled: 'Đã hủy' };
+// Chuẩn hóa tham chiếu bản sao có thể là ID dạng chuỗi hoặc đối tượng đã populate.
 const idOf = (value: string | BookCopy | null | undefined): string => typeof value === 'string' ? value : value && typeof value._id === 'string' ? value._id : '';
 
+// Danh sách lịch sử mượn kèm hạn trả, trạng thái phiếu và tình trạng từng cuốn.
 export default function ReaderBorrowHistoryScreen() {
+  // Tách trạng thái tải lần đầu và thao tác kéo làm mới để giữ trải nghiệm danh sách hiện tại.
   const [cards, setCards] = useState<BorrowCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tải phiếu mượn, cập nhật lỗi nếu có và luôn kết thúc trạng thái tải/làm mới.
   const load = useCallback(async (refresh = false) => {
     if (refresh) setRefreshing(true); else setLoading(true); setError(null);
     try { const response = await readerRequest<BorrowResponse | BorrowCard[]>('/borrow-cards?limit=100'); setCards(Array.isArray(response) ? response : response.data); }
@@ -23,6 +29,8 @@ export default function ReaderBorrowHistoryScreen() {
   useEffect(() => { const timer = setTimeout(() => void load(), 0); return () => clearTimeout(timer); }, [load]);
   return <SafeAreaView style={styles.container}><View style={styles.header}><Text style={styles.title}>Lịch sử mượn</Text><Text style={styles.subtitle}>Theo dõi các phiếu mượn của bạn</Text></View>{loading ? <State message="Đang tải lịch sử..." loading /> : error ? <State message={error} action="Thử lại" onAction={() => void load()} /> : cards.length === 0 ? <State message="Bạn chưa có phiếu mượn nào." /> : <FlatList data={cards} keyExtractor={(item) => item._id} contentContainerStyle={styles.list} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} colors={['#e97824']} />} renderItem={({ item }) => <View style={styles.card}><View style={styles.top}><Text style={styles.code}>#{item._id.slice(-8).toUpperCase()}</Text><Status status={item.status} /></View><View style={styles.dates}><Text style={styles.meta}>Ngày mượn: <Text style={styles.value}>{formatDate(item.borrowedAt)}</Text></Text><Text style={styles.meta}>Hạn trả: <Text style={[styles.value, item.status === 'Overdue' && styles.overdue]}>{formatDate(item.dueDate)}</Text></Text></View><Text style={styles.sectionTitle}>Sách trong phiếu ({Array.isArray(item.details) ? item.details.length : 0})</Text>{(Array.isArray(item.details) ? item.details : []).map((detail, index) => { const book = detail.bookId && typeof detail.bookId !== 'string' ? detail.bookId as Book : null; const copyId = idOf(detail.copyId); return <View style={styles.book} key={`${copyId}-${index}`}><View style={styles.bookDot} /><View style={styles.bookBody}><Text style={styles.bookName}>{book?.title ?? 'Sách trong phiếu'}</Text><Text style={styles.meta}>{book?.author ?? (copyId ? `Mã bản sao: ${copyId.slice(-8)}` : 'Chưa có mã bản sao')}</Text></View><Text style={styles.returned}>{detail.returnedAt ? 'Đã trả' : 'Chưa trả'}</Text></View>; })}</View>} />}</SafeAreaView>;
 }
+// Chọn màu huy hiệu theo trạng thái phiếu và hiển thị nhãn đã Việt hóa.
 function Status({ status }: { status: BorrowCardStatus }) { const style = status === 'Returned' ? styles.green : status === 'Overdue' ? styles.red : status === 'Pending' ? styles.orange : status === 'Cancelled' ? styles.gray : styles.blue; return <View style={[styles.badge, style]}><Text style={styles.badgeText}>{labels[status]}</Text></View>; }
+// Trạng thái rỗng dùng chung cho tải, lỗi, không có dữ liệu và thao tác thử lại.
 function State({ message, loading, action, onAction }: { message: string; loading?: boolean; action?: string; onAction?: () => void }) { return <View style={styles.center}>{loading && <ActivityIndicator size="large" color="#E97824" />}<Text style={styles.empty}>{message}</Text>{action && onAction && <Text style={styles.retry} onPress={onAction}>{action}</Text>}</View>; }
 const styles = StyleSheet.create({ container: { flex: 1, backgroundColor: '#FFF8F1' }, header: { padding: 20, paddingBottom: 12 }, title: { color: '#71370F', fontSize: 28, fontWeight: '700' }, subtitle: { color: '#947B68', marginTop: 4 }, list: { padding: 20, gap: 12 }, card: { backgroundColor: '#fff', borderRadius: 16, padding: 16, gap: 10, elevation: 2 }, top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, code: { color: '#E97824', fontWeight: '700' }, badge: { borderRadius: 20, paddingHorizontal: 9, paddingVertical: 5 }, badgeText: { color: '#41564d', fontSize: 12, fontWeight: '700' }, green: { backgroundColor: '#dff3e8' }, red: { backgroundColor: '#fde4e4' }, orange: { backgroundColor: '#FFF0DF' }, blue: { backgroundColor: '#E7EFF4' }, gray: { backgroundColor: '#EEE8E2' }, dates: { gap: 3, backgroundColor: '#FFF8F1', borderRadius: 10, padding: 10 }, meta: { color: '#947B68', fontSize: 13 }, value: { color: '#714526', fontWeight: '600' }, overdue: { color: '#bd4a4a' }, sectionTitle: { color: '#71370F', fontWeight: '700', marginTop: 2 }, book: { flexDirection: 'row', alignItems: 'center', gap: 9, borderTopWidth: 1, borderTopColor: '#F2E9DF', paddingTop: 9 }, bookDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E97824' }, bookBody: { flex: 1, gap: 2 }, bookName: { color: '#633617', fontWeight: '600' }, returned: { color: '#E97824', fontSize: 11, fontWeight: '700' }, center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, padding: 28 }, empty: { color: '#947B68', textAlign: 'center' }, retry: { color: '#E97824', fontWeight: '700' } });

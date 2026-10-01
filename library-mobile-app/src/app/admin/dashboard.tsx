@@ -1,3 +1,4 @@
+// Bảng điều khiển thủ thư tổng hợp chỉ số, phiếu gần đây, cảnh báo quá hạn và xuất báo cáo.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -76,12 +77,14 @@ const copyColors: Record<BookCopyStatus, string> = {
 const copyStatuses: BookCopyStatus[] = ['Available', 'Borrowed', 'Damaged', 'Lost', 'Maintenance'];
 const emptyBorrowCards: BorrowCard[] = [];
 
+// Chuẩn hóa danh sách phân trang hoặc mảng trực tiếp, đồng thời lấy tổng số bản ghi.
 function unwrapList<T>(response: PagedResult<T> | T[]): { items: T[]; total: number } {
   if (Array.isArray(response)) return { items: response, total: response.length };
   const items = response.data ?? [];
   return { items, total: response.pagination?.totalItems ?? response.pagination?.total ?? items.length };
 }
 
+// Trả về tên độc giả đã populate hoặc nhãn dự phòng khi chỉ có ID.
 function readerName(readerId: BorrowCard['readerId']): string {
   if (typeof readerId === 'string') return 'Độc giả';
   if (readerId && typeof readerId === 'object' && typeof readerId.full_name === 'string') {
@@ -90,6 +93,7 @@ function readerName(readerId: BorrowCard['readerId']): string {
   return 'Độc giả';
 }
 
+// Tóm tắt tối đa hai tên sách trong phiếu để dùng trên các hàng giao diện hẹp.
 function borrowedBookTitles(card: BorrowCard): string {
   const details = Array.isArray(card.details) ? card.details : [];
   return details
@@ -103,12 +107,15 @@ function borrowedBookTitles(card: BorrowCard): string {
     .join(', ') || 'Chưa có thông tin';
 }
 
+// Xác định quá hạn theo trạng thái API hoặc ngày đến hạn của phiếu còn đang mượn.
 function isOverdue(card: BorrowCard): boolean {
   return card.status === 'Overdue'
     || (['Borrowing', 'PartiallyReturned'].includes(card.status) && new Date(card.dueDate).getTime() < Date.now());
 }
 
+// Màn hình tổng quan dành cho thủ thư với thống kê và các luồng thao tác nhanh.
 export default function AdminDashboardScreen() {
+  // Giữ snapshot dashboard, bộ lọc cục bộ, hồ sơ thủ thư và trạng thái xuất báo cáo.
   const { width } = useWindowDimensions();
   const isWide = width >= 980;
   const [data, setData] = useState<DashboardData | null>(null);
@@ -122,6 +129,7 @@ export default function AdminDashboardScreen() {
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async (refresh = false) => {
+    // Tải phiếu mượn, thống kê và phiên thủ thư song song; mọi lỗi được đưa vào banner.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -150,6 +158,7 @@ export default function AdminDashboardScreen() {
     return () => clearTimeout(timer);
   }, [loadDashboard]);
 
+  // Tính cảnh báo và danh sách gần đây từ snapshot; bộ lọc chỉ tác động các phiếu được hiển thị.
   const cards = data?.cards ?? emptyBorrowCards;
   const overdueCards = useMemo(() => cards.filter(isOverdue), [cards]);
   const recentCards = useMemo(() => [...cards].slice(0, 7), [cards]);
@@ -175,6 +184,7 @@ export default function AdminDashboardScreen() {
   ] as const;
 
   const exportReport = async () => {
+    // Lấy số liệu mới, dựng bảng CSV từ thống kê và phiếu rồi chia sẻ/tải theo nền tảng.
     setExporting(true);
     setError(null);
     setExportNotice(null);
@@ -225,6 +235,7 @@ export default function AdminDashboardScreen() {
   };
 
   const openQuickAction = (action: 'return' | 'book' | 'reader' | 'fine') => {
+    // Điều hướng thao tác nhanh tới màn hình quản lý tương ứng.
     if (action === 'book') router.push({ pathname: '/admin/books_inventory', params: { action: 'create' } });
     else if (action === 'reader') router.push({ pathname: '/admin/reader_management', params: { action: 'create' } });
     else if (action === 'fine') router.push('/admin/fines');
@@ -236,6 +247,7 @@ export default function AdminDashboardScreen() {
       style={styles.scroll}
       contentContainerStyle={styles.page}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void loadDashboard(true)} colors={['#FF9F43']} />}>
+      {/* Phần đầu trang gom lời chào, thời điểm cập nhật và thao tác xuất báo cáo. */}
       <View style={[styles.pageHeading, !isWide && styles.pageHeadingStacked]}>
         <View style={styles.headingCopy}>
           <Text style={styles.greeting}>Chào buổi sáng, {librarian?.full_name ?? 'Thủ thư'}</Text>
@@ -259,6 +271,7 @@ export default function AdminDashboardScreen() {
         </View>
       )}
 
+      {/* Các thẻ chỉ số được dựng từ tổng hợp API; bố cục tự xuống dòng theo chiều rộng. */}
       <View style={styles.metrics}>
         {metrics.map((metric) => (
           <MetricCard
@@ -273,6 +286,7 @@ export default function AdminDashboardScreen() {
         ))}
       </View>
 
+      {/* Chọn nội dung trạng thái tải, lỗi ban đầu hoặc dashboard đã có dữ liệu. */}
       {loading ? (
         <View style={styles.statePanel}>
           <ActivityIndicator size="large" color="#FF9F43" />
@@ -454,6 +468,7 @@ export default function AdminDashboardScreen() {
   );
 }
 
+// Thẻ thống kê nhỏ nhận nhãn, giá trị và màu nhấn do dashboard cung cấp.
 function MetricCard({
   icon,
   title,
@@ -483,6 +498,7 @@ function MetricCard({
   );
 }
 
+// Một hàng phiếu mượn đổi sang bố cục xếp dọc khi không gian hiển thị hẹp.
 function BorrowRow({ card, wide }: { card: BorrowCard; wide: boolean }) {
   const bookCount = Array.isArray(card.details) ? card.details.length : 0;
   const bookSummary = `${bookCount} cuốn · ${borrowedBookTitles(card)}`;
@@ -511,6 +527,7 @@ function BorrowRow({ card, wide }: { card: BorrowCard; wide: boolean }) {
   );
 }
 
+// Huy hiệu trạng thái mượn dùng màu riêng theo từng nhóm trạng thái.
 function StatusBadge({ status }: { status: BorrowCardStatus }) {
   const colorStyle = status === 'Borrowing'
     ? styles.statusBlue
@@ -528,6 +545,7 @@ function StatusBadge({ status }: { status: BorrowCardStatus }) {
   );
 }
 
+// Nút thao tác nhanh dùng lại cho các lối tắt quản trị.
 function QuickAction({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
   return (
     <Pressable style={styles.quickAction} onPress={onPress}>
@@ -537,6 +555,7 @@ function QuickAction({ icon, label, onPress }: { icon: string; label: string; on
   );
 }
 
+// Một dòng chú giải tiền phạt gồm chấm màu, nhãn trạng thái và số lượng khoản.
 function FineSummary({ label, count, color }: { label: string; count: number; color: string }) {
   return (
     <View style={styles.fineSummaryRow}>
@@ -547,15 +566,18 @@ function FineSummary({ label, count, color }: { label: string; count: number; co
   );
 }
 
+// Huy hiệu dùng màu nền và màu chữ được truyền vào từ trạng thái hệ thống.
 function SystemBadge({ label, color, textColor }: { label: string; color: string; textColor: string }) {
   return <View style={[styles.systemBadge, { backgroundColor: color }]}><Text style={[styles.systemBadgeText, { color: textColor }]}>{label}</Text></View>;
 }
 
+// Rút gọn số tiền từ một triệu trở lên; số nhỏ hơn được định dạng đầy đủ theo locale Việt.
 function formatCompactMoney(amount: number): string {
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}tr`;
   return `${amount.toLocaleString('vi-VN')}đ`;
 }
 
+// Trả số ngày trễ tối thiểu là một ngày cho mỗi phiếu đã được phân loại quá hạn.
 function overdueDays(dueDate: string): number {
   return Math.max(1, Math.ceil((Date.now() - new Date(dueDate).getTime()) / 86_400_000));
 }

@@ -1,56 +1,51 @@
-# Welcome to your Expo app 👋
+# Ứng dụng di động LibraryManage
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ứng dụng Expo/React Native kết nối với REST API của dự án LibraryManage. Các màn hình được định tuyến bằng Expo Router và đặt trong `src/app/`.
 
-## Get started
+## Yêu cầu
 
-1. Install dependencies
+- Node.js và npm.
+- Backend LibraryManage đang chạy; xem hướng dẫn cài đặt và cấu hình tại [README gốc](../readme.md).
 
-   ```bash
-   npm install
-   ```
+## Cài đặt và chạy
 
-2. Start the app
+Từ thư mục `library-mobile-app`:
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```powershell
+npm install
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Hoặc chạy trực tiếp trên Android, iOS hay web:
 
-### Other setup steps
+```powershell
+npm run android
+npm run ios
+npm run web
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Kết nối backend
 
-## Learn more
+Mặc định ứng dụng dùng backend ở cổng `5001` và chọn địa chỉ theo nền tảng:
 
-To learn more about developing your project with Expo, look at the following resources:
+- Web: `http://localhost:5001/api/v1`
+- Android Emulator: `http://10.0.2.2:5001/api/v1`
+- Thiết bị thật: dùng địa chỉ máy chạy Expo trên cùng mạng Wi-Fi.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Có thể đặt `EXPO_PUBLIC_API_URL` để chỉ định URL khác trước khi chạy Expo:
 
-## Join the community
+```powershell
+$env:EXPO_PUBLIC_API_URL = 'http://192.168.1.10:5001/api/v1'
+npm start
+```
 
-Join our community of developers creating universal apps.
+Thay địa chỉ ví dụ bằng địa chỉ backend mà thiết bị truy cập được. Với trình duyệt, nếu gặp lỗi CORS, hãy thêm origin frontend vào `CORS_ORIGINS` trong file `.env` của backend.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Nếu không kết nối được, xác nhận backend đang chạy, thiết bị và backend có thể liên lạc qua mạng, URL có hậu tố `/api/v1`, và firewall không chặn cổng backend. Màn hình `debug-connection` có thể giúp kiểm tra URL và trạng thái kết nối.
+
+## Kiểm tra mã
+
+```powershell
+npm run lint
+npx tsc --noEmit
+```

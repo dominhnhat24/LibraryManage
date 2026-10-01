@@ -1,4 +1,6 @@
+// Chuẩn hóa lỗi ứng dụng và MongoDB/Mongoose thành phản hồi JSON có mã HTTP phù hợp.
 // Global error handler for MongoDB/Mongoose
+// Nhận error, req, res, next theo giao diện Express; ghi log một số lỗi và gửi phản hồi, không gọi middleware kế tiếp.
 const errorHandler = (error, req, res, next) => {
     if (error.name !== 'ApiError' || error.statusCode >= 500) {
         console.error(`[ERROR] ${req.method} ${req.originalUrl}`, error);

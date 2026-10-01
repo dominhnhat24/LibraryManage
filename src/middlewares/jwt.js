@@ -1,6 +1,9 @@
+// Xác thực Bearer token JWT trên request và gắn payload đã giải mã vào req.user.
 import jwt from 'jsonwebtoken';
 import apiError from '../utils/api-error.js'; // Đảm bảo đường dẫn import đúng với cấu trúc của bạn
 
+// Nhận req/res/next của Express; xác minh Authorization rồi chuyển lỗi hoặc gọi next().
+// Khi hợp lệ, gắn payload token vào req.user; middleware không tự gửi response.
 export const loginRequired = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;

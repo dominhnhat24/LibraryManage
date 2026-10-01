@@ -1,3 +1,4 @@
+// Khung quản trị dùng chung: thanh điều hướng, tìm kiếm toàn cục và hộp thoại tạo phiếu mượn.
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -46,10 +47,12 @@ interface AvailableCopy {
 interface ReaderPage { data?: Reader[] }
 interface SearchPage<T> { data?: T[] }
 
+// Chuẩn hóa danh sách API có thể được trả trực tiếp hoặc bọc trong thuộc tính data.
 function listItems<T>(response: T[] | SearchPage<T>): T[] {
   return Array.isArray(response) ? response : response.data ?? [];
 }
 
+// So khớp phiếu mượn với mã, trạng thái, tên độc giả và tiêu đề các sách trong phiếu.
 function borrowMatches(card: BorrowCard, query: string): boolean {
   const readerName = typeof card.readerId === 'string' ? '' : card.readerId?.full_name ?? '';
   const bookTitles = (Array.isArray(card.details) ? card.details : []).map((detail) => {
@@ -72,6 +75,7 @@ const administration: AdminNavigationItem[] = [
   { label: 'Cài đặt', icon: '⚙', path: '/admin/settings' },
 ];
 
+// Định dạng ngày thành nhãn tiếng Việt dùng ở thanh công cụ quản trị.
 function currentDateLabel(date: Date): string {
   const parts = new Intl.DateTimeFormat('vi-VN', {
     day: 'numeric',
@@ -84,7 +88,9 @@ function currentDateLabel(date: Date): string {
   return `${day} tháng ${month}, ${year}`;
 }
 
+// Giao diện quản trị responsive bao quanh mọi màn hình admin và điều phối các lối tắt chung.
 export default function AdminLayout() {
+  // Quản lý responsive layout, thông tin thủ thư, tìm kiếm và quy trình tạo phiếu tại chỗ.
   const { width } = useWindowDimensions();
   const segments = useSegments();
   const routeName = segments[segments.length - 1] ?? 'dashboard';
@@ -106,6 +112,7 @@ export default function AdminLayout() {
   const dateLabel = useMemo(() => currentDateLabel(new Date()), []);
 
   useEffect(() => {
+    // Nạp hồ sơ phiên sau khi mount và bỏ qua cập nhật nếu layout đã unmount.
     let mounted = true;
     void getSession().then((value) => {
       if (mounted) setSession(value);
@@ -118,11 +125,13 @@ export default function AdminLayout() {
   }, []);
 
   const navigate = (item: AdminNavigationItem) => {
+    // Đóng menu di động trước khi chuyển tới route được chọn.
     setMobileMenuOpen(false);
     if (item.path) router.push(item.path);
   };
 
   const performGlobalSearch = async () => {
+    // Tra cứu các nhóm dữ liệu song song rồi mở màn hình phù hợp với kết quả đầu tiên.
     const query = globalSearch.trim();
     if (!query) {
       setGlobalSearchMessage('Nhập từ khóa cần tìm.');
@@ -132,6 +141,7 @@ export default function AdminLayout() {
     setGlobalSearchMessage(null);
     const encoded = encodeURIComponent(query);
     try {
+      // Tải bốn nhóm dữ liệu độc lập cùng lúc để giảm thời gian phản hồi tìm kiếm.
       const [bookResponse, readerResponse, cardResponse, fineResponse] = await Promise.all([
         adminRequest<SearchPage<Book> | Book[]>(`/books?search=${encoded}&limit=100`),
         adminRequest<SearchPage<Reader> | Reader[]>(`/readers?search=${encoded}&limit=100`),
@@ -171,6 +181,7 @@ export default function AdminLayout() {
   };
 
   const openLoanDialog = async () => {
+    // Mở hộp thoại ngay, tải độc giả đang hoạt động và chỉ các bản sao hiện có.
     setCreateLoanOpen(true);
     setLoanLoading(true);
     setLoanError(null);
@@ -191,12 +202,14 @@ export default function AdminLayout() {
   };
 
   const toggleCopy = (copyId: string) => {
+    // Thêm/bỏ chọn bản sao và giới hạn tối đa mười lựa chọn trong một phiếu.
     setSelectedCopyIds((current) => current.includes(copyId)
       ? current.filter((selectedId) => selectedId !== copyId)
       : current.length < 10 ? [...current, copyId] : current);
   };
 
   const createLoan = async () => {
+    // Kiểm tra độc giả, bản sao và hạn trả tương lai trước khi gửi yêu cầu tạo phiếu.
     if (!selectedReaderId || selectedCopyIds.length === 0) {
       setLoanError('Chọn độc giả và ít nhất một bản sao.');
       return;
@@ -225,7 +238,9 @@ export default function AdminLayout() {
     }
   };
 
+  // Tạo các mục điều hướng và đánh dấu mục trùng với route hiện tại.
   const renderNavigation = (items: AdminNavigationItem[]) => items.map((item) => {
+    // Đánh dấu route hiện hành để cả sidebar thường và menu di động cùng hiển thị trạng thái.
     const active = item.path !== null && routeName === item.path.split('/').pop();
     return (
       <Pressable
@@ -243,6 +258,7 @@ export default function AdminLayout() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Bố cục thay sidebar bằng nút menu trên màn hình hẹp; nội dung route luôn nằm trong Stack. */}
       <View style={styles.shell}>
         {!isMobile && <Sidebar name={session?.full_name ?? 'Mai Linh'} renderNavigation={renderNavigation} />}
         <View style={styles.main}>
@@ -290,6 +306,7 @@ export default function AdminLayout() {
               />
             </View>
           )}
+          {/* Các màn hình con dùng chung thanh công cụ và lớp vỏ này. */}
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F8F9FA' } }}>
             <Stack.Screen name="dashboard" />
             <Stack.Screen name="books_inventory" />
@@ -343,6 +360,7 @@ export default function AdminLayout() {
   );
 }
 
+// Sidebar tái sử dụng cho desktop và menu thu gọn trên thiết bị nhỏ.
 function Sidebar({
   name,
   renderNavigation,

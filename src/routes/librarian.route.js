@@ -1,3 +1,4 @@
+// Định tuyến quản lý thủ thư; toàn bộ API trong router yêu cầu tài khoản thủ thư đã xác thực.
 import express from 'express';
 import { loginRequired } from '../middlewares/jwt.js';
 import { checkRole } from '../middlewares/checkRole.js';
@@ -14,6 +15,7 @@ import {
 const router = express.Router();
 router.use(loginRequired, checkRole('librarian'));
 
+// Hồ sơ cá nhân không nhận ID từ client; các tuyến bên dưới quản lý tài khoản theo quyền thủ thư.
 router.get('/me', controller.getMyProfile);
 router.put('/me', validateProfileUpdate, validateRequest, controller.updateMyProfile);
 router.get('/', validateLibrarianQuery, validateRequest, controller.listLibrarians);

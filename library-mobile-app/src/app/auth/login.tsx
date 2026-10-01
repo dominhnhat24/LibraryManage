@@ -1,3 +1,4 @@
+// Màn hình xác thực dùng chung cho độc giả và thủ thư, lưu phiên rồi chuyển theo vai trò.
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
@@ -19,13 +20,16 @@ interface LoginResponse {
   accessToken: string;
 }
 
+// Màn hình đăng nhập lưu phiên thành công và điều hướng theo vai trò người dùng.
 export default function LoginScreen() {
+  // Giữ thông tin nhập, trạng thái gửi, lỗi hiển thị và tùy chọn che mật khẩu.
   const [form, setForm] = useState<LoginForm>({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [secure, setSecure] = useState(true);
 
   const login = async () => {
+    // Chuẩn hóa email và dừng sớm nếu thiếu dữ liệu bắt buộc.
     const email = form.email.trim().toLowerCase();
     if (!email || !form.password) {
       setError('Vui lòng nhập đầy đủ email và mật khẩu.');
@@ -34,6 +38,7 @@ export default function LoginScreen() {
     setLoading(true);
     setError(null);
     try {
+      // Lưu phiên trả về trước khi rời màn hình để các route được bảo vệ đọc được quyền truy cập.
       const response = await request<LoginResponse>({ url: '/auth/login', method: 'POST', data: { email, password: form.password } });
       const session: AuthSession = response;
       await saveSession(session);
@@ -56,6 +61,7 @@ export default function LoginScreen() {
           <TextInput value={form.email} onChangeText={(email) => setForm((current) => ({ ...current, email }))} placeholder="you@example.com" placeholderTextColor="#A18D7D" autoCapitalize="none" keyboardType="email-address" autoComplete="email" style={styles.input} editable={!loading} />
           <Text style={styles.label}>Mật khẩu</Text>
           <View style={styles.passwordWrap}><TextInput value={form.password} onChangeText={(password) => setForm((current) => ({ ...current, password }))} placeholder="Nhập mật khẩu" placeholderTextColor="#A18D7D" secureTextEntry={secure} style={styles.passwordInput} editable={!loading} /><Pressable onPress={() => setSecure((value) => !value)}><Text style={styles.show}>{secure ? 'Hiện' : 'Ẩn'}</Text></Pressable></View>
+          {/* Lỗi đăng nhập chỉ hiển thị khi có nội dung lỗi từ kiểm tra hoặc API. */}
           {error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
           <Pressable style={({ pressed }) => [styles.button, pressed && styles.pressed]} onPress={() => void login()} disabled={loading}>{loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Đăng nhập</Text>}</Pressable>
           <Text style={styles.help}>Độc giả và thủ thư đăng nhập bằng tài khoản do thư viện cấp</Text>

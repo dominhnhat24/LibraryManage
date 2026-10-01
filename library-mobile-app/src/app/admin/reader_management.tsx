@@ -1,3 +1,4 @@
+// Màn hình quản lý độc giả: tải danh sách, tìm kiếm, tạo/cập nhật hồ sơ và đổi trạng thái.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -30,7 +31,9 @@ interface ReaderForm {
 
 const emptyForm: ReaderForm = { full_name: '', email: '', password: '', phone: '', address: '' };
 
+// Màn hình CRUD độc giả với tìm kiếm, biểu mẫu và điều khiển trạng thái tài khoản.
 export default function ReaderManagementScreen() {
+  // Lưu danh sách, bộ lọc, dữ liệu biểu mẫu và trạng thái các thao tác quản trị.
   const { action, search: searchParam } = useLocalSearchParams<{ action?: string; search?: string }>();
   const [readers, setReaders] = useState<Reader[]>([]);
   const [query, setQuery] = useState(() => typeof searchParam === 'string' ? searchParam : '');
@@ -45,7 +48,9 @@ export default function ReaderManagementScreen() {
   const [notice, setNotice] = useState<string | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
 
+  // Tải danh sách độc giả và phân biệt tải ban đầu với thao tác làm mới.
   const loadReaders = useCallback(async (refresh = false) => {
+    // Chuẩn hóa phản hồi có thể là mảng trực tiếp hoặc đối tượng bọc data.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -77,6 +82,7 @@ export default function ReaderManagementScreen() {
   }, [action]);
 
   const filteredReaders = useMemo(() => {
+    // Lọc theo tên và số điện thoại sau khi loại bỏ khoảng trắng đầu/cuối.
     const normalized = query.trim().toLowerCase();
     return normalized
       ? readers.filter(
@@ -87,6 +93,7 @@ export default function ReaderManagementScreen() {
       : readers;
   }, [query, readers]);
 
+  // Chuẩn bị biểu mẫu trống và mở modal ở chế độ tạo mới.
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
@@ -94,6 +101,7 @@ export default function ReaderManagementScreen() {
   };
 
   const saveReader = async () => {
+    // Email và mật khẩu bắt buộc khi tạo mới; khi sửa chỉ kiểm tra họ tên.
     if (!form.full_name.trim()) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập họ tên độc giả.');
       return;
@@ -135,6 +143,7 @@ export default function ReaderManagementScreen() {
     }
   };
 
+  // Gửi trạng thái đối nghịch hiện tại lên API và đồng bộ lại danh sách sau thành công.
   const toggleStatus = async (reader: Reader) => {
     const nextStatus: ReaderStatus = reader.status === 'Active' ? 'Blocked' : 'Active';
     setChangingStatusId(reader._id);
@@ -155,6 +164,7 @@ export default function ReaderManagementScreen() {
     }
   };
 
+  // Dựng thẻ độc giả cùng thông tin liên hệ, trạng thái và các thao tác liên quan.
   const renderReader = ({ item }: { item: Reader }) => (
     <View style={styles.card}>
       <View style={styles.avatar}><Text style={styles.avatarText}>{item.full_name.charAt(0).toUpperCase()}</Text></View>
@@ -192,7 +202,9 @@ export default function ReaderManagementScreen() {
   );
 }
 
+// Huy hiệu trạng thái tài khoản cho biết độc giả đang hoạt động hay bị khóa.
 function StatusBadge({ status }: { status: ReaderStatus }) { return <View style={[styles.badge, status === 'Active' ? styles.greenBadge : styles.redBadge]}><Text style={styles.badgeText}>{status === 'Active' ? 'Đang hoạt động' : 'Đã khóa'}</Text></View>; }
+// Hiển thị trạng thái danh sách trống/lỗi và tùy chọn gọi lại yêu cầu tải.
 function StateView({ message, action, onAction }: { message: string; action?: string; onAction?: () => void }) { return <View style={styles.center}><Text style={styles.empty}>{message}</Text>{action && onAction ? <Pressable style={styles.retry} onPress={onAction}><Text style={styles.primaryText}>{action}</Text></Pressable> : null}</View>; }
 
 const styles = StyleSheet.create({

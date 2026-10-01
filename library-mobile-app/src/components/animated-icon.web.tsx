@@ -1,3 +1,4 @@
+// Biến thể dành cho web: giữ hiệu ứng logo nhưng không can thiệp splash screen của hệ điều hành.
 import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 import Animated, { Keyframe, Easing } from 'react-native-reanimated';
@@ -5,7 +6,9 @@ import Animated, { Keyframe, Easing } from 'react-native-reanimated';
 import classes from './animated-icon.module.css';
 const DURATION = 300;
 
+// Không render lớp phủ splash riêng trên web.
 export function AnimatedSplashOverlay() {
+  // Web không cần lớp phủ splash riêng vì quá trình khởi động được xử lý bởi trình duyệt.
   return null;
 }
 
@@ -54,7 +57,9 @@ const glowKeyframe = new Keyframe({
   },
 });
 
+// Biểu tượng logo dành cho web với các hiệu ứng Reanimated.
 export function AnimatedIcon() {
+  // Render logo web với các keyframe phóng to, hiện dần và xoay quầng sáng.
   return (
     <View style={styles.iconContainer}>
       <Animated.View entering={glowKeyframe.duration(60 * 1000 * 4)} style={styles.glow}>

@@ -1,3 +1,4 @@
+// Màn hình khám phá mẫu, giới thiệu điều hướng theo tệp, chủ đề, hình ảnh và hoạt ảnh.
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
@@ -11,7 +12,9 @@ import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+// Màn hình khám phá trình bày các ví dụ Expo trong nội dung cuộn theo nền tảng.
 export default function TabTwoScreen() {
+  // Bù vùng an toàn và phần chiếm chỗ của thanh tab để nội dung cuộn không bị che khuất.
   const safeAreaInsets = useSafeAreaInsets();
   const insets = {
     ...safeAreaInsets,
@@ -32,6 +35,7 @@ export default function TabTwoScreen() {
     },
   });
 
+  // Các mục giải thích dùng Collapsible để nội dung chi tiết chỉ xuất hiện khi được mở.
   return (
     <ScrollView
       style={[styles.scrollView, { backgroundColor: theme.background }]}
@@ -119,6 +123,7 @@ export default function TabTwoScreen() {
             </ThemedText>
           </Collapsible>
         </ThemedView>
+        {/* Huy hiệu phiên bản chỉ dành cho bản web. */}
         {Platform.OS === 'web' && <WebBadge />}
       </ThemedView>
     </ScrollView>

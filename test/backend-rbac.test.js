@@ -1,3 +1,4 @@
+// Kiểm thử tích hợp API không cần MongoDB cho xác thực vai trò, phân quyền tuyến và định dạng lỗi validation.
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
@@ -7,6 +8,7 @@ const { app } = await import('../server.js');
 let server;
 let baseUrl;
 
+// Khởi chạy app trên cổng hệ điều hành cấp và lưu URL nền dùng bởi các request trong test.
 before(async () => {
     server = app.listen(0);
     await new Promise((resolve, reject) => {
@@ -16,12 +18,15 @@ before(async () => {
     baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 
+// Đóng server sau toàn bộ test để giải phóng cổng và cho runner kết thúc.
 after(async () => {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
 });
 
+// Nhận vai trò và tạo JWT thử nghiệm với ID cố định; trả token có thể dùng trong Authorization.
 const tokenFor = (role) => jwt.sign({ id: '507f1f77bcf86cd799439011', role }, process.env.JWT_SECRET);
 
+// Nhận path cùng method/role/body tùy chọn, gửi HTTP tới app đang chạy và trả Fetch Response.
 const request = (path, { role, method = 'GET', body } = {}) => fetch(`${baseUrl}${path}`, {
     method,
     headers: {
@@ -31,6 +36,7 @@ const request = (path, { role, method = 'GET', body } = {}) => fetch(`${baseUrl}
     ...(body ? { body: JSON.stringify(body) } : {})
 });
 
+// Bao phủ quyền thủ thư đối với độc giả và phản hồi validation khi thiếu mật khẩu tạo mới.
 test('reader records require authentication and Librarian role', async () => {
     assert.equal((await request('/api/v1/readers')).status, 401);
     assert.equal((await request('/api/v1/readers', { role: 'reader' })).status, 403);
@@ -45,6 +51,7 @@ test('reader records require authentication and Librarian role', async () => {
     assert.ok(validation.violations.some(({ path }) => path === 'password'));
 });
 
+// Bao phủ yêu cầu đăng nhập và vai trò thủ thư cho các thao tác ghi đầu sách/bản sao.
 test('book and book-copy mutations require a Librarian token', async () => {
     const bookId = '507f1f77bcf86cd799439011';
     const copyId = '507f1f77bcf86cd799439012';
@@ -62,16 +69,19 @@ test('book and book-copy mutations require a Librarian token', async () => {
     }
 });
 
+// Xác nhận tuyến quản lý thủ thư từ chối request chưa đăng nhập và token độc giả.
 test('Librarian management is not accessible to readers', async () => {
     assert.equal((await request('/api/v1/librarians')).status, 401);
     assert.equal((await request('/api/v1/librarians', { role: 'reader' })).status, 403);
 });
 
+// Xác nhận bảng điều khiển chỉ cho phép thủ thư đã xác thực.
 test('dashboard summary requires an authenticated Librarian', async () => {
     assert.equal((await request('/api/v1/dashboard')).status, 401);
     assert.equal((await request('/api/v1/dashboard', { role: 'reader' })).status, 403);
 });
 
+// Kiểm tra tạo phiếu cho thủ thư đi tới validation và độc giả không thể hủy phiếu của vai trò khác.
 test('borrow-card creation accepts librarian authorization and validates input', async () => {
     const response = await request('/api/v1/borrow-cards', {
         role: 'librarian',
@@ -88,6 +98,7 @@ test('borrow-card creation accepts librarian authorization and validates input',
     })).status, 403);
 });
 
+// Đảm bảo các hành động duyệt/nhận trả phiếu và thanh toán/miễn phạt bị chặn với độc giả.
 test('approval, return, payment, and waiver actions are Librarian-only', async () => {
     const cardId = '507f1f77bcf86cd799439011';
     const fineId = '507f1f77bcf86cd799439012';
@@ -111,6 +122,7 @@ test('approval, return, payment, and waiver actions are Librarian-only', async (
     })).status, 403);
 });
 
+// Đảm bảo namespace phiếu mượn không tồn tại dưới tuyến quản lý thủ thư.
 test('Librarian-only duplicate BorrowCard action namespace is removed', async () => {
     const response = await request('/api/v1/librarians/borrow-cards/507f1f77bcf86cd799439011/approve', {
         role: 'librarian',
@@ -119,6 +131,7 @@ test('Librarian-only duplicate BorrowCard action namespace is removed', async ()
     assert.equal(response.status, 404);
 });
 
+// Kiểm tra lỗi đăng nhập thiếu dữ liệu dùng cấu trúc phản hồi validation chuẩn của API.
 test('Auth validation uses the standard API error response', async () => {
     const response = await request('/api/v1/auth/login', {
         method: 'POST',

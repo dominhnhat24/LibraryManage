@@ -1,4 +1,4 @@
-// https://docs.expo.dev/guides/using-eslint/
+// Kết hợp cấu hình ESLint phẳng của Expo và bỏ qua đầu ra thư mục dist.
 const { defineConfig } = require('eslint/config');
 const expoConfig = require("eslint-config-expo/flat");
 

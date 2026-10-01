@@ -1,10 +1,13 @@
+// Khung điều hướng gốc: kiểm tra phiên đăng nhập, phân quyền theo route và áp dụng chủ đề.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View, useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useSegments } from 'expo-router';
 
 import { getSession } from '@/services/api';
 
+// Root layout bảo vệ các route theo vai trò và bọc Stack bằng ThemeProvider.
 export default function RootLayout() {
+  // Theo dõi phân đoạn URL để xác thực lại khi chuyển giữa các khu vực ứng dụng.
   const colorScheme = useColorScheme();
   const segments = useSegments();
   const segmentKey = segments.join('/');
@@ -12,6 +15,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     let active = true;
+    // Đọc phiên đã lưu và chuyển hướng khỏi màn hình không phù hợp với vai trò.
     const guard = async () => {
       const session = await getSession();
       if (!active) return;
@@ -28,6 +32,7 @@ export default function RootLayout() {
       setCheckingAuth(false);
     };
     void guard().catch(() => {
+      // Khi không đọc được phiên, không cho tiếp tục vào các khu vực cần xác thực.
       if (active) {
         const root = segmentKey.split('/')[0];
         if (root === 'admin' || root === 'reader') router.replace('/auth/login');
@@ -39,6 +44,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      {/* Chỉ hiển thị Stack sau khi hoàn tất kiểm tra phiên. */}
       {checkingAuth
         ? <View style={{ flex: 1, backgroundColor: '#FFF8F1', alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator size="large" color="#E97824" /></View>
         : <Stack screenOptions={{ contentStyle: { backgroundColor: '#FFF8F1' }, headerTintColor: '#8F3D13', headerStyle: { backgroundColor: '#FFF8F1' } }}>

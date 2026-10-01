@@ -1,3 +1,4 @@
+// Cung cấp nghiệp vụ liệt kê, tạo, sửa, khóa và đọc hồ sơ thủ thư, không trả mật khẩu băm.
 import bcrypt from 'bcrypt';
 import { Librarians } from '../models/init.js';
 import apiError from '../utils/api-error.js';
@@ -5,12 +6,14 @@ import { emailInUse, normalizeEmail } from './email-identity.service.js';
 
 const publicProjection = '-hash_pass';
 
+// Nhận ID thủ thư; tìm hồ sơ với trường mật khẩu bị loại khỏi kết quả hoặc ném lỗi 404.
 const ensureLibrarian = async (librarianId) => {
     const librarian = await Librarians.findById(librarianId).select(publicProjection);
     if (!librarian) throw new apiError(404, 'Librarian not found');
     return librarian;
 };
 
+// Nhận bộ lọc status/search và phân trang; trả danh sách công khai cùng metadata, chỉ đọc MongoDB.
 export const listLibrarians = async (query = {}) => {
     const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(Number.parseInt(query.limit, 10) || 10, 1), 100);
@@ -30,8 +33,11 @@ export const listLibrarians = async (query = {}) => {
     return { data, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 };
 
+// Nhận ID thủ thư; trả kết quả ensureLibrarian, không bao gồm mật khẩu băm.
 export const getLibrarian = (librarianId) => ensureLibrarian(librarianId);
 
+// Nhận tên đăng nhập, email tùy chọn, mật khẩu và tên đầy đủ; xác nhận duy nhất, băm mật khẩu, tạo và trả hồ sơ công khai.
+// Tác dụng phụ là đọc và ghi MongoDB.
 export const createLibrarian = async ({ user_name, email, password, full_name }) => {
     if (!password || password.length < 6) {
         throw new apiError(400, 'Password must be at least 6 characters long');
@@ -55,6 +61,8 @@ export const createLibrarian = async ({ user_name, email, password, full_name })
     return Librarians.findById(librarian._id).select(publicProjection);
 };
 
+// Nhận ID và các trường cập nhật được hỗ trợ; kiểm tra email/mật khẩu, lưu thay đổi và trả hồ sơ không chứa hash.
+// Có thể đọc/ghi MongoDB và băm mật khẩu mới khi được cung cấp.
 export const updateLibrarian = async (librarianId, data) => {
     const librarian = await ensureLibrarian(librarianId);
     const allowedFields = ['user_name', 'full_name', 'status'];
@@ -78,6 +86,7 @@ export const updateLibrarian = async (librarianId, data) => {
     return Librarians.findById(librarian._id).select(publicProjection);
 };
 
+// Nhận ID thủ thư; đặt status thành Blocked, lưu rồi trả tài liệu đã khóa.
 export const blockLibrarian = async (librarianId) => {
     const librarian = await ensureLibrarian(librarianId);
     librarian.status = 'Blocked';

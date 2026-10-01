@@ -1,9 +1,11 @@
+// Khai báo kiểm tra dữ liệu cho các tuyến đầu sách; một số rule truy vấn MongoDB để xác minh ID.
 import { body, query, param } from 'express-validator';
 import * as db from '../models/init.js';
 
 const allowedBookFields = ['isbn', 'title', 'author', 'publish_year', 'category', 'description'];
 
 // Hàm kiểm tra sách có tồn tại trong DB không
+// Nhận ID tùy chọn; nếu có thì truy vấn Books và ném lỗi validation khi không tìm thấy, không trả dữ liệu.
 const bookMustExist = async (bookId) => {
     if (!bookId) return;
     
@@ -16,6 +18,7 @@ const bookMustExist = async (bookId) => {
 
 // 1. Validate TẠO SÁCH MỚI (POST /api/books)
 // Note: Không validate book_id vì ID do Database tự sinh
+// Kiểm tra các trường sách trong req.body trước tạo mới; đầu ra là chuỗi middleware validation.
 export const validateCreateBook = [
     body('isbn').optional({ values: 'falsy' }).trim().isLength({ max: 32 }),
     body('title')
@@ -31,6 +34,7 @@ export const validateCreateBook = [
 ];
 
 // 2. Validate CẬP NHẬT SÁCH (PUT/PATCH /api/books/:id)
+// Kiểm tra có trường sách được hỗ trợ và xác thực các giá trị tùy chọn; chuỗi có thể chuẩn hóa ISBN.
 export const validateUpdateBook = [
     // Bắt buộc phải truyền ít nhất 1 trường hợp lệ trong allowedBookFields
     body()
@@ -68,6 +72,7 @@ export const validateUpdateBook = [
 ];
 
 // 3. Validate LẤY DẠNH SÁCH SÁCH (GET /api/books?page=1&limit=10)
+// Kiểm tra và chuyển kiểu các query page/limit/search/categoryId; trả chain ghi lỗi validation trên request.
 export const validateGetAllBook = [
     query('page')
         .optional()
@@ -94,6 +99,7 @@ export const validateGetAllBook = [
 ];
 
 // 4. Validate XEM CHI TIẾT SÁCH THEO ID (GET /api/books/:id)
+// Kiểm tra req.params.id đúng ObjectId và tồn tại trong Books; trả chuỗi middleware validation.
 export const validateGetBookById = [
     param('id')
         .isMongoId()

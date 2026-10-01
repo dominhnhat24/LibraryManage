@@ -1,3 +1,4 @@
+// Danh mục tra cứu sách dành cho độc giả, cho phép lọc, chọn bản sao và gửi yêu cầu mượn.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -34,17 +35,21 @@ interface ListResponse<T> {
   pagination?: { totalItems?: number; total?: number };
 }
 
+// Tạo khóa dự phòng để ghép bản sao với đầu sách khi API không cung cấp bookId.
 function getBookKey(title: string, author: string): string {
   return `${title.trim().toLocaleLowerCase()}|${author.trim().toLocaleLowerCase()}`;
 }
 
+// Tạo khóa nhận diện đầu sách để gộp các bản ghi trùng trước khi hiển thị.
 function canonicalBook(book: Book): string {
   return [book.isbn?.trim().toLowerCase() ?? '', book.title, book.author, book.publish_year ?? '', book.category ?? '']
     .map(String)
     .join('|');
 }
 
+// Màn hình tra cứu danh mục, lọc theo sách và gửi đăng ký mượn bản sao.
 export default function ReaderSearchScreen() {
+  // State lưu danh mục đã ghép, các bộ lọc, bản ghi đang chọn và trạng thái yêu cầu mượn.
   const [books, setBooks] = useState<BookResult[]>([]);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Tất cả');
@@ -57,6 +62,7 @@ export default function ReaderSearchScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(async (refresh = false) => {
+    // Đọc đầu sách và bản sao song song, ghép bản sao theo ID hoặc cặp tên sách/tác giả.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -73,6 +79,7 @@ export default function ReaderSearchScreen() {
         grouped.set(key, [...(grouped.get(key) ?? []), copy]);
       });
 
+      // Gộp đầu sách trùng và tránh thêm lại cùng một bản sao vào nhóm.
       const deduplicated = new Map<string, BookResult>();
       rawBooks.forEach((book) => {
         const key = canonicalBook(book);
@@ -102,6 +109,7 @@ export default function ReaderSearchScreen() {
   const categories = useMemo(() => ['Tất cả', ...new Set(books.map((book) => book.category).filter((value): value is string => Boolean(value)))], [books]);
   const authors = useMemo(() => ['Tất cả', ...new Set(books.map((book) => book.author).filter(Boolean))], [books]);
   const filtered = useMemo(() => {
+    // Áp dụng đồng thời từ khóa, thể loại và tác giả trên danh mục đã chuẩn hóa.
     const value = query.trim().toLowerCase();
     return books.filter((book) => {
       const matchesText = !value || `${book.title} ${book.author} ${book.category ?? ''} ${book.isbn ?? ''}`.toLowerCase().includes(value);
@@ -111,18 +119,21 @@ export default function ReaderSearchScreen() {
     });
   }, [authorFilter, books, categoryFilter, query]);
 
+  // Mở hộp thoại cho đầu sách và xóa lựa chọn cũ để tránh gửi nhầm bản sao trước đó.
   const openBook = (book: BookResult) => {
     setSelected(book);
     setSelectedCopyIds([]);
   };
 
   const toggleCopy = (copyId: string) => {
+    // Giới hạn đăng ký tối đa mười bản sao; lựa chọn hiện có vẫn có thể được bỏ.
     setSelectedCopyIds((current) => current.includes(copyId)
       ? current.filter((id) => id !== copyId)
       : current.length >= 10 ? current : [...current, copyId]);
   };
 
   const borrow = async () => {
+    // Gửi các ID đã chọn với hạn trả dự kiến sau 14 ngày và tải lại danh mục sau thành công.
     if (!selected || selectedCopyIds.length === 0) {
       setError('Vui lòng chọn ít nhất một bản sao đang có sẵn.');
       return;
@@ -167,6 +178,7 @@ export default function ReaderSearchScreen() {
         </Pressable>;
       }} />}
       <Modal visible={Boolean(selected)} transparent animationType="slide" onRequestClose={() => setSelected(null)}>
+        {/* Hộp thoại chỉ liệt kê bản sao sẵn có và gắn điều khiển chọn vào từng bản sao. */}
         <View style={styles.backdrop}><View style={styles.modal}>
           <Text style={styles.modalTitle}>{selected?.title}</Text><Text style={styles.author}>{selected?.author}</Text>
           <Text style={styles.modalSubtitle}>Chọn bản sao đang có sẵn (tối đa 10 cuốn)</Text>
@@ -182,10 +194,12 @@ export default function ReaderSearchScreen() {
   );
 }
 
+// Nút lọc dạng chip phản ánh lựa chọn hiện tại và chuyển thao tác về màn hình cha.
 function FilterChip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return <Pressable style={[styles.filterChip, selected && styles.filterChipSelected]} onPress={onPress}><Text style={[styles.filterText, selected && styles.filterTextSelected]}>{label}</Text></Pressable>;
 }
 
+// Trình bày trạng thái danh mục và nút thử lại tùy chọn.
 function State({ message, loading, action, onAction }: { message: string; loading?: boolean; action?: string; onAction?: () => void }) {
   return <View style={styles.center}>{loading && <ActivityIndicator size="large" color="#e97824" />}<Text style={styles.empty}>{message}</Text>{action && onAction && <Pressable style={styles.primary} onPress={onAction}><Text style={styles.primaryText}>{action}</Text></Pressable>}</View>;
 }
