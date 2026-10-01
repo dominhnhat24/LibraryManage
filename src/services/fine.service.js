@@ -1,8 +1,12 @@
+// Tra cứu khoản phạt theo quyền người dùng và cung cấp các thao tác thanh toán hoặc miễn phạt.
 import { Fines } from '../models/init.js';
 import apiError from '../utils/api-error.js';
 
+// Trích ID người dùng từ payload token, ưu tiên sub và dùng id làm dự phòng.
 const readerIdOf = (user) => user?.sub || user?.id;
 
+// Nhận query và người dùng; giới hạn độc giả vào khoản phạt của mình, phân trang và trả danh sách cùng metadata.
+// Thủ thư có thể lọc theo readerId; thao tác chỉ đọc và populate phiếu mượn/độc giả.
 export const listFines = async (query, user) => {
     const filter = user.role === 'reader' ? { readerId: readerIdOf(user) } : {};
     if (user.role === 'librarian' && query.readerId) filter.readerId = query.readerId;
@@ -18,6 +22,7 @@ export const listFines = async (query, user) => {
     return { data, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 };
 
+// Nhận ID khoản phạt và người dùng; trả chi tiết đã populate, chặn độc giả không sở hữu khoản phạt.
 export const getFine = async (fineId, user) => {
     const fine = await Fines.findById(fineId).populate('borrowCardId').populate('readerId');
     if (!fine) throw new apiError(404, 'Fine not found');
@@ -27,6 +32,8 @@ export const getFine = async (fineId, user) => {
     return fine;
 };
 
+// Nhận ID khoản phạt; chuyển khoản Pending thành Paid và đặt paidAt, trả bản ghi mới hoặc lỗi nếu không có.
+// Cập nhật một tài liệu trong MongoDB.
 export const payFine = async (fineId) => {
     const fine = await Fines.findOneAndUpdate(
         { _id: fineId, status: 'Pending' },
@@ -37,6 +44,8 @@ export const payFine = async (fineId) => {
     return fine;
 };
 
+// Nhận ID khoản phạt và lý do miễn; chuyển khoản Pending thành Waived, ghi thời điểm/lý do và trả bản ghi mới.
+// Cập nhật một tài liệu trong MongoDB; validator của schema được áp dụng cho dữ liệu mới.
 export const waiveFine = async (fineId, waiverReason) => {
     const fine = await Fines.findOneAndUpdate(
         { _id: fineId, status: 'Pending' },

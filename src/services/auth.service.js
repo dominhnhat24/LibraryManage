@@ -1,9 +1,11 @@
+// Xử lý đăng ký, xác thực thông tin đăng nhập và phát JWT cho độc giả hoặc thủ thư.
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Readers, Librarians } from '../models/init.js';
 import ApiError from '../utils/api-error.js';
 import { emailInUse, emailLookupPattern, normalizeEmail } from './email-identity.service.js';
 
+// Tạo JWT có ID, vai trò và thời hạn một giờ; nhận hồ sơ người dùng, trả chuỗi token.
 export const generateAccessToken = (user) => {
     return jwt.sign(    
         {
@@ -17,6 +19,8 @@ export const generateAccessToken = (user) => {
     );
 };
 
+// Nhận dữ liệu đăng ký từ controller; chuẩn hóa email, kiểm tra trùng, băm mật khẩu và tạo độc giả.
+// Trả các trường công khai cùng accessToken; tác dụng phụ là truy vấn và ghi cơ sở dữ liệu.
 export const serviceRegister = async (userData) => { // Nhận vào cả cục userData từ Controller cho gọn
     const { username, full_name, email, password, phone, address } = userData;
     const normalizedEmail = normalizeEmail(email);
@@ -47,6 +51,8 @@ export const serviceRegister = async (userData) => { // Nhận vào cả cục u
     };
 };
 
+// Nhận email/mật khẩu; tra cứu cả hai loại tài khoản, xác minh trạng thái và mật khẩu, rồi trả token cùng hồ sơ công khai.
+// Chỉ đọc cơ sở dữ liệu; phát ApiError khi tài khoản không hợp lệ hoặc email ánh xạ mơ hồ.
 export const serviceLogin = async (email, password) => {
     const normalizedEmail = normalizeEmail(email);
     const [reader, librarian] = await Promise.all([

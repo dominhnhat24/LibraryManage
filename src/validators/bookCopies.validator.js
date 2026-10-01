@@ -1,6 +1,8 @@
+// Khai báo validation cho request nhập kho và cập nhật thông tin bản sao sách.
 import { body, param } from 'express-validator';
 import * as db from '../models/init.js';
 
+// Kiểm tra bookId tồn tại cùng quantity nguyên dương trong body; truy vấn DB và trả chain ghi lỗi trên request.
 export const validateCreateBookCopy = [
     // 1. Kiểm tra bookId có tồn tại và đúng chuẩn MongoDB ObjectId không
     body('bookId')
@@ -24,6 +26,7 @@ export const validateCreateBookCopy = [
         .withMessage('quantity must be a positive integer')
 ];
 
+// Kiểm tra ID trên URL, ít nhất một trường cập nhật được cho phép và định dạng trường gửi kèm; trả chain validation.
 export const validateUpdateBookCopy = [
     // 1. Validate ID truyền trên URL params
     param('id')

@@ -1,3 +1,4 @@
+// Ô tìm kiếm có trạng thái focus và nút gửi tùy chọn, dùng lại được trên các màn hình.
 import { useState } from 'react';
 import {
   Pressable,
@@ -17,6 +18,7 @@ interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   onSearchPress?: () => void;
 }
 
+// Ô nhập tìm kiếm có viền focus và nút gửi tùy chọn theo callback.
 export function SearchBar({
   containerStyle,
   inputStyle,
@@ -26,6 +28,7 @@ export function SearchBar({
   returnKeyType = 'search',
   ...inputProps
 }: SearchBarProps) {
+  // Theo dõi focus để đổi viền và vẫn chuyển tiếp callback gốc cho TextInput.
   const [focused, setFocused] = useState(false);
   return (
     <View style={[styles.container, focused && styles.focused, containerStyle]}>
@@ -43,6 +46,7 @@ export function SearchBar({
         }}
         style={[styles.input, inputStyle]}
       />
+      {/* Chỉ hiện nút gửi khi màn hình cung cấp callback tìm kiếm riêng. */}
       {onSearchPress && (
         <Pressable accessibilityRole="button" accessibilityLabel="Tìm kiếm" onPress={onSearchPress} style={styles.submit}>
           <Text style={styles.submitText}>Tìm</Text>

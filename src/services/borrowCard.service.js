@@ -1,20 +1,26 @@
+// Xử lý vòng đời phiếu mượn, quản lý trạng thái bản sao và tạo khoản phạt khi nhận sách trả.
 import mongoose from 'mongoose';
 import { BorrowCards, BookCopy, Fines, Librarians, Readers } from '../models/init.js';
 import apiError from '../utils/api-error.js';
 
+// Trích ID độc giả từ payload JWT; ưu tiên sub và dự phòng id.
 const readerIdOf = (user) => user?.sub || user?.id;
+// Mức phạt cấu hình qua biến môi trường, dùng giá trị mặc định nếu biến không có.
 const fineRates = {
     overdue: Number(process.env.OVERDUE_FINE_PER_DAY || 1),
     damaged: Number(process.env.DAMAGED_BOOK_FINE || 50),
     lost: Number(process.env.LOST_BOOK_FINE || 100)
 };
 
+// Nhận phiếu và người dùng; độc giả chỉ được truy cập phiếu của chính mình, thủ thư không bị chặn tại đây.
 const assertOwnership = (card, user) => {
     if (user.role === 'reader' && card.readerId.toString() !== readerIdOf(user).toString()) {
         throw new apiError(403, 'You cannot access this borrow card');
     }
 };
 
+// Nhận readerId, danh sách copyIds và dueDate; kiểm tra quyền lợi/trạng thái bản sao rồi tạo phiếu Pending.
+// Đọc người dùng, khoản phạt và bản sao trong MongoDB; không đổi trạng thái bản sao cho đến khi duyệt.
 export const createBorrowCard = async ({ readerId, copyIds, dueDate }) => {
     if (!Array.isArray(copyIds) || copyIds.length === 0) {
         throw new apiError(400, 'copyIds must be a non-empty array');
@@ -39,6 +45,8 @@ export const createBorrowCard = async ({ readerId, copyIds, dueDate }) => {
     return BorrowCards.create({ readerId, dueDate: due, details });
 };
 
+// Nhận bộ lọc phân trang cùng người dùng; độc giả bị giới hạn vào phiếu của mình, thủ thư có thể lọc readerId.
+// Trả danh sách đã populate và metadata phân trang; chỉ đọc dữ liệu.
 export const listBorrowCards = async (query, user) => {
     const filter = user.role === 'reader' ? { readerId: readerIdOf(user) } : {};
     if (query.status) filter.status = query.status;
@@ -53,6 +61,7 @@ export const listBorrowCards = async (query, user) => {
     return { data, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 };
 
+// Nhận ID phiếu và người dùng; trả chi tiết đã populate sau khi kiểm tra tồn tại và quyền sở hữu.
 export const getBorrowCard = async (id, user) => {
     const card = await BorrowCards.findById(id)
         .populate('readerId').populate('librarianId').populate('details.bookId').populate('details.copyId');
@@ -61,6 +70,7 @@ export const getBorrowCard = async (id, user) => {
     return card;
 };
 
+// Nhận ID phiếu và người dùng; chỉ hủy phiếu Pending của người có quyền, lưu rồi trả tài liệu.
 export const cancelBorrowCard = async (id, user) => {
     const card = await BorrowCards.findById(id);
     if (!card) throw new apiError(404, 'Borrow card not found');
@@ -70,6 +80,8 @@ export const cancelBorrowCard = async (id, user) => {
     return card.save();
 };
 
+// Nhận ID phiếu và thủ thư duyệt; trong một transaction xác nhận quyền/trạng thái, giữ các bản sao và chuyển phiếu sang Borrowing.
+// Trả phiếu đã duyệt; khi lỗi sẽ hủy transaction, đồng thời luôn đóng session.
 export const approveBorrow = async (id, librarianId) => {
     const session = await mongoose.startSession();
     try {
@@ -103,6 +115,8 @@ export const approveBorrow = async (id, librarianId) => {
     }
 };
 
+// Nhận ID phiếu, danh sách {copyId, condition} và ID thủ thư; xác nhận các sách trả hợp lệ rồi cập nhật nguyên tử.
+// Trả phiếu sau cập nhật; transaction thay đổi bản sao, chi tiết mượn, trạng thái phiếu và khoản phạt, rollback nếu lỗi.
 export const returnBook = async (id, returns, librarianId) => {
     if (!Array.isArray(returns) || returns.length === 0) {
         throw new apiError(400, 'returns must be a non-empty array');
@@ -118,6 +132,7 @@ export const returnBook = async (id, returns, librarianId) => {
         throw new apiError(400, 'Duplicate returned book copies are not allowed');
     }
 
+    // Kiểm tra sơ bộ các bản sao trước khi mở transaction để từ chối sớm request không hợp lệ.
     const requestedCard = await BorrowCards.findById(id).select('status details');
     if (!requestedCard) throw new apiError(404, 'Borrow card not found');
     if (!['Borrowing', 'PartiallyReturned', 'Overdue'].includes(requestedCard.status)) {
@@ -167,6 +182,7 @@ export const returnBook = async (id, returns, librarianId) => {
                 throw new apiError(409, `Book copy ${copyId} was already returned`);
             }
         }
+        // Ghi nhận cùng thời điểm trả, cập nhật tồn kho và tính tổng tiền phạt theo hạn trả/tình trạng.
         const now = new Date();
         for (const detail of card.details) {
             const condition = returnMap.get(String(detail.copyId));
@@ -198,6 +214,7 @@ export const returnBook = async (id, returns, librarianId) => {
                 }], { session });
             }
         }
+        // Tính trạng thái phiếu từ các dòng đã trả và hạn trả sau khi xử lý danh sách lần này.
         card.status = card.details.every((detail) => detail.returnedAt)
             ? 'Returned'
             : card.details.some((detail) => detail.returnedAt) ? 'PartiallyReturned' : card.status;

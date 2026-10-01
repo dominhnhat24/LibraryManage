@@ -1,6 +1,8 @@
+// Khai báo chuỗi express-validator để kiểm tra và chuẩn hóa dữ liệu đăng ký/đăng nhập trong req.body.
 import { body } from 'express-validator';
 
 // Quy tắc validate cho Đăng ký
+// Kiểm tra username hoặc full_name, email, mật khẩu và phone tùy chọn; trả middleware chain ghi lỗi vào request.
 const validateRegister = [
     body('username')
         .optional()
@@ -25,6 +27,7 @@ const validateRegister = [
 ];
 
 // Quy tắc validate cho Đăng nhập
+// Kiểm tra email hợp lệ và mật khẩu bắt buộc trong body; trả middleware chain cho tuyến đăng nhập.
 const validateLogin = [
     body('email')
         .notEmpty().withMessage('Email is required')

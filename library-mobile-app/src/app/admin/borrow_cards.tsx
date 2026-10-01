@@ -1,3 +1,4 @@
+// Quản lý phiếu mượn: duyệt yêu cầu, lọc danh sách và ghi nhận trả từng bản sao.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -33,17 +34,21 @@ interface BorrowCardResponse {
   data?: BorrowCard[];
 }
 
+// Chuẩn hóa các tham chiếu populate và ID chuỗi về cùng một giá trị định danh.
 function getId(value: string | BookCopy | Book | Reader | null | undefined): string {
   if (typeof value === 'string') return value;
   return value && typeof value === 'object' && typeof value._id === 'string' ? value._id : '';
 }
 
+// Chỉ trả về sách khi bookId là đối tượng đã populate có tên sách hợp lệ.
 function getBook(detail: BorrowCard['details'][number]): Book | null {
   if (!detail.bookId || typeof detail.bookId === 'string') return null;
   return typeof detail.bookId === 'object' && typeof detail.bookId.title === 'string' ? detail.bookId : null;
 }
 
+// Trang phiếu mượn hỗ trợ tìm kiếm, duyệt phiếu chờ và ghi nhận trả sách.
 export default function BorrowCardsScreen() {
+  // Lưu danh sách, trạng thái bộ lọc và các lựa chọn liên quan đến thao tác duyệt/trả.
   const { search: searchParam } = useLocalSearchParams<{ search?: string }>();
   const [cards, setCards] = useState<BorrowCard[]>([]);
   const [tab, setTab] = useState<BorrowCardStatus | 'All'>('All');
@@ -58,6 +63,7 @@ export default function BorrowCardsScreen() {
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Nạp lại danh sách phiếu và giải phóng cờ tải trong cả trường hợp thành công lẫn lỗi.
   const loadCards = useCallback(async (refresh = false) => {
     if (refresh) setRefreshing(true);
     else setLoading(true);
@@ -78,6 +84,7 @@ export default function BorrowCardsScreen() {
     return () => clearTimeout(timer);
   }, [loadCards]);
 
+  // Lọc theo trạng thái và chuỗi gồm mã phiếu, tên độc giả cùng tiêu đề sách.
   const visibleCards = useMemo(
     () => cards.filter((card) => {
       const matchesTab = tab === 'All' || card.status === tab;
@@ -90,6 +97,7 @@ export default function BorrowCardsScreen() {
   );
 
   const approve = async (card: BorrowCard) => {
+    // Chuyển phiếu đang chờ sang trạng thái mượn sau khi API xác nhận duyệt.
     setApprovingId(card._id);
     setNotice(null);
     try {
@@ -105,6 +113,7 @@ export default function BorrowCardsScreen() {
   };
 
   const openReturn = (card: BorrowCard) => {
+    // Mặc định chọn các bản sao chưa trả và gán tình trạng tốt cho từng bản.
     const unreturned = (Array.isArray(card.details) ? card.details : [])
       .filter((detail) => !detail.returnedAt && getId(detail.copyId));
     const defaults = Object.fromEntries(unreturned.map((detail) => [getId(detail.copyId), 'Good' as ReturnCondition]));
@@ -113,6 +122,7 @@ export default function BorrowCardsScreen() {
     setReturnConditions(defaults);
   };
 
+  // Bật/tắt lựa chọn của bản sao trong hộp thoại xác nhận trả.
   const toggleCopy = (copyId: string) => {
     setSelectedIds((current) => current.includes(copyId)
       ? current.filter((id) => id !== copyId)
@@ -120,6 +130,7 @@ export default function BorrowCardsScreen() {
   };
 
   const submitReturn = async () => {
+    // Gửi từng bản sao đã chọn cùng tình trạng trả, sau đó tải lại phiếu mới nhất.
     if (!returnCard || selectedIds.length === 0) {
       setError('Chọn ít nhất một bản sao cần ghi nhận trả.');
       return;
@@ -144,6 +155,7 @@ export default function BorrowCardsScreen() {
     }
   };
 
+  // Lấy tên độc giả từ tham chiếu đã populate hoặc dùng nhãn mặc định.
   const readerName = (card: BorrowCard): string => {
     if (typeof card.readerId === 'string') return 'Độc giả';
     if (card.readerId && typeof card.readerId === 'object' && typeof card.readerId.full_name === 'string') {
@@ -196,11 +208,13 @@ export default function BorrowCardsScreen() {
   );
 }
 
+// Huy hiệu trạng thái phiếu chọn màu theo tiến trình mượn/trả.
 function StatusBadge({ status }: { status: BorrowCardStatus }) {
   const color = status === 'Returned' ? styles.green : status === 'Overdue' ? styles.red : status === 'Pending' ? styles.orange : status === 'Cancelled' ? styles.gray : styles.blue;
   return <View style={[styles.badge, color]}><Text style={styles.badgeText}>{labels[status]}</Text></View>;
 }
 
+// Khối trạng thái danh sách có thể hiển thị spinner hoặc nút thử tải lại.
 function State({ message, loading, action, onAction }: { message: string; loading?: boolean; action?: string; onAction?: () => void }) {
   return <View style={styles.center}>{loading && <ActivityIndicator size="large" color="#e97824" />}<Text style={styles.empty}>{message}</Text>{action && onAction && <Pressable style={styles.primaryButton} onPress={onAction}><Text style={styles.primaryText}>{action}</Text></Pressable>}</View>;
 }

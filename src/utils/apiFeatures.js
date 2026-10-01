@@ -1,3 +1,5 @@
+// Tạo cấu hình truy vấn danh sách từ tham số URL: bộ lọc tìm kiếm, phân trang và sắp xếp.
+// Nhận queryParams cùng danh sách field được tìm kiếm; trả filter/skip/limit/page/sort, không truy cập DB.
 export const getPaginationAndFilter = (queryParams, searchableFields = []) => {
     // 1. Phân trang
     const page = parseInt(queryParams.page) || 1;

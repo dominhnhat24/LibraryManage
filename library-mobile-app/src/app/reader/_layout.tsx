@@ -1,6 +1,9 @@
+// Khai báo tiêu đề và ngăn xếp điều hướng cho các màn hình dành riêng cho độc giả.
 import { Stack } from 'expo-router';
 
+// Stack điều hướng các chức năng tra cứu, lịch sử mượn và hồ sơ độc giả.
 export default function ReaderLayout() {
+  // Router ánh xạ từng Screen tới tệp cùng tên trong thư mục reader.
   return (
     <Stack>
       <Stack.Screen name="reader_search" options={{ title: 'Tra cứu sách' }} />

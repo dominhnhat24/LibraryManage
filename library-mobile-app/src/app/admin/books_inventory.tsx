@@ -1,3 +1,4 @@
+// Màn hình kho sách quản lý đầu sách, bản sao, trạng thái tồn kho và biểu mẫu chỉnh sửa.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -61,6 +62,7 @@ interface ListResponse<T> {
 
 const emptyForm: BookForm = { isbn: '', title: '', author: '', category: '', publish_year: '', description: '' };
 
+// Ưu tiên ISBN làm khóa gộp; nếu thiếu thì dùng các thuộc tính nhận diện đầu sách.
 function canonicalTitle(book: Book): string {
   if (book.isbn?.trim()) return `isbn:${book.isbn.trim().toLocaleLowerCase()}`;
   return [book.title, book.author, book.publish_year ?? '', book.category ?? '']
@@ -68,6 +70,7 @@ function canonicalTitle(book: Book): string {
     .join('|');
 }
 
+// Chuẩn hóa chuỗi biểu mẫu và chuyển năm xuất bản sang số trước khi gửi API.
 function mapBookForm(form: BookForm): Omit<Book, '_id'> {
   return {
     isbn: form.isbn.trim() || undefined,
@@ -79,7 +82,9 @@ function mapBookForm(form: BookForm): Omit<Book, '_id'> {
   };
 }
 
+// Trang kho sách đáp ứng bố cục nhiều cột và thao tác trên đầu sách/bản sao.
 export default function BooksInventoryScreen() {
+  // Lưu kho đã nhóm, bộ lọc, biểu mẫu đầu sách và trạng thái modal bản sao.
   const { action, search: searchParam } = useLocalSearchParams<{ action?: string; search?: string }>();
   const { width } = useWindowDimensions();
   const columns = width >= 1200 ? 4 : width >= 820 ? 3 : width >= 500 ? 2 : 1;
@@ -99,6 +104,7 @@ export default function BooksInventoryScreen() {
   const [saving, setSaving] = useState(false);
 
   const loadInventory = useCallback(async (refresh = false) => {
+    // Tải sách và bản sao song song rồi nhóm các đầu sách trùng để tránh lặp thẻ.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -117,6 +123,7 @@ export default function BooksInventoryScreen() {
         }
       });
 
+      // Gộp dữ liệu sách trùng khóa và nối các bản sao vào bản ghi đại diện.
       const groupedBooks = new Map<string, InventoryBook>();
       rawBooks.forEach((book) => {
         const key = book.isbn?.trim() ? `isbn:${book.isbn.trim().toLowerCase()}` : canonicalTitle(book);
@@ -145,12 +152,14 @@ export default function BooksInventoryScreen() {
   }, [loadInventory]);
 
   const visible = useMemo(() => books.filter((book) => {
+    // Kết hợp tìm kiếm văn bản với bộ lọc khi ít nhất một bản sao có trạng thái được chọn.
     const text = `${book.title} ${book.author} ${book.category ?? ''} ${book.isbn ?? ''}`.toLowerCase();
     const matchesQuery = !query.trim() || text.includes(query.trim().toLowerCase());
     const matchesStatus = filter === 'All' || book.copies.some((copy) => copy.status === filter);
     return matchesQuery && matchesStatus;
   }), [books, filter, query]);
 
+  // Khởi tạo biểu mẫu rỗng và mở modal thêm đầu sách.
   const openCreate = () => {
     setEditingBook(null);
     setForm(emptyForm);
@@ -166,6 +175,7 @@ export default function BooksInventoryScreen() {
     return () => clearTimeout(timer);
   }, [action]);
 
+  // Nạp dữ liệu hiện tại của đầu sách vào biểu mẫu chỉnh sửa.
   const openEdit = (book: InventoryBook) => {
     setEditingBook(book);
     setForm({
@@ -180,6 +190,7 @@ export default function BooksInventoryScreen() {
   };
 
   const saveBook = async () => {
+    // Kiểm tra tiêu đề, tác giả và năm hợp lệ trước khi tạo hoặc cập nhật đầu sách.
     if (!form.title.trim() || !form.author.trim()) {
       setError('Vui lòng nhập tiêu đề và tác giả.');
       return;
@@ -209,6 +220,7 @@ export default function BooksInventoryScreen() {
   };
 
   const addCopies = async () => {
+    // Chỉ chấp nhận số lượng nguyên từ 1 đến 100 cho yêu cầu tạo bản sao.
     if (!copyModal) return;
     const quantity = Number(copyQuantity);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
@@ -231,6 +243,7 @@ export default function BooksInventoryScreen() {
   };
 
   const updateCopyStatus = async (copy: BookCopyInventoryItem, status: BookCopyStatus) => {
+    // Cập nhật trạng thái trên máy chủ, tải lại kho và đồng bộ modal nếu còn mở.
     try {
       await adminRequest(`/book-copies/${copy.copyId}`, { method: 'PUT', body: JSON.stringify({ status }) });
       await loadInventory(true);
@@ -244,6 +257,7 @@ export default function BooksInventoryScreen() {
   };
 
   const deleteCopy = async (copy: BookCopyInventoryItem) => {
+    // Xóa bản sao qua API rồi làm mới kho để loại bỏ bản ghi đã xóa.
     try {
       await adminRequest(`/book-copies/${copy.copyId}`, { method: 'DELETE' });
       await loadInventory(true);
@@ -252,6 +266,7 @@ export default function BooksInventoryScreen() {
     }
   };
 
+  // Thẻ đầu sách hiển thị số bản sao và cho phép mở danh sách quản lý từng bản.
   const renderBook = ({ item }: { item: InventoryBook }) => (
     <View style={[styles.bookCard, columns > 1 ? styles.gridCard : null, columns > 1 ? { width: cardWidth } : null]}>
       <View style={styles.bookHeader}>
@@ -341,15 +356,18 @@ export default function BooksInventoryScreen() {
   );
 }
 
+// Trường nhập dùng chung cho biểu mẫu sách, hỗ trợ nhập nhiều dòng và bàn phím số.
 function FormField({ label, value, placeholder, onChangeText, multiline, keyboardType }: { label: string; value: string; placeholder: string; onChangeText: (value: string) => void; multiline?: boolean; keyboardType?: 'default' | 'number-pad' }) {
   return <View style={styles.formField}><Text style={styles.fieldLabel}>{label}</Text><TextInput value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor="#a18d7d" keyboardType={keyboardType ?? 'default'} multiline={multiline} style={[styles.input, multiline && styles.multiline]} /></View>;
 }
 
+// Huy hiệu trạng thái bản sao kèm số lượng và nhãn mô tả tùy chọn.
 function StatusChip({ status, count, label }: { status: BookCopyStatus; count: number; label?: string }) {
   const color = status === 'Available' ? styles.greenChip : status === 'Borrowed' ? styles.blueChip : status === 'Damaged' || status === 'Lost' ? styles.redChip : styles.orangeChip;
   return <View style={[styles.chip, color]}><Text style={styles.chipText}>{label ?? `${count} ${filterLabels[status].toLowerCase()}`}</Text></View>;
 }
 
+// Trạng thái danh sách dùng chung cho tải, lỗi, dữ liệu trống và hành động thử lại.
 function State({ message, loading, action, onAction }: { message: string; loading?: boolean; action?: string; onAction?: () => void }) {
   return <View style={styles.center}>{loading && <ActivityIndicator size="large" color="#e97824" />}<Text style={styles.empty}>{message}</Text>{action && onAction && <Pressable style={styles.primaryButton} onPress={onAction}><Text style={styles.primaryText}>{action}</Text></Pressable>}</View>;
 }

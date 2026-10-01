@@ -1,7 +1,9 @@
+// Quản lý các bản sao vật lý của đầu sách, bao gồm tra cứu, nhập kho, đổi trạng thái và thanh lý.
 import * as db from '../models/init.js';
 import apiError from '../utils/api-error.js';
 
 // 1. Lấy tất cả bản sao
+// Nhận bookId tùy chọn; truy vấn và populate đầu sách liên quan, trả danh sách tài liệu.
 export const getAllBookCopies = async (bookId) => {
     const filter = bookId ? { bookId } : {};
     const copies = await db.BookCopy.find(filter).populate('bookId');
@@ -10,6 +12,7 @@ export const getAllBookCopies = async (bookId) => {
     return copies;
 };
 
+// Nhận ID bản sao; trả tài liệu có đầu sách liên kết hoặc ném ApiError 404.
 export const getBookCopyById = async (copyId) => {
     const copy = await db.BookCopy.findById(copyId).populate('bookId');
     if (!copy) {
@@ -20,6 +23,7 @@ export const getBookCopyById = async (copyId) => {
 };
 
 // 3. Tạo bản sao sách
+// Nhận ID đầu sách và số lượng; xác minh đầu sách/số lượng, chèn bản sao Available và trả kết quả nhập kho.
 export const createBookCopy = async (bookId, quantity) => {
     const book = await db.Books.findById(bookId);
     if (!book) {
@@ -48,6 +52,7 @@ export const createBookCopy = async (bookId, quantity) => {
 };
 
 // 4. Cập nhật trạng thái bản sao (Ví dụ: available -> borrowed)
+// Nhận ID bản sao và trạng thái mới; không cho đổi bản sao đang mượn, lưu và trả thông báo cùng tài liệu.
 export const updateBookCopy = async (copyId, status) => {
     const copy = await db.BookCopy.findById(copyId);
     if (!copy) {
@@ -67,6 +72,7 @@ export const updateBookCopy = async (copyId, status) => {
 }
 
 // 5. Xóa / Thanh lý bản sao theo ID
+// Nhận ID bản sao; từ chối bản sao đang mượn, nếu hợp lệ thì xóa và trả ID bản sao đã xóa.
 export const deleteBookCopy = async (copyId) => {
     const copy = await db.BookCopy.findById(copyId);
     if (!copy) {

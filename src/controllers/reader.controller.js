@@ -1,8 +1,10 @@
+// Điều phối request quản lý độc giả và chuyển kết quả từ readerService thành phản hồi HTTP.
 import * as readerService from '../services/reader.service.js';
 import asyncHandler from '../middlewares/async-handler.js';
 import successResponse from '../utils/api.response.js';
 
 // Lấy danh sách tất cả độc giả
+// Nhận tham số tìm kiếm/phân trang từ req.query; trả danh sách độc giả phù hợp.
 const getAllReaders = asyncHandler(async (req, res) => {
     const readers = await readerService.getAllReaders(req.query);
 
@@ -13,6 +15,7 @@ const getAllReaders = asyncHandler(async (req, res) => {
 });
 
 // Lấy chi tiết một độc giả theo ID
+// Nhận id từ req.params; trả hồ sơ tương ứng hoặc chuyển tiếp lỗi nếu không tồn tại.
 const getReaderById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const reader = await readerService.getReaderById(id);
@@ -23,6 +26,7 @@ const getReaderById = asyncHandler(async (req, res) => {
     });
 });
 
+// Không nhận tham số từ client; dùng ID trong token và trả hồ sơ độc giả đang đăng nhập.
 const getMyProfile = asyncHandler(async (req, res) => {
     const readerId = req.user?.sub || req.user?.id;
     const reader = await readerService.getReaderById(readerId);
@@ -33,6 +37,7 @@ const getMyProfile = asyncHandler(async (req, res) => {
 });
 
 // Đăng ký mới một độc giả
+// Nhận dữ liệu hồ sơ từ req.body; tạo tài khoản và trả kết quả với HTTP 201.
 const createReader = asyncHandler(async (req, res) => {
     const newReader = await readerService.createReader(req.body);
 
@@ -44,6 +49,7 @@ const createReader = asyncHandler(async (req, res) => {
 });
 
 // Cập nhật thông tin độc giả
+// Nhận id từ URL và các trường cần đổi từ body; trả hồ sơ đã cập nhật.
 const updateReader = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const updatedReader = await readerService.updateReader(id, req.body);
@@ -55,6 +61,7 @@ const updateReader = asyncHandler(async (req, res) => {
 });
 
 // Xóa hoặc khóa độc giả
+// Nhận id từ URL; xóa hoặc xử lý theo quy tắc lưu trữ ở service, rồi trả thông báo.
 const deleteReader = asyncHandler(async (req, res) => {
     const { id } = req.params;
     await readerService.deleteReader(id);

@@ -3,11 +3,13 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
+// Tập trung màu giao diện, kiểu chữ và khoảng cách dùng chung cho toàn bộ ứng dụng.
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
 export const Colors = {
+  // Màu nền và chữ theo hai chế độ sáng/tối.
   light: {
     text: '#633617',
     background: '#FFF8F1',
@@ -25,6 +27,7 @@ export const Colors = {
 } as const;
 
 export const BrandColors = {
+  // Màu nhận diện thương hiệu được dùng độc lập với bảng màu theo chế độ.
   primary: '#FF9F43',
   primaryStrong: '#E97824',
   background: '#FFF3E0',
@@ -62,6 +65,7 @@ export const Fonts = Platform.select({
 });
 
 export const Spacing = {
+  // Thang khoảng cách theo đơn vị pixel để các thành phần giữ nhịp bố cục nhất quán.
   half: 2,
   one: 4,
   two: 8,

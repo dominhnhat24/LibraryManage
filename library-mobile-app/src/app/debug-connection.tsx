@@ -1,3 +1,4 @@
+// Màn hình chẩn đoán kết nối Backend bằng một yêu cầu đọc thử danh sách sách.
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,11 +26,14 @@ interface HealthResult {
   data?: unknown;
 }
 
+// Màn hình kiểm tra kết nối hiển thị kết quả và nguyên nhân lỗi từ API thử nghiệm.
 export default function DebugConnectionScreen() {
+  // Kết quả được giữ trong state để hiển thị trạng thái, thời điểm và dữ liệu phản hồi.
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<HealthResult | null>(null);
 
   const checkConnection = async () => {
+    // Xóa kết quả cũ trước mỗi lần thử và luôn giải phóng trạng thái tải sau yêu cầu.
     setLoading(true);
     setResult(null);
 
@@ -50,6 +54,7 @@ export default function DebugConnectionScreen() {
         },
       });
     } catch (error) {
+      // Phân loại lỗi mạng và mã HTTP để hướng dẫn cấu hình hoặc mô tả sự cố phù hợp.
       const axiosError = error as AxiosError<ApiErrorPayload>;
       const statusCode = axiosError.response?.status;
       const responseMessage = axiosError.response?.data?.message;
@@ -106,6 +111,7 @@ export default function DebugConnectionScreen() {
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Kiểm tra kết nối Backend</Text>}
         </Pressable>
 
+        {/* Chỉ render chi tiết phản hồi sau khi người dùng đã chạy phép kiểm tra. */}
         {result && (
           <View style={[styles.resultCard, result.success ? styles.successCard : styles.failureCard]}>
             <View style={styles.resultHeader}>

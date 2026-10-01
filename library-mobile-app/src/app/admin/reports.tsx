@@ -1,3 +1,4 @@
+// Báo cáo tổng hợp số liệu kho, độc giả, phiếu mượn và tiền phạt từ API dashboard.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -14,13 +15,16 @@ interface ReportData {
   finesSummary: { total: number; totalAmount: number; byStatus: Partial<Record<FineStatus, { count: number; amount: number }>> };
 }
 
+// Màn hình báo cáo số lượng sách, độc giả, phiếu mượn và khoản phạt.
 export default function AdminReportsScreen() {
+  // Giữ snapshot thống kê để các mục và bộ đếm trạng thái cùng dùng một kết quả tải.
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (refresh = false) => {
+    // Chuyển cấu trúc dashboard sang dạng báo cáo và luôn đóng trạng thái tải khi hoàn tất.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -87,6 +91,7 @@ export default function AdminReportsScreen() {
   );
 }
 
+// Hiển thị một chỉ số tổng quan với định dạng số theo locale tiếng Việt.
 function ReportMetric({ label, value }: { label: string; value: number }) {
   return <View style={styles.metric}><Text style={styles.metricLabel}>{label}</Text><Text style={styles.metricValue}>{value.toLocaleString('vi-VN')}</Text></View>;
 }

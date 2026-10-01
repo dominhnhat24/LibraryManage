@@ -1,3 +1,4 @@
+// Hiển thị lớp phủ khởi động và biểu tượng logo với các hiệu ứng Reanimated trên thiết bị di động.
 import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState } from 'react';
@@ -8,7 +9,9 @@ import { scheduleOnRN } from 'react-native-worklets';
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
 
+// Quản lý thời điểm ẩn splash hệ thống và lớp phủ khởi động có hoạt ảnh.
 export function AnimatedSplashOverlay() {
+  // Giữ lớp phủ cho tới khi bố cục sẵn sàng, sau đó ẩn splash hệ thống và chạy hoạt ảnh thoát.
   const [animate, setAnimate] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -39,6 +42,7 @@ export function AnimatedSplashOverlay() {
     <Animated.View
       entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
         'worklet';
+        // Callback chạy trên UI thread; chuyển cập nhật trạng thái về JS thread sau khi hoạt ảnh kết thúc.
         if (finished) {
           scheduleOnRN(setVisible, false);
         }
@@ -95,7 +99,9 @@ const glowKeyframe = new Keyframe({
   },
 });
 
+// Logo trung tâm với nền phóng to và quầng sáng chuyển động.
 export function AnimatedIcon() {
+  // Ghép nền, quầng sáng xoay và logo thành một biểu tượng có hoạt ảnh khi được render.
   return (
     <View style={styles.iconContainer}>
       <Animated.View entering={glowKeyframe.duration(60 * 1000 * 4)} style={styles.glow}>

@@ -1,3 +1,4 @@
+// Trang quản lý tài khoản thủ thư, bao gồm tải danh sách và tạo tài khoản mới.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Modal, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -14,7 +15,9 @@ interface LibrarianPage { data?: Librarian[]; pagination?: { total?: number; tot
 interface LibrarianForm { user_name: string; full_name: string; email: string; password: string }
 const blankForm: LibrarianForm = { user_name: '', full_name: '', email: '', password: '' };
 
+// Màn hình danh sách thủ thư và biểu mẫu tạo tài khoản nhân viên.
 export default function AdminLibrariansScreen() {
+  // Theo dõi danh sách, trạng thái làm mới và biểu mẫu tạo tài khoản trong modal.
   const [items, setItems] = useState<Librarian[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -24,6 +27,7 @@ export default function AdminLibrariansScreen() {
   const [form, setForm] = useState<LibrarianForm>(blankForm);
 
   const load = useCallback(async (refresh = false) => {
+    // Chấp nhận danh sách trực tiếp hoặc payload phân trang từ API.
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -44,6 +48,7 @@ export default function AdminLibrariansScreen() {
   }, [load]);
 
   const createLibrarian = async () => {
+    // Kiểm tra độ dài tối thiểu trước khi gửi dữ liệu tạo nhân viên.
     if (form.user_name.trim().length < 3 || form.full_name.trim().length < 2 || form.password.length < 6) {
       setError('Tên đăng nhập cần ít nhất 3 ký tự, họ tên 2 ký tự và mật khẩu 6 ký tự.');
       return;

@@ -1,5 +1,8 @@
+// Tổng hợp số liệu đầu sách, độc giả, bản sao, phiếu mượn quá hạn và khoản phạt cho bảng điều khiển.
 import { Books, BookCopy, BorrowCards, Fines, Readers } from '../models/init.js';
 
+// Không nhận tham số; chạy các truy vấn đếm/tổng hợp song song và trả đối tượng thống kê.
+// Chỉ đọc MongoDB; overdueCopies đếm các dòng sách chưa trả trong phiếu đang quá hạn.
 export const getDashboardSummary = async () => {
     const now = new Date();
     const [bookCount, readerCount, copyGroups, borrowGroups, overdueCopies, fineGroups] = await Promise.all([

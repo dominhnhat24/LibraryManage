@@ -1,3 +1,4 @@
+// Hiển thị một hàng gợi ý gồm nhãn và nội dung dạng đoạn mã có thể tùy chỉnh.
 import type { ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 
@@ -11,7 +12,9 @@ type HintRowProps = {
   hint?: ReactNode;
 };
 
+// Hàng gợi ý có tiêu đề tùy chọn và nội dung ReactNode ở dạng nhấn mạnh.
 export function HintRow({ title = 'Try editing', hint = 'app/index.tsx' }: HintRowProps) {
+  // Dùng màu và kiểu chữ theo chủ đề để phân biệt gợi ý với nội dung thông thường.
   return (
     <View style={styles.stepRow}>
       <ThemedText type="small">{title}</ThemedText>

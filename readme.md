@@ -1,101 +1,175 @@
-# HƯỚNG DẪN THIẾT KẾ MODULE, API VÀ ROADMAP DỰ ÁN QUẢN LÝ THƯ VIỆN
+# LibraryManage
 
----
+Ứng dụng quản lý thư viện gồm REST API viết bằng Express/MongoDB và ứng dụng di động đa nền tảng xây dựng bằng Expo, React Native.
 
-## PHẦN 1: PHÂN TÍCH MODULE & API CHI TIẾT (CHUẨN THỰC CHIẾN)
+## Chức năng
 
-### 1. Module Auth & Users (Xác thực & Phân quyền)
-* **Mục tiêu:** Quản lý đăng nhập, phân quyền cho Librarian (admin/staff) và Readers (nếu có tính năng độc giả tự login).
-* **Các API cần có:**
-* `POST /api/auth/login`: Nhận `user_name`/`email` và `password`, so sánh hash password, trả về JWT Token.
-* `POST /api/auth/register`: (Dành cho Readers hoặc tạo Librarian mới bởi Admin).
-* **Thành phần kỹ thuật:**
-* **Middleware:** `verifyToken` (giải mã JWT, gán `req.user`), `checkRole` (kiểm tra quyền admin/staff).
-* **Validation:** Joi/Zod kiểm tra định dạng email, độ dài password tối thiểu.
+- Quản lý đầu sách và các bản sao trong kho.
+- Quản lý tài khoản độc giả, thủ thư và đăng nhập bằng JWT.
+- Tạo, duyệt, hủy phiếu mượn; hỗ trợ trả sách từng phần.
+- Tự ghi nhận tiền phạt do quá hạn, hỏng hoặc mất sách; thủ thư có thể thanh toán hoặc miễn phạt.
+- Trang tổng quan cho thủ thư và các màn hình tra cứu dành cho độc giả.
 
-### 2. Module Books (Quản lý đầu sách)
-* **Mục tiêu:** Quản lý thông tin chung của đầu sách.
-* **Các API cần có:**
-* `GET /api/books`: Lấy danh sách có phân trang (`page`, `limit`), tìm kiếm động (`search` trên `title`, `author`), lọc theo `category`, `publish_year`. Sử dụng `Promise.all` kết hợp `countDocuments`.
-* `GET /api/books/:id`: Lấy chi tiết một đầu sách.
-* `POST /api/books`: Tạo đầu sách mới (Chỉ Admin/Staff).
-* `PUT /api/books/:id`: Cập nhật thông tin sách.
-* `DELETE /api/books/:id`: Xóa sách (kiểm tra ràng buộc xem còn bản sao hay không trước khi xóa).
-* **Thành phần kỹ thuật:**
-* **Validation:** Bắt buộc có `title`, `author`, `publish_year`.
+## Công nghệ
 
-### 3. Module Book Copies (Quản lý bản sao sách trong kho)
-* **Mục tiêu:** Quản lý từng cuốn sách vật lý cụ thể (mỗi bản có một mã riêng để mượn/trả).
-* **Các API cần có:**
-* `GET /api/book-copies`: Lấy danh sách bản sao (có filter theo `book_id`, `status` như `available`, `borrowed`).
-* `POST /api/book-copies`: Thêm bản sao mới cho một `book_id` (kèm số lượng muốn tạo thêm).
-* `PUT /api/book-copies/:id`: Cập nhật trạng thái bản sao.
-* `DELETE /api/book-copies/:id`: Xóa bản sao.
+- **Backend:** Node.js, Express 5, Mongoose, MongoDB.
+- **Mobile:** Expo SDK 57, React Native, Expo Router, TypeScript.
+- **Kiểm thử:** Node.js test runner; kiểm thử luồng nghiệp vụ có thể chạy với MongoDB.
 
-### 4. Module Readers (Quản lý bạn đọc)
-* **Mục tiêu:** Quản lý thông tin người mượn sách.
-* **Các API cần có:**
-* `GET /api/readers`: Lấy danh sách độc giả (có phân trang, tìm kiếm theo `full_name`, `phone`, `email`).
-* `GET /api/readers/:id`: Xem lịch sử mượn sách của độc giả này.
-* `POST /api/readers`: Thêm độc giả mới.
-* `PUT /api/readers/:id`: Cập nhật thông tin.
-* `DELETE /api/readers/:id`: Xóa/Khóa thẻ độc giả (đổi `status`).
+## Cấu trúc dự án
 
-### 4.1 Module Librarian (Thủ thư)
-* **
-### 5. Module Borrow Card (Nghiệp vụ Mượn - Trả sách) - Cốt lõi logic
-* **Mục tiêu:** Xử lý toàn bộ luồng mượn và trả sách, tác động trực tiếp đến kho (`Books_Copies`) và tiền phạt (`Fines`).
-* **Các API cần có:**
-* `GET /api/borrow-cards`: Lấy danh sách phiếu mượn (filter theo `status`, `reader_id`, phân trang).
-* `POST /api/borrow-cards`: Tạo phiếu mượn (Transaction):
-1. Kiểm tra các `copies_id` có đang `available` hay không.
-2. Tạo bản ghi trong `Borrow_Card`.
-3. Tạo các bản ghi trong `Borrow_Card_Detail`.
-4. Cập nhật trạng thái các `Books_Copies` thành `borrowed`.
-* `PUT /api/borrow-cards/:id/return`: Trả sách (Transaction):
-1. Cập nhật `returned_day` và `status_returned_date` trong `Borrow_Card_Detail`.
-2. Cập nhật lại trạng thái `Books_Copies` về `available`.
-3. Kiểm tra ngày trả có quá hạn (`due_date`) hay không. Nếu quá hạn, tự động sinh bản ghi phạt vào bảng `Fines`.
+```text
+.
+├── server.js                 # Điểm khởi chạy REST API
+├── src/
+│   ├── controllers/          # Xử lý request/response
+│   ├── middlewares/          # JWT, phân quyền, validation và lỗi
+│   ├── models/               # Schema và kết nối MongoDB
+│   ├── routes/               # Các nhóm endpoint
+│   ├── services/             # Logic nghiệp vụ
+│   └── validators/           # Kiểm tra dữ liệu đầu vào
+├── scripts/seed-admin.js     # Tạo hoặc cập nhật tài khoản thủ thư
+├── test/                     # Kiểm thử API và luồng nghiệp vụ
+└── library-mobile-app/       # Ứng dụng Expo
+```
 
-### 6. Module Fines (Quản lý tiền phạt)
-* **Mục tiêu:** Theo dõi các khoản phạt do trả quá hạn hoặc làm hỏng sách.
-* **Các API cần có:**
-* `GET /api/fines`: Lấy danh sách phiếu phạt (filter theo `payment_status` như `paid`/`unpaid`, `reader_id`).
-* `PUT /api/fines/:id/pay`: Cập nhật trạng thái thanh toán tiền phạt thành `paid`.
+## Yêu cầu
 
-## PHẦN 2: HƯỚNG ĐI (ROADMAP) TRIỂN KHAI TỪNG MODULE
+- Node.js và npm.
+- MongoDB Replica Set tên `rs0` (hoặc một MongoDB deployment hỗ trợ transaction) để dùng các luồng mượn/trả sách.
 
-Để không bị rối và code chạy thông suốt, bắt buộc phải triển khai theo thứ tự phân tầng từ dưới lên trên (**Database -> Core Middleware -> Logic chính**):
+Backend dùng MongoDB transaction khi duyệt và trả sách. Nếu MongoDB chạy cục bộ, cần khởi động nó ở chế độ Replica Set và khởi tạo Replica Set trước khi chạy các luồng đó. URI mẫu trong `.env.example` đã dùng `replicaSet=rs0`.
 
-### Bước 1: Setup Core & Models (Móng nhà)
-1. Kết nối Database (Mongoose/Sequelize tùy chọn).
-2. Viết toàn bộ các Mongoose Schema dựa chính xác trên ERD: `Books`, `Books_Copies`, `Librarian`, `Readers`, `Borrow_Card`, `Borrow_Card_Detail`, `Fines`. Đảm bảo định nghĩa đúng các kiểu dữ liệu và khóa ngoại (`ObjectId` reference).
+## Cài đặt và chạy backend
 
-### Bước 2: Viết Middleware dùng chung
-1. **Error Handling Middleware:** Bắt lỗi tập trung (`try`/`catch` global) để các controller không phải viết lại lặp code `res.status(500)`.
-2. **Auth Middleware (`verifyToken`, `checkRole`):** Dùng để bảo vệ các API yêu cầu đăng nhập.
-3. **Validation Middleware:** Cấu hình Joi/Zod schema dùng chung cho việc validate dữ liệu đầu vào.
+Từ thư mục gốc của repository:
 
-### Bước 3: Triển khai các Module độc lập (CRUD cơ bản trước)
-1. **Module Readers & Librarian:** Viết API đăng nhập, tạo/sửa/xóa thông tin cơ bản.
-2. **Module Books & Book Copies:** Viết API quản lý sách, áp dụng chuẩn phân trang, dynamic filter, `Promise.all` như đã phân tích ở phần trước.
+```powershell
+npm install
+Copy-Item .env.example .env
+```
 
-### Bước 4: Triển khai Module Phức tạp nhất (Borrow Card)
-1. Độc giả tạo phiếu mượn ở trạng thái `Pending`; thủ thư duyệt phiếu bằng transaction, đồng thời chuyển các bản sao khả dụng sang `Borrowed`.
-2. Thủ thư nhận trả toàn bộ hoặc từng phần bằng transaction; cập nhật trạng thái bản sao và phát sinh `Fine` nếu quá hạn, hỏng hoặc mất.
+Mở `.env`, kiểm tra `MONGODB_URI` và thay `JWT_SECRET` bằng một chuỗi bí mật ngẫu nhiên riêng, đủ mạnh. Không commit `.env` hoặc chia sẻ secret này. Các biến cấu hình được hỗ trợ:
 
-### Bước 5: Hoàn thiện Module Fines & Test tổng thể
-1. Xử lý API thanh toán tiền phạt.
-2. Dùng Postman test toàn bộ luồng:
-$$\text{Tạo sách} \rightarrow \text{Tạo độc giả} \rightarrow \text{Mượn sách} \rightarrow \text{Trả sách} \rightarrow \text{Phát sinh phạt}$$
+| Biến | Ý nghĩa |
+| --- | --- |
+| `PORT` | Cổng HTTP; mặc định `5001`. |
+| `MONGODB_URI` | URI kết nối MongoDB; mẫu trỏ tới database `librarymanage` trên Replica Set `rs0`. |
+| `JWT_SECRET` | Khóa ký JWT; bắt buộc để khởi động backend. |
+| `OVERDUE_FINE_PER_DAY` | Mức phạt cho mỗi ngày quá hạn. |
+| `DAMAGED_BOOK_FINE` | Mức phạt khi sách bị hỏng. |
+| `LOST_BOOK_FINE` | Mức phạt khi sách bị mất. |
+| `CORS_ORIGINS` | Tùy chọn: danh sách origin được phép, phân tách bằng dấu phẩy. |
 
-## API backend hiện tại
+Tạo tài khoản thủ thư ban đầu bằng cách đặt `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_FULL_NAME` và `ADMIN_PASSWORD` trong `.env`, sau đó chạy:
 
-- API được mount dưới tiền tố `/api/v1`; backend dùng MongoDB/Mongoose và ES Modules.
-- `GET /api/v1/readers` và `GET /api/v1/readers/:id` chỉ dành cho Librarian vì dữ liệu trả về có thông tin cá nhân.
-- Độc giả tạo/hủy phiếu mượn; Librarian duyệt/trả phiếu. Các thao tác duyệt/trả chỉ dùng namespace `/api/v1/borrow-cards/:id/approve|return`.
-- Reader chỉ xem BorrowCard/Fine của chính mình; Librarian có thể truy vấn toàn bộ.
-- `npm test` chạy các kiểm thử HTTP/RBAC không cần MongoDB. Để chạy transaction thực tế, cấu hình `MONGODB_URI` trỏ tới MongoDB Replica Set hoặc deployment hỗ trợ transactions.
-- Cần cấu hình `JWT_SECRET` bằng chuỗi bí mật ngẫu nhiên đủ mạnh trước khi chạy server; ứng dụng sẽ từ chối khởi động nếu thiếu biến này.
-- Có thể dùng [.env.example](./.env.example) làm mẫu; thay giá trị `JWT_SECRET` bằng secret riêng trước khi chạy và không commit file `.env`.
-- Chạy kiểm thử luồng MongoDB thật bằng PowerShell: `$env:RUN_DB_INTEGRATION = '1'; npm test`. Test dùng dữ liệu định danh riêng và tự xóa các bản ghi mà nó tạo.
+```powershell
+npm run seed:admin
+```
+
+Hãy tự đặt thông tin tài khoản, đặc biệt là mật khẩu; không dùng thông tin mặc định khi triển khai thật. Sau khi tạo tài khoản, khởi động API:
+
+```powershell
+npm run dev
+```
+
+API mặc định chạy tại `http://localhost:5001`. Kiểm tra máy chủ bằng cách mở `http://localhost:5001/`; endpoint này trả về trạng thái hoạt động của API.
+
+Các lệnh backend khác:
+
+```powershell
+npm start       # Chạy không dùng nodemon
+npm test        # Chạy kiểm thử không cần MongoDB
+```
+
+Để chạy thêm kiểm thử luồng nghiệp vụ với MongoDB đã cấu hình:
+
+```powershell
+$env:RUN_DB_INTEGRATION = '1'
+npm test
+```
+
+Kiểm thử này tạo dữ liệu riêng và dọn dữ liệu đã tạo khi hoàn tất.
+
+## Chạy ứng dụng di động
+
+Mở terminal thứ hai:
+
+```powershell
+Set-Location library-mobile-app
+npm install
+npm start
+```
+
+Expo hiển thị các lựa chọn mở ứng dụng trên thiết bị hoặc emulator. Có thể chạy trực tiếp trên từng nền tảng:
+
+```powershell
+npm run android
+npm run ios
+npm run web
+```
+
+Ứng dụng mặc định kết nối tới backend cổng `5001`; URL được chọn theo nền tảng (web dùng `localhost`, Android Emulator dùng `10.0.2.2`). Để ghi đè URL, đặt biến `EXPO_PUBLIC_API_URL` trước khi chạy Expo, ví dụ:
+
+```powershell
+$env:EXPO_PUBLIC_API_URL = 'http://192.168.1.10:5001/api/v1'
+npm start
+```
+
+Thay địa chỉ mẫu bằng địa chỉ backend có thể truy cập từ thiết bị. Điện thoại thật và máy chạy backend cần kết nối cùng mạng; backend phải cho phép origin của ứng dụng web nếu chạy trên trình duyệt. Xem thêm [README của ứng dụng di động](./library-mobile-app/README.md).
+
+## API
+
+Các endpoint được đặt dưới tiền tố `/api/v1`. Những endpoint cần đăng nhập nhận JWT qua header:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+Đăng ký độc giả và đăng nhập:
+
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{
+  "full_name": "Nguyen Van A",
+  "email": "reader@example.com",
+  "password": "your-password"
+}
+```
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "reader@example.com",
+  "password": "your-password"
+}
+```
+
+### Các nhóm endpoint
+
+| Nhóm | Endpoint chính | Quyền |
+| --- | --- | --- |
+| Xác thực | `POST /auth/register`, `POST /auth/login` | Công khai |
+| Đầu sách | `GET /books`, `GET /books/:id`; `POST`, `PUT`, `DELETE /books` | Đọc công khai; tạo/sửa/xóa cần thủ thư |
+| Bản sao | `GET /book-copies`, `GET /book-copies/:id`; `POST`, `PUT`, `DELETE /book-copies` | Đọc công khai; tạo/sửa/xóa cần thủ thư |
+| Độc giả | `GET /readers/me`; CRUD `/readers` và `/readers/:id` | Độc giả chỉ xem hồ sơ của mình; quản lý cần thủ thư |
+| Thủ thư | `/librarians`, `/librarians/me`, `/librarians/:id` | Thủ thư |
+| Phiếu mượn | `GET`, `POST /borrow-cards`; `GET /borrow-cards/:id`; `PATCH /borrow-cards/:id/cancel`, `/approve`, `/return` | Độc giả và thủ thư; hủy dành cho độc giả, duyệt/trả dành cho thủ thư |
+| Tiền phạt | `GET /fines`, `GET /fines/:id`; `PATCH /fines/:id/pay`, `/waive` | Độc giả xem khoản phạt của mình; thủ thư quản lý |
+| Tổng quan | `GET /dashboard` | Thủ thư |
+
+Các URL trong bảng được nối sau `/api/v1`. Ví dụ, endpoint đăng nhập đầy đủ là `/api/v1/auth/login`. Dữ liệu đầu vào không hợp lệ trả HTTP 400; endpoint cần xác thực trả HTTP 401 nếu thiếu/sai token và HTTP 403 nếu không đủ quyền.
+
+## Chất lượng mã
+
+Ứng dụng di động có các lệnh:
+
+```powershell
+Set-Location library-mobile-app
+npm run lint
+npx tsc --noEmit
+```

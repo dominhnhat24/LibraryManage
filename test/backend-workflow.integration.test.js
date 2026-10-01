@@ -1,3 +1,5 @@
+// Kiểm thử tích hợp có MongoDB cho xác thực, hồ sơ, kho sách, mượn/trả, khoản phạt và rollback transaction.
+// Chỉ chạy khi RUN_DB_INTEGRATION=1; dữ liệu được tạo riêng theo UUID và xóa trong finally.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -5,6 +7,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
+// Bao phủ toàn bộ vòng đời nghiệp vụ qua API và kiểm tra trực tiếp MongoDB; không nhận đối số.
+// Tạo server/dữ liệu thử, kiểm tra phản hồi cùng trạng thái lưu trữ, rồi luôn dọn dữ liệu và đóng kết nối.
 test('MongoDB-backed reader borrowing and librarian return workflow', {
     skip: process.env.RUN_DB_INTEGRATION !== '1'
 }, async () => {
@@ -28,6 +32,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
     const fineIds = [];
     let server;
 
+    // Gửi request tới server thử nghiệm; nhận URL tương đối và tùy chọn token/method/body, trả Fetch Response.
     const api = async (path, { token, method = 'GET', body } = {}) => fetch(
         `http://127.0.0.1:${server.address().port}${path}`,
         {
@@ -39,8 +44,10 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
             ...(body ? { body: JSON.stringify(body) } : {})
         }
     );
+    // Nhận Fetch Response và giải mã JSON trong body để các assertion đọc dữ liệu API.
     const readJson = async (response) => response.json();
 
+    // Thiết lập DB/server và tạo danh tính đầu vào cho kiểm tra đăng ký, đăng nhập, email duy nhất và hồ sơ.
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         server = app.listen(0);
@@ -143,6 +150,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         });
         assert.equal(blockedLogin.status, 403);
 
+        // Bao phủ CRUD thủ thư/độc giả và xác nhận endpoint không trả mật khẩu băm.
         const managedReaderResponse = await api('/api/v1/readers', {
             token: librarianLogin.accessToken,
             method: 'POST',
@@ -172,6 +180,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         });
         assert.equal(deleteManagedReader.status, 200);
 
+        // Kiểm tra tạo đầu sách, nhập bản sao, đọc/cập nhật và chặn xóa sách còn bản sao.
         const managedBookResponse = await api('/api/v1/books', {
             token: librarianLogin.accessToken,
             method: 'POST',
@@ -223,6 +232,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         });
         assert.equal(deleteManagedBook.status, 200);
 
+        // Chuẩn bị độc giả khác và tồn kho để kiểm tra giới hạn sở hữu phiếu mượn.
         const otherReader = await Readers.create({
             full_name: 'Other Integration Reader',
             email: `other-${runId}@example.test`,
@@ -251,6 +261,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         assert.equal(bookDetail._id, book._id.toString());
         assert.equal(bookDetail.copies.length, 5);
 
+        // Kiểm tra tạo phiếu, giới hạn quyền xem, duyệt mượn, trả một phần/quá hạn và tính tiền phạt.
         const createResponse = await api('/api/v1/borrow-cards', {
             token: readerLogin.accessToken,
             method: 'POST',
@@ -335,6 +346,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         assert.equal(cardFines.length, 2);
         assert.ok(cardFines.every((fine) => fine.status === 'Pending' && fine.amount > 0));
 
+        // Kiểm tra độc giả chỉ xem khoản phạt của mình, nợ chặn mượn mới và thủ thư có thể trả/miễn phạt.
         const outsiderFineResponse = await api(`/api/v1/fines/${cardFines[0]._id}`, {
             token: otherReaderToken
         });
@@ -368,6 +380,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         assert.equal(waiveResponse.status, 200);
         assert.equal((await readJson(waiveResponse)).data.status, 'Waived');
 
+        // Bao phủ trả sách hỏng, khoản phạt tương ứng và hủy phiếu Pending mà không đổi trạng thái bản sao.
         const damagedCardResponse = await api('/api/v1/borrow-cards', {
             token: readerLogin.accessToken,
             method: 'POST',
@@ -421,6 +434,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         assert.equal((await readJson(cancelResponse)).data.status, 'Cancelled');
         assert.equal((await BookCopy.findById(copies[3]._id)).status, 'Available');
 
+        // Kiểm tra lỗi duyệt do nợ hoặc bản sao không còn sẵn sàng không làm thay đổi phiếu/tồn kho một phần.
         const createRollbackCardResponse = await api('/api/v1/borrow-cards', {
             token: readerLogin.accessToken,
             method: 'POST',
@@ -466,6 +480,7 @@ test('MongoDB-backed reader borrowing and librarian return workflow', {
         assert.equal((await BorrowCards.findById(rollbackCard._id)).status, 'Pending');
         assert.equal((await BookCopy.findById(copies[3]._id)).status, 'Available');
     } finally {
+        // Luôn đóng server, xóa các bản ghi gắn với UUID của test và ngắt kết nối MongoDB.
         if (server) {
             await new Promise((resolve, reject) => {
                 server.close((error) => error ? reject(error) : resolve());

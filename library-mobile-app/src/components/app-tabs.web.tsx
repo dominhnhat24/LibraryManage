@@ -1,3 +1,4 @@
+// Cung cấp thanh tab tùy biến trên web và các nút điều hướng tương thích với Expo Router.
 import {
   Tabs,
   TabList,
@@ -15,7 +16,9 @@ import { ThemedView } from './themed-view';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 
+// Điều phối nội dung route và danh sách tab tùy biến trên web.
 export default function AppTabs() {
+  // Đặt vùng nội dung phía trên danh sách tab dùng chung cho màn hình web.
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -33,7 +36,9 @@ export default function AppTabs() {
   );
 }
 
+// Nút tab hiển thị trạng thái focus và chuyển tiếp props điều hướng.
 export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+  // Đổi nền và màu chữ theo trạng thái được chọn; giữ nguyên thuộc tính điều hướng nhận từ Router.
   return (
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
@@ -47,7 +52,9 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
+// Danh sách tab nổi gồm thương hiệu, các tab con và lối tắt tới tài liệu Expo.
 export function CustomTabList(props: TabListProps) {
+  // Tạo thanh tab nổi, lấy màu biểu tượng theo chủ đề và cung cấp liên kết tài liệu.
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
 
