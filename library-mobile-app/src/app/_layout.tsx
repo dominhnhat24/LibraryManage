@@ -1,13 +1,11 @@
-// Khung điều hướng gốc: kiểm tra phiên đăng nhập, phân quyền theo route và áp dụng chủ đề.
+// Bảo vệ màn hình ứng dụng bằng phiên lưu cục bộ và giữ điều hướng theo hợp đồng mới.
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View, useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useSegments } from 'expo-router';
 
 import { getSession } from '@/services/api';
 
-// Root layout bảo vệ các route theo vai trò và bọc Stack bằng ThemeProvider.
 export default function RootLayout() {
-  // Theo dõi phân đoạn URL để xác thực lại khi chuyển giữa các khu vực ứng dụng.
   const colorScheme = useColorScheme();
   const segments = useSegments();
   const segmentKey = segments.join('/');
@@ -15,44 +13,35 @@ export default function RootLayout() {
 
   useEffect(() => {
     let active = true;
-    // Đọc phiên đã lưu và chuyển hướng khỏi màn hình không phù hợp với vai trò.
-    const guard = async () => {
-      const session = await getSession();
+    void getSession().then((session) => {
       if (!active) return;
       const root = segmentKey.split('/')[0];
-      if ((root === 'admin' || root === 'reader') && !session) {
-        router.replace('/auth/login');
-      } else if (root === 'admin' && session?.role !== 'librarian') {
-        router.replace('/reader/reader_search');
-      } else if (root === 'reader' && session?.role !== 'reader') {
-        router.replace('/admin/dashboard');
-      } else if (root === 'auth' && session) {
-        router.replace(session.role === 'librarian' ? '/admin/dashboard' : '/reader/reader_search');
-      }
+      const isAuth = root === 'auth';
+      if (session && (isAuth || root === 'index')) router.replace('/catalog' as never);
+      else if (!session && !isAuth) router.replace('/auth/login' as never);
       setCheckingAuth(false);
-    };
-    void guard().catch(() => {
-      // Khi không đọc được phiên, không cho tiếp tục vào các khu vực cần xác thực.
-      if (active) {
-        const root = segmentKey.split('/')[0];
-        if (root === 'admin' || root === 'reader') router.replace('/auth/login');
-        setCheckingAuth(false);
-      }
+    }).catch(() => {
+      if (!active) return;
+      const root = segmentKey.split('/')[0];
+      if (root !== 'auth') router.replace('/auth/login' as never);
+      setCheckingAuth(false);
     });
     return () => { active = false; };
   }, [segmentKey]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {/* Chỉ hiển thị Stack sau khi hoàn tất kiểm tra phiên. */}
       {checkingAuth
-        ? <View style={{ flex: 1, backgroundColor: '#FFF8F1', alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator size="large" color="#E97824" /></View>
-        : <Stack screenOptions={{ contentStyle: { backgroundColor: '#FFF8F1' }, headerTintColor: '#8F3D13', headerStyle: { backgroundColor: '#FFF8F1' } }}>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="debug-connection" options={{ title: 'Kiểm tra kết nối' }} />
-        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-        <Stack.Screen name="admin" options={{ headerShown: false }} />
-        <Stack.Screen name="reader" options={{ headerShown: false }} />
+        ? <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF8F1' }}><ActivityIndicator color="#C65D2E" size="large" /></View>
+        : <Stack screenOptions={{ contentStyle: { backgroundColor: '#FFF8F1' }, headerTintColor: '#71370F', headerStyle: { backgroundColor: '#FFF8F1' } }}>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="catalog" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+          <Stack.Screen name="books/[bookId]" options={{ title: 'Chi tiết sách' }} />
+          <Stack.Screen name="books/[bookId]/read" options={{ title: 'Đọc sách' }} />
+          <Stack.Screen name="subscription" options={{ headerShown: false }} />
+          <Stack.Screen name="account" options={{ headerShown: false }} />
         </Stack>}
     </ThemeProvider>
   );
