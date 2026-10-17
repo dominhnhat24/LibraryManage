@@ -1,8 +1,9 @@
 // [CONTROLLER BÁO CÁO] Lưu yêu cầu liên hệ/báo lỗi và chuyển nội dung tới Admin qua SMTP.
-import nodemailer from 'nodemailer';
-import Report from '../models/report.model.js';
 import ApiError from '../utils/api-error.js';
 import { asyncHandler } from '../utils/async-handler.js';
+import * as reportService from '../services/report.service.js';
+import { toReportDto } from '../utils/api-dto.js';
+import { createSmtpTransport } from '../config/mailer.js';
 
 // [NHẬN BÁO CÁO] Ghi yêu cầu trước để không mất nội dung; nếu SMTP lỗi sẽ trả lỗi có mã tra cứu.
 export const createReport = asyncHandler(async (req, res) => {
@@ -20,31 +21,27 @@ export const createReport = asyncHandler(async (req, res) => {
     if (!message || message.length > 5000) violations.push({ field: 'message', message: 'Message is required and must be at most 5000 characters' });
     if (violations.length) throw new ApiError(400, 'Request validation failed', violations);
 
-    const report = await Report.create({
-        user: req.authUser?._id || null, email, subject, message, type
-    });
-    const requiredMailSettings = [
-        process.env.MAIL_HOST, process.env.MAIL_USER, process.env.MAIL_PASSWORD,
-        process.env.MAIL_FROM, process.env.ADMIN_EMAIL
-    ];
-    if (requiredMailSettings.some((value) => !value)) {
+    const report = await reportService.createReport(
+        { email, subject, message, type }, req.authUser || null
+    );
+    if (!process.env.ADMIN_EMAIL) {
         throw new ApiError(503, 'Report was recorded but email delivery is not configured', [
             { field: 'report_id', message: report.id }
         ]);
     }
-    const port = Number(process.env.MAIL_PORT || 587);
-    const transport = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,
-        port,
-        secure: port === 465,
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-        auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASSWORD }
-    });
+    let transporter;
+    let from;
     try {
-        await transport.sendMail({
-            from: process.env.MAIL_FROM,
+        ({ transporter, from } = createSmtpTransport());
+    } catch (error) {
+        if (!(error instanceof ApiError)) throw error;
+        throw new ApiError(503, 'Report was recorded but email delivery is not configured', [
+            { field: 'report_id', message: report.id }
+        ]);
+    }
+    try {
+        await transporter.sendMail({
+            from,
             to: process.env.ADMIN_EMAIL,
             replyTo: email,
             subject: `[OpenBook ${type}] ${subject}`,
@@ -59,6 +56,6 @@ export const createReport = asyncHandler(async (req, res) => {
     return res.status(201).json({
         status: 'success',
         message: 'Report was sent to the administrator',
-        data: { id: report.id, status: report.status }
+        data: toReportDto({ id: report.id, status: report.status })
     });
 });

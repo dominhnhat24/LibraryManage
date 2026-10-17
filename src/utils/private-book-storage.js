@@ -1,7 +1,26 @@
 // [KHO FILE RIÊNG TƯ] Phân giải/xóa file sách chỉ trong thư mục lưu trữ không public.
-import { realpath, rm, stat } from 'node:fs/promises';
+import { mkdir, realpath, rm, stat, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path';
 import ApiError from './api-error.js';
+import { validateBookFile } from './book-file-validation.js';
+
+// Hàm savePrivateBookFile: Xác thực chữ ký file rồi ghi file với tên UUID vào kho không phục vụ static.
+export const savePrivateBookFile = async (file, category) => {
+    if (!file) throw new ApiError(400, 'A book file is required');
+    const extension = validateBookFile({
+        buffer: file.buffer,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        category
+    });
+    const storageRoot = resolve(process.env.BOOK_STORAGE_DIR || 'private-books');
+    await mkdir(storageRoot, { recursive: true });
+    const fileKey = `${randomUUID()}${extension}`;
+    const filePath = resolve(storageRoot, fileKey);
+    await writeFile(filePath, file.buffer, { flag: 'wx', mode: 0o600 });
+    return { file_key: fileKey, original_name: file.originalname.slice(0, 200) };
+};
 
 // [PHÂN GIẢI FILE] Từ chối path traversal, đường dẫn tuyệt đối và symlink thoát khỏi kho riêng.
 export const resolvePrivateBookFile = async (fileKey) => {

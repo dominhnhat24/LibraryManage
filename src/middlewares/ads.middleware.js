@@ -1,9 +1,10 @@
-// [MIDDLEWARE QUẢNG CÁO 3 CHƯƠNG] Hiển thị một quảng cáo sau mỗi ba lượt mở chương của tài khoản Free.
+// [MIDDLEWARE QUẢNG CÁO 3 CHƯƠNG] Hiển thị một quảng cáo sau mỗi ba lượt mở chương của tài khoản USER.
 import ReadingProgress from '../models/reading-progress.model.js';
 import { asyncHandler } from '../utils/async-handler.js';
 
 // [CHU KỲ QUẢNG CÁO] Một quảng cáo sau ba lượt mở chương; dùng chung trong cập nhật atomic và kiểm thử.
-export const ADS_CHAPTER_INTERVAL = 6;
+export const ADS_CHAPTER_INTERVAL = 3;
+// Hàm shouldShowAd: Xác định cần hiển thị quảng cáo khi bộ đếm đã quay về đầu chu kỳ ba chương.
 export const shouldShowAd = (chaptersSinceLastAd) => chaptersSinceLastAd === 0;
 
 // [ĐẾM LƯỢT ĐỌC] Người Premium/VIP không nhận quảng cáo; Free được tính độc lập theo từng sách.

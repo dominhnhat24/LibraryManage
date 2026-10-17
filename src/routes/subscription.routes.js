@@ -2,10 +2,12 @@
 import { Router } from 'express';
 import { createSubscription, getMySubscriptions } from '../controllers/subscription.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
+import { validateBody } from '../middlewares/validation.middleware.js';
+import { modelValidation } from '../validations/model.validation.js';
 
 const router = Router();
 router.use(verifyToken);
-router.post('/', createSubscription);
+router.post('/', validateBody(modelValidation.subscription.create), createSubscription);
 router.get('/me', getMySubscriptions);
 
 export default router;

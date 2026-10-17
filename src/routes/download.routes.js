@@ -3,8 +3,11 @@ import { Router } from 'express';
 import { downloadBook } from '../controllers/download.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 import { checkDownloadPermission } from '../middlewares/role.middleware.js';
+import { validateParams } from '../middlewares/validation.middleware.js';
+import { modelValidation } from '../validations/model.validation.js';
 
 const router = Router();
-router.get('/:bookId', verifyToken, checkDownloadPermission, downloadBook);
+router.get('/:bookId', validateParams(modelValidation.params.book),
+    verifyToken, checkDownloadPermission, downloadBook);
 
 export default router;
