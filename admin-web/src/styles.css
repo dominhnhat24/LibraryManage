@@ -1,0 +1,353 @@
+@import "tailwindcss";
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #202b28;
+  background: #f4f3ef;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.eyebrow {
+  color: #728078;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #deddd5;
+  border-radius: 0;
+  background: #fff;
+  padding: 0.55rem 0.75rem;
+  color: #26332e;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.form-input.pl-10 {
+  padding-left: 2.5rem;
+}
+
+.form-input.pr-10 {
+  padding-right: 2.5rem;
+}
+
+.form-input.pr-11 {
+  padding-right: 2.75rem;
+}
+
+.form-input::placeholder {
+  color: #a1a6a0;
+}
+
+.form-input:focus {
+  border-color: #527563;
+  box-shadow: 0 0 0 2px rgb(82 117 99 / 12%);
+}
+
+.field-label {
+  display: block;
+  color: #38443f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.button-primary,
+.button-secondary,
+.button-danger,
+.control-button,
+.icon-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 0.375rem;
+  padding: 0.62rem 1rem;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.button-primary {
+  border: 1px solid #203a34;
+  background: #203a34;
+  color: #fff;
+}
+
+.button-primary:hover:not(:disabled) {
+  border-color: #31564a;
+  background: #31564a;
+}
+
+.button-secondary {
+  border: 1px solid #deddd5;
+  background: #fff;
+  color: #4b5751;
+}
+
+.button-secondary:hover:not(:disabled) {
+  border-color: #aab7ad;
+  background: #f7f7f2;
+  color: #203a34;
+}
+
+.button-danger {
+  border: 1px solid #a83535;
+  background: #a83535;
+  color: white;
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #872b2b;
+}
+
+.control-button {
+  min-width: 34px;
+  min-height: 34px;
+  border: 1px solid transparent;
+  padding: 0.35rem;
+  color: #66736b;
+}
+
+.control-button:hover:not(:disabled) {
+  border-color: #deddd5;
+  background: #fff;
+}
+
+.page-button-active {
+  border-color: #203a34;
+  background: #203a34;
+  color: #fff;
+}
+
+.page-button-active:hover:not(:disabled) {
+  border-color: #203a34;
+  background: #203a34;
+  color: #fff;
+}
+
+.icon-button {
+  min-height: 32px;
+  min-width: 34px;
+  border: 1px solid #e6e4dd;
+  background: #fff;
+  padding: 0.4rem;
+  color: #62716a;
+}
+
+.icon-button:hover:not(:disabled) {
+  border-color: #b4c2b8;
+  background: #f4f7f3;
+  color: #31564a;
+}
+
+.icon-button-danger:hover:not(:disabled) {
+  border-color: #e8c2bd;
+  background: #fff5f3;
+  color: #a83535;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  border: 1px solid;
+  padding: 0.3rem 0.5rem;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.status-published {
+  border-color: #d3e2d5;
+  background: #edf5ee;
+  color: #45704f;
+}
+
+.status-draft {
+  border-color: #e7ddc5;
+  background: #f8f3e8;
+  color: #94743c;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  overflow-y: auto;
+  background: rgb(22 33 29 / 54%);
+  padding: 1rem;
+}
+
+.modal-panel,
+.confirm-panel {
+  width: min(100%, 680px);
+  border: 1px solid #deddd5;
+  background: #fff;
+  box-shadow: 0 24px 80px rgb(18 32 26 / 24%);
+}
+
+.confirm-panel {
+  width: min(100%, 480px);
+  padding: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Hiệu ứng Double Slider chuẩn */
+.right-panel-active .form-signup {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+}
+
+.right-panel-active .form-login {
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: 1;
+}
+
+.right-panel-active .overlay-container {
+  transform: translateX(-100%);
+}
+
+.right-panel-active .overlay-panel-inner {
+  transform: translateX(50%);
+}
+
+/* Hiệu ứng chuyển động khung ảnh động nền bên phải/trái */
+.auth-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-container .form-signup,
+.auth-container .form-login {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+}
+
+.auth-container .form-signup {
+  left: 0;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.auth-container .form-login {
+  left: 0;
+  opacity: 1;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.auth-container.right-panel-active .form-signup {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.auth-container.right-panel-active .form-login {
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.auth-container .overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 500ms ease-in-out;
+  z-index: 50;
+}
+
+.auth-container.right-panel-active .overlay-container {
+  transform: translateX(-100%);
+}
+
+.auth-container .overlay-panel-inner {
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 500ms ease-in-out;
+}
+
+.auth-container.right-panel-active .overlay-panel-inner {
+  transform: translateX(50%);
+}
+
+/* Tạo đường bo tròn cong lượn độc đáo cho overlay container */
+.auth-container .overlay-container {
+  border-radius: 0;
+  transition: transform 500ms ease-in-out, border-radius 500ms ease-in-out;
+}
+
+/* Khi ở trang Đăng nhập (khung hình bên phải) -> Cong tròn mép bên trái */
+.auth-container:not(.right-panel-active) .overlay-container {
+  border-top-left-radius: 120px;
+  border-bottom-left-radius: 120px;
+}
+
+/* Khi trượt sang Đăng ký (khung hình bên trái) -> Cong tròn mép bên phải */
+.auth-container.right-panel-active .overlay-container {
+  border-top-right-radius: 120px;
+  border-bottom-right-radius: 120px;
+}

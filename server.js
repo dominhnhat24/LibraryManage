@@ -1,92 +1,113 @@
-// Điểm khởi tạo ứng dụng Express: cấu hình CORS, bộ phân tích request và các tuyến API.
-import 'dotenv/config';
+// [ĐIỂM KHỞI CHẠY] Nạp .env từ thư mục dự án trước khi khởi tạo các cấu hình phụ thuộc môi trường.
+import './src/config/load-env.js';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import bookRouter from './src/routes/book.route.js';
-import bookCopiesRouter from './src/routes/bookCopies.route.js';
-import readerRouter from './src/routes/reader.route.js';
-import authRouter from './src/routes/auth.route.js';
-import { connectDB } from './src/models/init.js';
-import errorHandler from './src/middlewares/error-handler.js';
-import borrowCardRouter from './src/routes/borrowCard.route.js';
-import fineRouter from './src/routes/fine.route.js';
-import apiError from './src/utils/api-error.js';
-import librarianRouter from './src/routes/librarian.route.js';
-import dashboardRouter from './src/routes/dashboard.route.js';
+import { connectDB } from './src/config/database.config.js';
+import authRoutes from './src/routes/auth.routes.js';
+import bookRoutes from './src/routes/book.routes.js';
+import subscriptionRoutes from './src/routes/subscription.routes.js';
+import downloadRoutes from './src/routes/download.routes.js';
+import adminRoutes from './src/routes/admin.routes.js';
+import interactionRoutes from './src/routes/interaction.routes.js';
+import reportRoutes from './src/routes/report.routes.js';
+import chapterRoutes from './src/routes/chapter.routes.js';
+import bookmarkRoutes from './src/routes/bookmark.routes.js';
+import readingProgressRoutes from './src/routes/reading-progress.routes.js';
+import { errorHandler, notFoundHandler } from './src/middlewares/error.middleware.js';
+import { loggerMiddleware } from './src/middlewares/logger.middleware.js';
+import {
+    apiRateLimiter, authRateLimiter, closeRateLimitStore, connectRateLimitStore, loginRateLimiter,
+    parseTrustProxy, sanitizeMongoInput
+} from './src/middlewares/security.middleware.js';
+import ApiError from './src/utils/api-error.js';
+import commentRoutes from './src/routes/comment.routes.js';
+import multer from 'multer';
 
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+// [CẤU HÌNH ỨNG DỤNG] Thiết lập middleware chung, CORS theo danh sách cấu hình và giới hạn payload JSON.
 export const app = express();
-const PORT = process.env.PORT || 5001;
-const configuredOrigins = new Set(
-    (process.env.CORS_ORIGINS || '')
-        .split(',')
-        .map(origin => origin.trim())
-        .filter(Boolean)
-);
+app.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
+const allowedOrigins = new Set((process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean));
 
+app.disable('x-powered-by');
+app.use(helmet());
+app.use(loggerMiddleware);
 app.use(cors({
-    // Callback CORS nhận Origin và callback kết quả; không thay đổi response mà quyết định cho phép nguồn.
     origin(origin, callback) {
-        // Cho phép nguồn không có Origin, nguồn cấu hình rõ ràng và nguồn LAN khi không ở production.
-        const isLocalDevelopmentOrigin = typeof origin === 'string'
+        const localOrigin = typeof origin === 'string'
             && /^http:\/\/(?:localhost|127(?:\.\d{1,3}){3}|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}):\d+$/.test(origin);
-        const isAllowed = !origin
-            || configuredOrigins.has(origin)
-            || (process.env.NODE_ENV !== 'production' && isLocalDevelopmentOrigin);
-        callback(null, isAllowed);
+        callback(null, !origin || allowedOrigins.has(origin)
+            || (process.env.NODE_ENV !== 'production' && localOrigin));
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Disposition', 'X-OpenBook-Show-Ad', 'X-OpenBook-Ad-Reason']
 }));
-
-// Middleware để đọc dữ liệu JSON từ request body
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Endpoint kiểm tra nhanh trạng thái phục vụ của API; không truy cập cơ sở dữ liệu.
-// Nhận request bất kỳ tại / và gửi JSON báo trạng thái thành công.
-// Gọi hàm kết nối MongoDB
-app.get('/', (req, res) => {
-    res.json({
-        status: 'success',
-        message: 'API Running'
-    });
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+app.use(sanitizeMongoInput);
+// [KIỂM TRA BODY] Chuẩn hóa body vắng mặt thành object và từ chối JSON không phải object.
+app.use((req, res, next) => {
+    if (req.body === undefined) req.body = {};
+    if (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body)) {
+        return next(new ApiError(400, 'Request body must be a JSON object'));
+    }
+    return next();
 });
 
-app.use('/api/v1/books', bookRouter);
-app.use('/api/v1/book-copies', bookCopiesRouter);
-app.use('/api/v1/readers', readerRouter);
-app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/borrow-cards', borrowCardRouter);
-app.use('/api/v1/fines', fineRouter);
-app.use('/api/v1/librarians', librarianRouter);
-app.use('/api/v1/dashboard', dashboardRouter);
+// [KIỂM TRA SỨC KHỎE] Trả trạng thái API mà không làm lộ thông tin cấu hình hoặc dữ liệu hệ thống.
+app.get('/', (req, res) => res.json({ status: 'success', message: 'OpenBook API is running' }));
 
-// Chuyển URL không khớp tuyến thành lỗi 404 để bộ xử lý lỗi định dạng phản hồi.
-// Middleware nhận req/res/next và chuyển ApiError 404 qua next(), không tự gửi response.
-app.use((req, res, next) => next(new apiError(404, `Route not found: ${req.method} ${req.originalUrl}`)));
+// [ĐĂNG KÝ TUYẾN] Gom API theo chức năng và dùng chung tiền tố phiên bản.
+app.use('/api/v1', apiRateLimiter);
+app.use('/api/v1/auth', authRateLimiter);
+app.use('/api/v1/auth/login', loginRateLimiter);
+app.use('/api/v1/auth/admin-login', loginRateLimiter);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/books', bookRoutes);
+app.use('/api/v1/subscriptions', subscriptionRoutes);
+app.use('/api/v1/downloads', downloadRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', interactionRoutes);
+app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/admin/chapters', chapterRoutes);
+app.use('/api/v1/bookmarks', bookmarkRoutes);
+app.use('/api/v1/reading-progress', readingProgressRoutes); 
+app.use('/api', commentRoutes);
+
+// [XỬ LÝ LỖI] Chuẩn hóa tuyến không tồn tại và lỗi phát sinh trong middleware/controller.
+app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Kết nối MongoDB rồi mở cổng HTTP; dừng tiến trình khi thiếu cấu hình JWT hoặc khởi động thất bại.
-// Không nhận tham số; resolve sau khi mở server, đồng thời kết nối DB và bắt đầu lắng nghe cổng.
-const startServer = async () => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not configured');
+// [KHỞI ĐỘNG SERVER] Kết nối DB và chỉ mở cổng khi cấu hình JWT/MongoDB hợp lệ.
+export const startServer = async () => {
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+        throw new Error('JWT_SECRET must contain at least 32 characters');
     }
+    await connectRateLimitStore();
     await connectDB();
-    // Callback lắng nghe được gọi khi server bắt đầu nhận request; chỉ ghi log, không trả dữ liệu.
-    app.listen(PORT, () => {
-        // Ghi nhận cổng đã mở để hỗ trợ chẩn đoán khởi động.
-        console.log(`Server is running on port ${PORT}`);
-    });
+    const port = Number(process.env.PORT || 5000);
+    return app.listen(port, () => console.log(`OpenBook API is running on port ${port}`));
 };
 
-// Chỉ tự khởi động khi tệp được chạy trực tiếp; khi import chỉ cung cấp app cho nơi gọi.
+const upload = multer({ storage: multer.memoryStorage() });
+const router = express.Router();
+
+// [CHẠY TRỰC TIẾP] Không tự khởi động khi server.js được import bởi kiểm thử.
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
-    // Bắt lỗi khởi động, ghi log và kết thúc tiến trình với mã lỗi.
     startServer().catch((error) => {
-        console.error('Failed to start server:', error);
-        process.exit(1);
+        console.error('OpenBook server failed to start:', error);
+        closeRateLimitStore().catch((closeError) => {
+            console.error('Failed to close rate-limit Redis connection:', closeError);
+        });
+        process.exitCode = 1;
     });
 }

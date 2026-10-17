@@ -1,2 +1,6 @@
 .env
 node_modules/
+/private-books/
+/admin-web/dist/
+/admin-web/.env.local
+/admin-web/*.tsbuildinfo
