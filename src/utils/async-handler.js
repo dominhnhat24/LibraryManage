@@ -1,4 +1,2 @@
-// [UTIL] Chuyển lỗi bất đồng bộ của controller sang middleware lỗi Express.
-export const asyncHandler = (handler) => (req, res, next) => {
-    Promise.resolve(handler(req, res, next)).catch(next);
-};
+// Giữ import cũ trong controller và tái sử dụng middleware chuẩn.
+export { asyncHandler } from '../middlewares/asyncHandler.middleware.js';

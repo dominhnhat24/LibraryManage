@@ -1,52 +1,59 @@
 import Nodemailer from 'nodemailer';
 import ApiError from '../utils/api-error.js';
 
-// Tạo transporter dùng chung
-const transporter = Nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false, // true cho port 465, false cho các port khác như 587
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+// Hàm getSmtpSettings: Đọc cấu hình mail ưu tiên MAIL_* và hỗ trợ tên SMTP_* đang dùng trong .env hiện tại.
+export const getSmtpSettings = () => {
+    const host = process.env.MAIL_HOST || process.env.SMTP_HOST;
+    const user = process.env.MAIL_USER || process.env.SMTP_USER;
+    const password = process.env.MAIL_PASSWORD || process.env.SMTP_PASS;
+    const from = process.env.MAIL_FROM || process.env.SMTP_FROM || user;
+    if (!host || !user || !password || !from) {
+        throw new ApiError(503, 'Email delivery is unavailable because SMTP is not configured');
     }
-});
 
-const sendRegisterOtp = async (email, otp) => {
+    const port = Number(process.env.MAIL_PORT || process.env.SMTP_PORT || 587);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        throw new ApiError(503, 'Email delivery is unavailable because the SMTP port is invalid');
+    }
+    return { host, port, user, password, from };
+};
+
+// Hàm createSmtpTransport: Tạo kết nối Nodemailer dùng chung cấu hình đã chuẩn hóa cho các luồng email.
+export const createSmtpTransport = () => {
+    const settings = getSmtpSettings();
+    const transporter = Nodemailer.createTransport({
+        host: settings.host,
+        port: settings.port,
+        secure: settings.port === 465,
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+        auth: { user: settings.user, pass: settings.password }
+    });
+    return { transporter, from: settings.from };
+};
+
+// Hàm sendRegistrationOtp: Gửi mã xác minh đăng ký qua SMTP; báo lỗi cấu hình hoặc giao nhận rõ ràng.
+export const sendRegistrationOtp = async (email, otp) => {
+    const { transporter, from } = createSmtpTransport();
+
     try {
         await transporter.sendMail({
-            from: `"OpenBook Support" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: 'Mã xác thực tài khoản OpenBook',
+            from: `"OpenBook Library" <${process.env.SMTP_USER}>`,
+            to: email.requested || email, // Hỗ trợ cả email trực tiếp hoặc req.body.email từ controller
+            subject: 'Mã xác minh đăng ký OpenBook',
+            text: `Mã xác minh OpenBook của bạn là ${otp}. Mã có hiệu lực trong 5 phút. Không chia sẻ mã này với bất kỳ ai.`,
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9;">
-                    <h2 style="color: #4A90E2; text-align: center;">Chào mừng bạn đến với OpenBook!</h2>
-                    <p style="font-size: 16px; color: #333;">Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất quá trình xác thực, vui lòng sử dụng mã OTP bên dưới:</p>
-                    
-                    <div style="text-align: center; margin: 30px 0;">
-                        <span style="display: inline-block; font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #ff5722; background: #fff; padding: 12px 24px; border: 1px dashed #ff5722; border-radius: 6px;">
-                            ${otp}
-                        </span>
-                    </div>
-                    
-                    <p style="font-size: 14px; color: #666;">Mã xác thực này có hiệu lực trong vòng <strong>5 phút</strong>. Vui lòng không chia sẻ mã này cho bất kỳ ai.</p>
-                    
-                    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
-                    <p style="font-size: 12px; color: #999; text-align: center;">Trân trọng,<br>Đội ngũ phát triển OpenBook</p>
+                <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #ddd">
+                    <h2>Chào mừng bạn đến với OpenBook</h2>
+                    <p>Nhập mã sau để xác minh địa chỉ email và hoàn tất đăng ký:</p>
+                    <p style="font-size:32px;font-weight:bold;letter-spacing:8px">${otp}</p>
+                    <p>Mã có hiệu lực trong <strong>5 phút</strong>. Không chia sẻ mã này với bất kỳ ai.</p>
                 </div>
             `
         });
     } catch (error) {
-        console.error('Lỗi gửi email:', error);
-        throw new ApiError(500, 'Không thể gửi email xác thực, vui lòng thử lại sau.');
+        console.error('[MAIL] Could not deliver registration verification email', error);
+        throw new ApiError(502, 'Could not deliver the verification email; please try again later');
     }
 };
-
-
-
-
-
-
-
-
-

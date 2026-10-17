@@ -2,11 +2,12 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
-import { connectDB } from '../src/config/db.js';
+import { connectDB } from '../src/config/database.config.js';
 import User from '../src/models/user.model.js';
+import { ROLES } from '../src/constants/roles.constant.js';
 
 // [KIỂM TRA CẤU HÌNH] Bắt buộc cung cấp danh tính và mật khẩu riêng qua biến môi trường.
-const { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = process.env;
+const { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME, ADMIN_PHONE } = process.env;
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !ADMIN_NAME || ADMIN_PASSWORD.length < 12) {
     throw new Error('Set ADMIN_EMAIL, ADMIN_NAME, and ADMIN_PASSWORD (at least 12 characters) before seeding');
 }
@@ -18,7 +19,14 @@ try {
     const password_hash = await bcrypt.hash(ADMIN_PASSWORD, 12);
     const user = await User.findOneAndUpdate(
         { email },
-        { $set: { name: ADMIN_NAME.trim(), password_hash, role: 'admin' } },
+        {
+            $set: {
+                name: ADMIN_NAME.trim(),
+                password_hash,
+                role: ROLES.ADMIN,
+                ...(ADMIN_PHONE ? { phone_number: ADMIN_PHONE.trim() } : {})
+            }
+        },
         { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
     );
     console.log(`Admin account is ready: ${user.email}`);

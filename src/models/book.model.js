@@ -3,8 +3,9 @@ import mongoose from 'mongoose';
 
 const bookSchema = new mongoose.Schema({
     title: { type: String, required: true, trim: true, maxlength: 200 },
+    slug: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
     author_name: { type: String, required: true, trim: true, maxlength: 120 },
-    category: { type: String, enum: ['ebook', 'audiobook', 'comic', 'webnovel'], required: true },
+    category: { type: String, enum: ['ebook', 'Science', 'Programming', 'Database', 'audiobook', 'comic', 'webnovel', 'software_engineering', 'computer_science', 'backend', 'frontend', 'database', 'programming', 'mobile', 'other', 'Technology'], required: true },
     publication_year: { type: Number, min: 1, max: 3000, default: null },
     description: { type: String, trim: true, maxlength: 5000, default: '' },
     cover_url: { type: String, trim: true, default: '' },

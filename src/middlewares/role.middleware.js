@@ -1,16 +1,17 @@
-// [MIDDLEWARE PHÂN QUYỀN] Chặn request nếu người dùng hiện tại không có một trong các vai trò cho phép.
+// Middleware phân quyền; ADMIN/USER chỉ là quyền truy cập, không đại diện cho gói thuê bao.
 import ApiError from '../utils/api-error.js';
+import { ROLES } from '../constants/roles.constant.js';
 
-// [KIỂM TRA ROLE] Phải chạy sau verifyToken để sử dụng hồ sơ tài khoản đã nạp từ cơ sở dữ liệu.
-export const checkRole = (...roles) => (req, res, next) => {
+// Hàm requireAdmin: Chỉ cho phép tài khoản có role ADMIN đi qua; phải chạy sau verifyToken.
+export const requireAdmin = (req, res, next) => {
     if (!req.authUser) return next(new ApiError(401, 'Authentication is required'));
-    if (!roles.includes(req.authUser.role)) {
+    if (req.authUser.role !== ROLES.ADMIN) {
         return next(new ApiError(403, 'You do not have permission to perform this action'));
     }
     return next();
 };
 
-// [KIỂM TRA PREMIUM] Premium còn hạn, VIP và admin mới được đọc nội dung sách trả phí.
+// Hàm checkPremium: Cho phép đọc nội dung trả phí nếu hồ sơ có thuê bao Premium/VIP còn hiệu lực hoặc quyền Admin.
 export const checkPremium = (req, res, next) => {
     if (!req.authUser) return next(new ApiError(401, 'Authentication is required'));
     if (!req.authUser.hasActivePremium()) {
@@ -19,7 +20,7 @@ export const checkPremium = (req, res, next) => {
     return next();
 };
 
-// [KIỂM TRA TẢI OFFLINE] Chỉ VIP còn hạn hoặc admin có thể tải tệp sách riêng tư.
+// Hàm checkDownloadPermission: Chỉ cho phép tải tệp riêng tư khi VIP còn hạn hoặc tài khoản là Admin.
 export const checkDownloadPermission = (req, res, next) => {
     if (!req.authUser) return next(new ApiError(401, 'Authentication is required'));
     if (!req.authUser.hasActiveVip()) {

@@ -1,6 +1,7 @@
 // [MODEL USER] Hồ sơ OpenBook gồm vai trò, quyền Premium/VIP và refresh token đã băm.
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { ROLES } from '../constants/roles.constant.js';
 
 // [LƯỢC ĐỒ NGƯỜI DÙNG] Lưu thông tin tối thiểu và không bao giờ trả mật khẩu/refresh token ra API.
 const userSchema = new mongoose.Schema({
@@ -8,7 +9,12 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
     phone_number: { type: String, default: null, trim: true, maxlength: 12 },
     password_hash: { type: String, required: true, select: false },
-    role: { type: String, enum: ['free', 'vip', 'premium', 'admin'], default: 'free', required: true },
+    role: { type: String, enum: Object.values(ROLES), default: ROLES.USER, required: true },
+    email_verified: { type: Boolean, default: true, required: true },
+    email_otp_hash: { type: String, default: null, select: false },
+    email_otp_expires_at: { type: Date, default: null, select: false },
+    email_otp_sent_at: { type: Date, default: null, select: false },
+    email_otp_attempts: { type: Number, default: 0, select: false },
     is_premium: { type: Boolean, default: false, required: true },
     premium_expires_at: { type: Date, default: null },
     is_vip: { type: Boolean, default: false, required: true },
@@ -16,22 +22,24 @@ const userSchema = new mongoose.Schema({
     refresh_token_hash: { type: String, default: null, select: false }
 }, { timestamps: true });
 
-// [KIỂM TRA QUYỀN] Premium gồm thuê bao còn hạn hoặc vai trò VIP/Admin; VIP download cần vai trò VIP còn hạn.
+// Hàm hasActivePremium: Kiểm tra quyền Premium còn hạn, bao gồm quyền VIP đang hoạt động và quyền Admin.
 userSchema.methods.hasActivePremium = function hasActivePremium(now = new Date()) {
-    return this.role === 'admin' || this.hasActiveVip(now)
+    return this.role === ROLES.ADMIN || this.hasActiveVip(now)
         || (this.is_premium && this.premium_expires_at instanceof Date && this.premium_expires_at > now);
 };
+
+// Hàm hasActiveVip: Kiểm tra cờ VIP và ngày hết hạn độc lập với role phân quyền ADMIN/USER.
 userSchema.methods.hasActiveVip = function hasActiveVip(now = new Date()) {
-    return this.role === 'admin' || (this.role === 'vip' && this.is_vip
+    return this.role === ROLES.ADMIN || (this.is_vip
         && this.vip_expires_at instanceof Date && this.vip_expires_at > now);
 };
 
-// [BẢO MẬT MẬT KHẨU] So sánh mật khẩu gửi vào với bcrypt hash chỉ được nạp trong luồng đăng nhập.
+// Hàm verifyPassword: So sánh mật khẩu đăng nhập với bcrypt hash chỉ được nạp trong luồng xác thực.
 userSchema.methods.verifyPassword = function verifyPassword(password) {
     return bcrypt.compare(password, this.password_hash);
 };
 
-// [DỮ LIỆU CÔNG KHAI] Loại bỏ mọi trường xác thực và tính lại quyền thuê bao còn hiệu lực.
+// Hàm toPublicJSON: Tạo dữ liệu hồ sơ an toàn, không xuất mật khẩu/token và trả quyền thuê bao đang hiệu lực.
 userSchema.methods.toPublicJSON = function toPublicJSON() {
     const activeVip = this.hasActiveVip();
     const activePremium = this.hasActivePremium();
@@ -39,18 +47,16 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
         id: this.id,
         name: this.name,
         email: this.email,
-        role: this.role === 'vip' && !activeVip ? 'free' : this.role,
+        role: this.role,
         is_premium: activePremium,
-        premium_expires_at: activePremium && this.role !== 'admin'
+        premium_expires_at: activePremium && this.role !== ROLES.ADMIN
             ? (activeVip ? this.vip_expires_at : this.premium_expires_at) : null,
         is_vip: activeVip,
-        vip_expires_at: activeVip && this.role !== 'admin' ? this.vip_expires_at : null
+        vip_expires_at: activeVip && this.role !== ROLES.ADMIN ? this.vip_expires_at : null
     };
 };
 
 export default mongoose.models.User || mongoose.model('User', userSchema);
-
-
 
 
 
