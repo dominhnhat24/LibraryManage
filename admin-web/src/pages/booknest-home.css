@@ -1,0 +1,848 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+/* ==========================================================================
+   BOOKNEST HOME
+   Giữ giao diện hiện tại, gom các quy tắc trùng lặp và chuẩn hóa Sidebar.
+   ========================================================================== */
+
+.booknest-home {
+  --bn-bg: #eee7d7;
+  --bn-page: #fbf9f2;
+  --bn-page-right: #fcfbf6;
+  --bn-ink: #26221c;
+  --bn-muted: #7d776d;
+  --bn-line: rgba(170, 154, 126, .24);
+  --bn-dark: #29261f;
+  min-height: 100vh;
+  padding: 34px 38px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255,255,255,.68), transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(206,191,158,.18), transparent 38%),
+    linear-gradient(135deg, #f3ecde 0%, var(--bn-bg) 52%, #ece3d2 100%);
+  color: var(--bn-ink);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.booknest-home *,
+.booknest-home *::before,
+.booknest-home *::after {
+  box-sizing: border-box;
+}
+
+.booknest-home a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.booknest-home button,
+.booknest-home input {
+  font-family: inherit;
+}
+
+/* Main floating reading surface */
+.booknest-book {
+  width: min(1510px, 97vw);
+  height: min(850px, calc(100vh - 68px));
+  min-height: 720px;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(166,150,121,.25);
+  border-radius: 30px;
+  background: var(--bn-page);
+  box-shadow:
+    0 36px 90px rgba(83,65,40,.17),
+    0 9px 24px rgba(83,65,40,.08),
+    inset 0 0 0 1px rgba(255,255,255,.55);
+  transition: grid-template-columns .3s ease;
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.booknest-sidebar {
+  min-width: 0;
+  background: #fbf9f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px;
+  position: relative;
+  z-index: 20;
+  transition: padding .3s ease;
+}
+
+.booknest-sidebar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 30px;
+  bottom: 30px;
+  width: 1px;
+  background: var(--bn-line);
+  transition: opacity .2s ease;
+}
+
+.booknest-side-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 20px;
+  min-height: 0;
+  transform: scale(1);
+  transform-origin: center bottom;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    transform .38s cubic-bezier(.65, 0, .35, 1),
+    opacity .25s ease,
+    visibility 0s linear 0s;
+}
+
+.booknest-side-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #777164;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease,
+    opacity .25s ease;
+}
+
+.booknest-side-icon:hover {
+  color: #5f512b;
+  background: #e8dec0;
+}
+
+.booknest-side-icon.is-active {
+  color: #5f512b;
+  background: #e8dec0;
+}
+
+.booknest-menu-button {
+  margin-top: auto;
+  background: transparent;
+  color: #777164;
+  box-shadow: none;
+  position: relative;
+  z-index: 2;
+}
+
+.booknest-menu-button:hover {
+  color: #5f512b;
+  background: #e8dec0;
+  transform: scale(1.05);
+}
+
+/* Collapsed state: nav remains mounted so its CSS transition can run. */
+.booknest-sidebar.is-collapsed {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.booknest-sidebar.is-collapsed::after {
+  opacity: 0;
+}
+
+.booknest-side-nav.is-collapsed {
+  transform: scale(.03);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    transform .38s cubic-bezier(.65, 0, .35, 1),
+    opacity .25s ease,
+    visibility 0s linear .38s;
+}
+
+.booknest-side-nav.is-collapsed .booknest-side-icon {
+  opacity: 0;
+  transform: scale(.1);
+  pointer-events: none;
+}
+
+/* Narrow the sidebar while keeping the three-dot button visible. */
+.booknest-book:has(.booknest-sidebar.is-collapsed) {
+  grid-template-columns: 48px minmax(0, 1fr);
+}
+
+/* Two-page canvas */
+.booknest-pages {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent 49.9%, rgba(154,139,113,.12) 50%, transparent 50.1%),
+    var(--bn-page);
+}
+
+.booknest-pages::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(174,157,127,.28);
+  box-shadow: 8px 0 18px rgba(85,66,43,.045), -8px 0 18px rgba(85,66,43,.045);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Search and profile */
+.booknest-search {
+  position: absolute;
+  left: 22px;
+  top: 18px;
+  width: min(390px, 42%);
+  height: 34px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7d786f;
+  border-bottom: 1px solid #e2ddd2;
+}
+
+.booknest-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 500 10px/1 "Plus Jakarta Sans", sans-serif;
+  color: var(--bn-ink);
+}
+
+.booknest-search input::placeholder {
+  color: #8d877d;
+}
+
+.booknest-user {
+  position: absolute;
+  right: 22px;
+  top: 16px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.booknest-notification {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #716c64;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.booknest-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.booknest-avatar {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ead0c0, #b6a18b);
+  color: white;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 7px rgba(0,0,0,.12);
+  font-size: 10px;
+}
+
+.booknest-left-page,
+.booknest-right-page {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Left page */
+.booknest-left-page {
+  padding: 105px 48px 30px 66px;
+  display: grid;
+  grid-template-rows: 330px 1fr 132px;
+  overflow: visible;
+  z-index: 4;
+}
+
+.booknest-welcome {
+  position: relative;
+  z-index: 8;
+  width: 48%;
+  max-width: 440px;
+}
+
+.booknest-welcome h1 {
+  margin: 0;
+  font: 700 clamp(38px, 3.1vw, 50px)/.98 "Playfair Display", Georgia, serif;
+  letter-spacing: -1.8px;
+  color: #24211c;
+}
+
+.booknest-welcome h1 span {
+  display: block;
+  font-size: .9em;
+  margin-top: 2px;
+}
+
+.booknest-welcome p {
+  margin: 17px 0 21px;
+  max-width: 380px;
+  color: #777168;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.booknest-start {
+  border: 0;
+  border-radius: 22px;
+  padding: 12px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: white;
+  background: var(--bn-dark);
+  font: 700 10px/1 "Plus Jakarta Sans", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(42,37,30,.18);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.booknest-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 18px rgba(42,37,30,.2);
+}
+
+.booknest-start span {
+  font-size: 15px;
+  line-height: 7px;
+}
+
+/* Open-book artwork */
+.booknest-open-book {
+  position: absolute;
+  z-index: 12;
+  width: 690px;
+  height: 372px;
+  top: 42px;
+  right: -345px;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 16px rgba(74,57,36,.11));
+}
+
+.booknest-open-book img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.booknest-popular {
+  align-self: end;
+  min-width: 0;
+  z-index: 7;
+}
+
+.booknest-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.booknest-section-head h2 {
+  margin: 0;
+  font: 600 19px/1.2 "Playfair Display", Georgia, serif;
+  color: #29261f;
+  letter-spacing: -.25px;
+}
+
+.booknest-mini-arrows {
+  display: flex;
+  gap: 4px;
+}
+
+.booknest-mini-arrows button,
+.booknest-section-head > button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #827b70;
+  cursor: pointer;
+}
+
+.booknest-mini-arrows button:hover,
+.booknest-section-head > button:hover {
+  background: #eee8db;
+}
+
+.booknest-popular-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 22px;
+  margin-top: 15px;
+}
+
+.booknest-popular-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.booknest-popular-card img {
+  width: 100%;
+  height: 112px;
+  object-fit: contain;
+  object-position: bottom;
+  filter: drop-shadow(5px 7px 5px rgba(72,58,39,.15));
+  transition: transform .18s ease;
+}
+
+.booknest-popular-card:hover img {
+  transform: translateY(-3px);
+}
+
+.booknest-popular-card strong {
+  margin-top: 8px;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.booknest-popular-card span {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+  color: #858076;
+  font-size: 8px;
+}
+
+/* Series collection */
+.booknest-series {
+  align-self: end;
+  min-width: 0;
+  z-index: 7;
+}
+
+.booknest-series .booknest-section-head h2 {
+  font-size: 18px;
+}
+
+.booknest-series-card {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 13px;
+  min-height: 62px;
+}
+
+.booknest-series-card img {
+  width: 72px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.booknest-series-card span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.booknest-series-card strong {
+  font-size: 9px;
+  line-height: 1.2;
+}
+
+.booknest-series-card small {
+  color: #817b72;
+  font-size: 8px;
+}
+
+.booknest-series-card b {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* Right page */
+.booknest-right-page {
+  background: linear-gradient(90deg, rgba(255,255,255,.12), transparent 16%), var(--bn-page-right);
+  padding: 105px 48px 30px;
+  display: grid;
+  grid-template-rows: 330px 148px 1fr;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.booknest-feature-book {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Only one open-book illustration is visible. */
+.booknest-right-book-art {
+  display: none !important;
+}
+
+.booknest-feature-copy {
+  margin-left: clamp(255px, 35%, 340px);
+  position: relative;
+  z-index: 15;
+  max-width: 250px;
+}
+
+.booknest-feature-copy h2 {
+  margin: 0;
+  max-width: 250px;
+  font: 600 clamp(31px, 2.4vw, 40px)/.98 "Playfair Display", Georgia, serif;
+  letter-spacing: -1px;
+}
+
+.booknest-feature-copy > span {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+  color: #3e3932;
+}
+
+.booknest-feature-copy p {
+  max-width: 245px;
+  margin: 15px 0 10px;
+  color: #827b71;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.booknest-feature-copy em {
+  color: #81796e;
+  font: italic 9px "Playfair Display", Georgia, serif;
+}
+
+/* Audio player */
+.booknest-audio .booknest-section-head {
+  margin-bottom: 10px;
+}
+
+.booknest-player {
+  height: 92px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 5px 18px rgba(80,62,38,.06);
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.booknest-player > img {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.booknest-player-main {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+
+.booknest-player-main strong {
+  font-size: 10px;
+}
+
+.booknest-player-main > span {
+  color: #817a70;
+  font-size: 8px;
+}
+
+.booknest-progress {
+  width: 100%;
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #d9d2c6;
+}
+
+.booknest-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #39342d;
+  transition: width .25s ease;
+}
+
+.booknest-time {
+  display: flex;
+  justify-content: space-between;
+  color: #969087;
+  font-size: 6px;
+}
+
+.booknest-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.booknest-player-controls button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: #39342d;
+  cursor: pointer;
+}
+
+.booknest-player-controls .booknest-play {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: white;
+  background: #34302a;
+}
+
+/* Chapters */
+.booknest-chapters {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.booknest-chapter-list {
+  position: relative;
+  margin-top: 9px;
+}
+
+.booknest-chapter {
+  position: relative;
+  display: grid;
+  grid-template-columns: 13px 1fr auto;
+  gap: 10px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid #ebe5da;
+}
+
+.booknest-chapter-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border: 1px solid #aaa295;
+  border-radius: 50%;
+}
+
+.booknest-chapter-line {
+  position: absolute;
+  left: 3px;
+  top: 15px;
+  bottom: -2px;
+  width: 1px;
+  background: #d9d1c4;
+  z-index: 0;
+}
+
+.booknest-chapter strong {
+  display: block;
+  font: 600 11px/1.25 "Playfair Display", Georgia, serif;
+}
+
+.booknest-chapter p {
+  margin: 5px 0 0;
+  color: #858077;
+  font-size: 7.5px;
+  line-height: 1.55;
+}
+
+.booknest-chapter time {
+  align-self: center;
+  color: #80796e;
+  font-size: 7px;
+  white-space: nowrap;
+}
+
+.booknest-data-status {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  color: #8b8479;
+  font-size: 7px;
+}
+
+.booknest-data-status.is-error {
+  color: #a85d55;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .booknest-home {
+    padding: 20px;
+  }
+
+  .booknest-book {
+    width: 96vw;
+    height: min(820px, calc(100vh - 40px));
+  }
+
+  .booknest-open-book {
+    width: 610px;
+    height: 329px;
+    right: -305px;
+  }
+
+  .booknest-feature-copy {
+    margin-left: 235px;
+  }
+
+  .booknest-welcome h1 {
+    font-size: 39px;
+  }
+}
+
+@media (max-width: 900px) {
+  .booknest-home {
+    padding: 14px;
+  }
+
+  .booknest-book {
+    height: auto;
+    min-height: 720px;
+  }
+
+  .booknest-pages {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .booknest-pages::after {
+    display: none;
+  }
+
+  .booknest-right-page {
+    min-height: 620px;
+    border-top: 1px solid var(--bn-line);
+  }
+
+  .booknest-left-page {
+    min-height: 650px;
+  }
+
+  .booknest-open-book {
+    width: 560px;
+    height: 302px;
+    right: -280px;
+    top: 52px;
+  }
+}
+
+@media (max-width: 620px) {
+  .booknest-home {
+    padding: 8px;
+  }
+
+  .booknest-book {
+    grid-template-columns: 50px minmax(0, 1fr);
+    border-radius: 20px;
+  }
+
+  .booknest-book:has(.booknest-sidebar.is-collapsed) {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .booknest-left-page {
+    padding: 92px 20px 24px;
+  }
+
+  .booknest-right-page {
+    padding: 92px 20px 24px;
+  }
+
+  .booknest-welcome {
+    width: 100%;
+  }
+
+  .booknest-welcome h1 {
+    font-size: 34px;
+  }
+
+  .booknest-open-book {
+    width: 390px;
+    height: 211px;
+    right: -195px;
+    top: 105px;
+  }
+
+  .booknest-popular-grid {
+    gap: 7px;
+  }
+
+  .booknest-popular-card img {
+    height: 88px;
+  }
+
+  .booknest-feature-copy {
+    margin-left: 70px;
+  }
+
+  .booknest-feature-copy h2 {
+    font-size: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booknest-side-nav,
+  .booknest-side-nav .booknest-side-icon,
+  .booknest-book,
+  .booknest-sidebar {
+    transition: none !important;
+  }
+}

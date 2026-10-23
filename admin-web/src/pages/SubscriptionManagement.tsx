@@ -143,15 +143,15 @@ export function SubscriptionManagement() {
     </section>
 
     {/* Thống kê đồng bộ cấu trúc với Report Management */}
-    <section aria-label="Thống kê thuê bao" className="mb-5 grid gap-px border border-[#dfded7] bg-[#dfded7] sm:grid-cols-3">
-      <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng theo bộ lọc</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.total.toLocaleString('vi-VN')}</p></div>
-      <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p></div>
-      <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.limit}</p></div>
+    <section aria-label="Thống kê thuê bao" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+      <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng theo bộ lọc</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p></div>
+      <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p></div>
+      <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.limit}</p></div>
     </section>
 
-    <section className="border border-[#dfded7] bg-[#fbfaf7]">
+    <section className="border border-[#DDE9E6] bg-[#FFFFFF]">
       {/* Bộ lọc đồng bộ cấu trúc 2 cột với Report Management */}
-      <div className="grid gap-2 border-b border-[#e5e4de] px-4 py-4 sm:grid-cols-[minmax(220px,1fr)_200px] sm:px-6">
+      <div className="grid gap-2 border-b border-[#EEF3F0] px-4 py-4 sm:grid-cols-[minmax(220px,1fr)_200px] sm:px-6">
         <label>
           <span className="sr-only">Lọc trạng thái thuê bao</span>
           <select className="form-input h-10" onChange={(event) => { setStatus(event.target.value); setPage(1); }} value={status}>
@@ -179,7 +179,7 @@ export function SubscriptionManagement() {
         : subscriptions.length === 0 ? <div className="grid min-h-64 place-items-center px-6 text-center"><div><CreditCard className="mx-auto text-slate-400" size={28} /><h3 className="mt-3 text-sm font-bold">Không có yêu cầu thuê bao</h3><p className="mt-1 text-sm text-slate-500">Thử bộ lọc khác hoặc chờ yêu cầu mới.</p></div></div>
           : <div className="overflow-x-auto"><table className="w-full min-w-[1000px] border-collapse text-left">
             <thead>
-              <tr className="border-y border-[#e9e8e2] bg-[#f8f7f3] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+              <tr className="border-y border-[#e9e8e2] bg-[#F8FBF9] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                 <th className="px-5 py-3.5">Người đăng ký</th>
                 <th className="px-4 py-3.5">Gói</th>
                 <th className="px-4 py-3.5">Thanh toán & Cổng</th>
@@ -188,15 +188,15 @@ export function SubscriptionManagement() {
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#efeee9]">{subscriptions.map((item: any) => <tr className="hover:bg-[#fbfaf7]" key={item._id}>
+            <tbody className="divide-y divide-[#EEF3F0]">{subscriptions.map((item: any) => <tr className="hover:bg-[#FFFFFF]" key={item._id}>
               <td className="px-5 py-3.5"><p className="text-sm font-bold text-[#202b28]">{subscriberName(item.user)}</p><p className="mt-1 text-xs text-slate-500">{subscriberEmail(item.user)}</p></td>
               <td className="px-4 py-3.5"><span className="text-xs font-semibold">{item.plan === 'vip_monthly' ? 'VIP' : 'Premium'} · Tháng</span><p className="mt-1 text-[11px] text-slate-500">{Number(item.amount_vnd).toLocaleString('vi-VN')} ₫</p></td>
               <td className="px-4 py-3.5">
-                <p className="font-mono text-xs font-bold text-[#31564a]">{item.transfer_note}</p>
+                <p className="font-mono text-xs font-bold text-[#24795C]">{item.transfer_note}</p>
                 <p className="mt-1 text-[11px] text-slate-500">Cổng: <span className="uppercase font-semibold text-slate-700">{item.gateway || 'manual'}</span> {item.auto_approved && <span className="text-emerald-600 font-semibold">(Tự động)</span>}</p>
               </td>
               <td className="px-4 py-3.5">
-                <span className={`inline-flex border px-2.5 py-1 text-[10px] font-bold ${item.status === 'active' ? 'border-[#d3e2d5] bg-[#edf5ee] text-[#45704f]' : item.status === 'pending' ? 'border-[#e7ddc5] bg-[#f8f3e8] text-[#94743c]' : 'border-[#e9e7df] bg-white text-slate-500'}`}>
+                <span className={`inline-flex border px-2.5 py-1 text-[10px] font-bold ${item.status === 'active' ? 'border-[#C3E5D0] bg-[#E3F4EB] text-[#24795C]' : item.status === 'pending' ? 'border-[#F5DDB0] bg-[#FFF9ED] text-[#B8860B]' : 'border-[#DDE9E6] bg-white text-slate-500'}`}>
                   {statusLabel(item.status)}
                 </span>
                 {item.status === 'active' && <p className="mt-1 text-[10px] text-slate-500">Hết hạn {formatDate(item.expires_at)}</p>}
@@ -222,7 +222,7 @@ export function SubscriptionManagement() {
     {selectedSubscription && (
       <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !detailLoading) setSelectedSubscription(null); }} role="presentation">
         <section aria-labelledby="subscription-detail-title" aria-modal="true" className="modal-panel !max-w-[640px]" role="dialog">
-          <header className="flex items-start justify-between border-b border-[#e9e7df] px-6 py-5 sm:px-8">
+          <header className="flex items-start justify-between border-b border-[#DDE9E6] px-6 py-5 sm:px-8">
             <div>
               <p className="eyebrow">Chi tiết giao dịch</p>
               <h2 className="mt-1 text-xl font-bold" id="subscription-detail-title">{subscriberName(selectedSubscription.user)}</h2>
@@ -236,7 +236,7 @@ export function SubscriptionManagement() {
               <p className="py-8 text-center text-sm text-slate-500">Đang tải chi tiết…</p>
             ) : (
               <>
-                <div className="grid gap-4 border-b border-[#e9e7df] pb-4 sm:grid-cols-2">
+                <div className="grid gap-4 border-b border-[#DDE9E6] pb-4 sm:grid-cols-2">
                   <div>
                     <p className="eyebrow">Gói đăng ký</p>
                     <p className="mt-1 text-sm font-semibold">{selectedSubscription.plan === 'vip_monthly' ? 'VIP' : 'Premium'} tháng</p>
@@ -255,7 +255,7 @@ export function SubscriptionManagement() {
                   </div>
                   <div>
                     <p className="eyebrow">Cổng thanh toán</p>
-                    <p className="mt-1 font-semibold uppercase text-[#31564a]">{(selectedSubscription as any).gateway || 'manual'} {(selectedSubscription as any).auto_approved ? '(Tự động)' : '(Thủ công)'}</p>
+                    <p className="mt-1 font-semibold uppercase text-[#24795C]">{(selectedSubscription as any).gateway || 'manual'} {(selectedSubscription as any).auto_approved ? '(Tự động)' : '(Thủ công)'}</p>
                   </div>
                   <div>
                     <p className="eyebrow">Mã Transaction (Webhook)</p>
@@ -263,7 +263,7 @@ export function SubscriptionManagement() {
                   </div>
                   <div className="sm:col-span-2">
                     <p className="eyebrow">Nội dung chuyển khoản</p>
-                    <p className="mt-1 font-mono font-semibold text-[#31564a]">{selectedSubscription.transfer_note}</p>
+                    <p className="mt-1 font-mono font-semibold text-[#24795C]">{selectedSubscription.transfer_note}</p>
                   </div>
                 </div>
 
@@ -277,7 +277,7 @@ export function SubscriptionManagement() {
             )}
           </div>
 
-          <footer className="flex items-center justify-end gap-3 border-t border-[#e9e7df] bg-[#fbfaf7] px-6 py-4 sm:px-8">
+          <footer className="flex items-center justify-end gap-3 border-t border-[#DDE9E6] bg-[#FFFFFF] px-6 py-4 sm:px-8">
             {selectedSubscription && selectedSubscription.status === 'pending' && (
               <button className="button-primary text-xs" disabled={saving || detailLoading} onClick={() => void savePaymentReference()} type="button">
                 <Save size={15} />{saving ? 'Đang lưu…' : 'Lưu mã giao dịch'}

@@ -4,6 +4,16 @@ import { asyncHandler } from '../utils/async-handler.js';
 import * as commentService from '../services/comment.service.js';
 import { mapDtoList, toCommentDto } from '../utils/api-dto.js';
 
+// [KIỂM DUYỆT ADMIN] Danh sách bình luận toàn hệ thống có tìm kiếm và phân trang.
+export const listAdminComments = asyncHandler(async (req, res) => {
+    const result = await commentService.getAllAdminComments({ ...req.query });
+    return res.json({
+        status: 'success',
+        data: mapDtoList(result.comments, toCommentDto),
+        pagination: result.pagination
+    });
+});
+
 // [LIỆT KÊ BÌNH LUẬN] Trả bình luận mới nhất trước, không kèm thông tin nhạy cảm của người dùng.
 export const listComments = asyncHandler(async (req, res) => {
     const result = await commentService.getAllComments(req.params.bookId, { ...req.query });

@@ -2,8 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   ApiEnvelope, Bookmark, Book, Chapter, Comment, PaginationData, ReadChapterResult, ReadingProgress,
   Report, Subscription, User,
-} from '../types';
-
+} from '../types.ts';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 const ACCESS_TOKEN_KEY = 'openbook.access_token';
 const REFRESH_TOKEN_KEY = 'openbook.refresh_token';
@@ -53,6 +52,44 @@ export interface ReportListResponse {
 export interface PublicBookListResponse {
   books: Book[];
   pagination: PaginationData;
+}
+
+export interface AdminDashboardResponse {
+  metrics: {
+    totalBooks: number;
+    totalChapters: number;
+    totalUsers: number;
+    activeSubscriptions: number;
+    pendingSubscriptions: number;
+    openReports: number;
+  };
+  categories: Array<{ category: string; count: number }>;
+  readingActivity: Array<{ date: string; count: number }>;
+  readingActivityTotal: number;
+  periodDays: 7 | 30 | 90;
+  system: { api: 'connected' | 'disconnected'; database: 'connected' | 'disconnected' };
+}
+
+export interface AdminCommentListResponse {
+  comments: Comment[];
+  pagination: PaginationData;
+}
+
+// Hàm fetchAdminDashboard: Lấy số liệu tổng hợp và chuỗi lượt đọc thật từ endpoint ADMIN.
+export async function fetchAdminDashboard(days: 7 | 30 | 90 = 7): Promise<AdminDashboardResponse> {
+  const { data } = await api.get<ApiEnvelope<AdminDashboardResponse>>('/admin/dashboard', { params: { days } });
+  return data.data;
+}
+
+// Hàm fetchAdminComments: Lấy danh sách bình luận toàn hệ thống theo trang, không quét từng đầu sách.
+export async function fetchAdminComments(params: {
+  page: number;
+  limit: number;
+  search?: string;
+}): Promise<AdminCommentListResponse> {
+  const { data } = await api.get<ApiEnvelope<Comment[]>>('/admin/comments', { params });
+  if (!data.pagination) throw new Error('API bình luận quản trị không trả dữ liệu phân trang.');
+  return { comments: data.data, pagination: data.pagination };
 }
 
 // Hàm fetchPublicBooks: Tải catalog sách đã xuất bản cho trang chủ độc giả.
@@ -294,6 +331,10 @@ export function storeSession(payload: AuthPayload): void {
 }
 
 // Hàm clearSession: Xóa phiên local khi đăng xuất hoặc refresh token không còn hợp lệ.
+function storeUser(user: User): void {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
 export function clearSession(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
@@ -354,8 +395,14 @@ api.interceptors.response.use(
     const isAuthRequest = url.includes('/auth/');
     const isImportRequest = url.includes('books/import-excel');
 
-    console.log("Interceptor bắt lỗi 401 từ URL:", url);
-    console.log("Refresh token có tồn tại không?", !!localStorage.getItem(REFRESH_TOKEN_KEY));
+    // Chỉ ghi log 401 khi đúng là lỗi xác thực; trước đây hai dòng log này chạy với mọi lỗi,
+    // khiến HTTP 404 cũng bị hiểu nhầm là lỗi refresh token.
+    if (error.response?.status === 401) {
+      console.warn('API trả về HTTP 401 từ URL:', url);
+      console.warn('Refresh token có tồn tại không?', !!localStorage.getItem(REFRESH_TOKEN_KEY));
+    } else if (error.response?.status) {
+      console.error(`API trả về HTTP ${error.response.status} từ URL: ${url}`, error.response.data);
+    }
 
     // 1. Thử refresh token nếu thỏa điều kiện
     if (error.response?.status === 401 && config && !config._retry && !isAuthRequest && !isImportRequest
@@ -435,6 +482,16 @@ export async function signInAdmin(email: string, password: string): Promise<User
 export async function fetchCurrentUser(): Promise<User> {
   const { data } = await api.get<ApiEnvelope<User>>('/auth/me');
   return data.data;
+}
+
+export async function updateMyProfile(payload: { name: string; phone_number?: string | null }): Promise<User> {
+  const { data } = await api.patch<ApiEnvelope<User>>('/auth/me', payload);
+  storeUser(data.data);
+  return data.data;
+}
+
+export async function changeMyPassword(current_password: string, new_password: string): Promise<void> {
+  await api.post('/auth/change-password', { current_password, new_password });
 }
 
 // Hàm signOut: Thu hồi refresh token phía server trước khi dọn phiên trên trình duyệt.

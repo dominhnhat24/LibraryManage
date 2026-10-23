@@ -36,7 +36,7 @@ export function ReaderSupportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f8f6] text-[#202b28]">
+    <div className="reader-support-page min-h-screen bg-[#f7f8f6] text-[#202b28]">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-16 max-w-[900px] items-center justify-between px-4 sm:px-7">
           <Link className="inline-flex items-center gap-2 font-extrabold tracking-[0.08em] text-[#203a34]" to="/"><BookOpen size={20} /> OPENBOOK</Link>

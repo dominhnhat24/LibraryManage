@@ -28,7 +28,7 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
     return (
       <div className="grid min-h-64 place-items-center">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-          <span className="h-4 w-4 animate-spin border-2 border-[#31564a] border-t-transparent" />
+          <span className="h-4 w-4 animate-spin border-2 border-[#24795C] border-t-transparent" />
           Đang tải danh sách chương...
         </div>
       </div>
@@ -51,7 +51,7 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[760px] border-collapse text-left">
         <thead>
-          <tr className="border-y border-[#e9e8e2] bg-[#f8f7f3] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+          <tr className="border-y border-[#e9e8e2] bg-[#F8FBF9] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
             <th className="px-5 py-3.5">Chương</th>
             <th className="px-4 py-3.5">Sách</th>
             <th className="px-4 py-3.5">Quyền đọc</th>
@@ -59,14 +59,14 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
             <th className="px-5 py-3.5 text-right">Thao tác</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#efeee9]">
+        <tbody className="divide-y divide-[#EEF3F0]">
           {chapters.map((chapter) => {
             const book = getChapterBook(chapter.book_id);
             return (
-              <tr className="group transition-colors hover:bg-[#fbfaf7]" key={chapter._id}>
+              <tr className="group transition-colors hover:bg-[#FFFFFF]" key={chapter._id}>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-[#e4e1d8] bg-[#f1eee6] text-xs font-bold tabular-nums text-[#496a55]">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-[#DDE9E6] bg-[#f1eee6] text-xs font-bold tabular-nums text-[#496a55]">
                       {chapter.chapter_number}
                     </span>
                     <div className="min-w-0">
@@ -80,7 +80,7 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
                     {book && (
                       <img
                         alt=""
-                        className="h-10 w-8 shrink-0 border border-[#e4e1d8] object-cover"
+                        className="h-10 w-8 shrink-0 border border-[#DDE9E6] object-cover"
                         onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
                         src={book.cover_url || '/book-cover-placeholder.svg'}
                       />
@@ -91,8 +91,8 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
                 <td className="px-4 py-3.5">
                   <span className={`inline-flex border px-2.5 py-1 text-[11px] font-semibold ${
                     chapter.access_level === 'free'
-                      ? 'border-[#d3e2d5] bg-[#edf5ee] text-[#45704f]'
-                      : 'border-[#e7ddc5] bg-[#f8f3e8] text-[#94743c]'
+                      ? 'border-[#C3E5D0] bg-[#E3F4EB] text-[#24795C]'
+                      : 'border-[#F5DDB0] bg-[#FFF9ED] text-[#B8860B]'
                   }`}>
                     {accessLabels[chapter.access_level]}
                   </span>

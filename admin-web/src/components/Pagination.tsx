@@ -18,7 +18,7 @@ export function Pagination({ pagination, onPageChange, itemLabel = 'đầu sách
   const lastItem = Math.min(pagination.page * pagination.limit, pagination.total);
 
   return (
-    <div className="flex flex-col gap-4 border-t border-[#e5e4de] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div className="flex flex-col gap-4 border-t border-[#EEF3F0] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <p className="text-xs font-medium text-slate-500">
         Hiển thị <span className="font-bold text-slate-800">{firstItem}–{lastItem}</span> trong{' '}
         <span className="font-bold text-slate-800">{pagination.total}        </span> {itemLabel}

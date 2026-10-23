@@ -1,361 +1,388 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowRight, BookOpen, ChevronLeft, ChevronRight, Crown, Search, UserRound, X,
+  Bell,
+  Bookmark,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  LibraryBig,
+  MoreHorizontal,
+  Play,
+  Search,
+  Settings,
+  Timer,
 } from 'lucide-react';
-//import { LoginPage } from '../pages/AuthPages';
+
 import { Link, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../auth/AuthContext';
+
 import { errorMessage, fetchPublicBooks } from '../api/client';
-import type { Book, BookCategory } from '../types';
 
-const categories: Array<{ label: string; value?: BookCategory }> = [
-  { label: 'Tất cả sách' },
-  { label: 'Sách điện tử', value: 'ebook' },
-  { label: 'Truyện tranh', value: 'comic' },
-  { label: 'Sách nói', value: 'audiobook' },
-  { label: 'Truyện dài kỳ', value: 'webnovel' },
+import type { Book as BookType } from '../types';
+
+import './booknest-home.css';
+
+
+const visualBooks = [
+  { title: 'Eat that frog', author: 'Brian Tracy', cover: '/assets/eat-that-frog.svg' },
+  { title: 'Psychology of money', author: 'Morgan Housel', cover: '/assets/psychology-of-money.svg' },
+  { title: 'How to talk to anyone', author: 'Leil Lowndes', cover: '/assets/how-to-talk.svg' },
+  { title: 'The 10X rule', author: 'Grant Cardone', cover: '/assets/the-10x-rule.svg' },
 ];
 
-const heroSlides = [
-  {
-    eyebrow: 'Dành cho người yêu sách',
-    title: <>Sách tốt<br />dành cho bạn.</>,
-    description: 'Khám phá những câu chuyện mới, tuyển tập nổi bật và không gian đọc dành riêng cho bạn.',
-    action: 'Khám phá sách',
-  },
-  {
-    eyebrow: 'Mở ra một thế giới mới',
-    title: <>Mỗi trang sách<br />một hành trình.</>,
-    description: 'Tìm cảm hứng mỗi ngày với những đầu sách được chọn lọc từ thư viện OpenBook.',
-    action: 'Xem thư viện',
-  },
-  {
-    eyebrow: 'Đọc theo cách của bạn',
-    title: <>Tri thức luôn<br />ở bên bạn.</>,
-    description: 'Sách điện tử, truyện tranh và sách nói — chọn thể loại bạn yêu thích và bắt đầu.',
-    action: 'Bắt đầu đọc',
-  },
+/**
+ * Dữ liệu phần "Chapters" là dữ liệu trình bày giống ảnh mẫu.
+ * Khi người dùng chọn chapter, ta vẫn điều hướng về trang đọc thật.
+ */
+
+const chapterPreview = [
+  { title: 'The Surprising Power of Atomic Habits', text: 'small, consistent changes can produce remarkable results over time.', time: '15 min' },
+  { title: 'How Your Habits Shape Your Identity', text: 'small, consistent changes can produce remarkable results over time.', time: '18 min' },
 ];
 
-// Hàm ReaderHome: Dựng trang chủ độc giả theo mẫu với thanh thông báo, điều hướng, banner và kệ sách ngang.
+/**
+ * Trang chủ Reader được dựng riêng theo composition của ảnh tham chiếu:
+ * desk background → khung sách bo góc → sidebar mảnh → hai trang sách.
+ */
+
 export function ReaderHome() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const shelfRef = useRef<HTMLElement>(null);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
+
+  // Dữ liệu thật từ backend vẫn được tải để các thao tác đọc sách hoạt động với project hiện tại.
+  const [books, setBooks] = useState<BookType[]>([]);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<BookCategory | undefined>();
-  const [slide, setSlide] = useState(0);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSearch(searchInput.trim()), 250);
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => { setPage(1); }, [search, category]);
-
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   useEffect(() => {
     let active = true;
-    if (page === 1) {
-      setLoading(true);
-      setLoadingMore(false);
-    }
-    else setLoadingMore(true);
+    setLoading(true);
     setError('');
-    fetchPublicBooks(search, category, page)
+
+    fetchPublicBooks(search, undefined, 1, 24)
       .then((result) => {
-        if (!active) return;
-        setBooks((current) => page === 1 ? result.books : [...current, ...result.books]);
-        setTotalPages(result.pagination.totalPages);
+        if (active) setBooks(result.books);
       })
-      .catch((loadError: unknown) => { if (active) setError(errorMessage(loadError)); })
+      .catch((err) => {
+        if (active) setError(errorMessage(err));
+      })
       .finally(() => {
-        if (!active) return;
-        if (page === 1) setLoading(false);
-        setLoadingMore(false);
+        if (active) setLoading(false);
       });
-    return () => { active = false; };
-  }, [search, category, page]);
 
-  // Hàm handleLogout: Kết thúc phiên độc giả rồi trở về trang thư viện công khai.
-  async function handleLogout() {
-    try {
-      await logout();
-      navigate('/', { replace: true });
-    } catch (logoutError) {
-      setError(errorMessage(logoutError));
+    return () => {
+      active = false;
+    };
+  }, [search]);
+
+  // Cuốn sách thật đầu tiên được dùng làm target cho nút "Start reading".
+  const firstReadableBook = books[0];
+
+  // Thông tin hero có fallback để ảnh vẫn giữ đúng bố cục ngay cả khi API chưa trả dữ liệu.
+  const heroBook = useMemo(() => {
+    const fallback = {
+      title: 'Happy reading',
+      author: user?.name || 'Harvey',
+      description: "Wow! you've deep dived into the wonderful world of reading.",
+    };
+
+    return {
+      title: firstReadableBook?.title || fallback.title,
+      author: firstReadableBook?.author_name || fallback.author,
+      description: firstReadableBook?.description || fallback.description,
+    };
+  }, [firstReadableBook, user?.name]);
+
+  const openBook = () => {
+    if (firstReadableBook?._id) {
+      navigate(`/books/${encodeURIComponent(firstReadableBook._id)}/read`);
+    } else {
+      navigate('/catalog');
     }
-  }
+  };
 
-  // Hàm submitSearch: Áp dụng từ khóa nhập trong thanh tìm kiếm trên cùng.
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSearch(searchInput.trim());
-    setSearchOpen(false);
-    shelfRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  const nextHero = () => {
+    if (books.length) setBannerIndex((current) => (current + 1) % books.length);
+  };
 
-  // Hàm changeSlide: Chuyển nội dung banner theo vòng lặp khi người đọc chọn mũi tên hoặc chấm trang.
-  function changeSlide(direction: number) {
-    setSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
-  }
+  const previousHero = () => {
+    if (books.length) {
+      setBannerIndex((current) => (current - 1 + books.length) % books.length);
+    }
+  };
 
-  // Hàm scrollShelf: Cuộn ngang kệ sách theo một nhóm bìa sách nhỏ.
-  function scrollShelf(direction: number) {
-    shelfRef.current?.scrollBy({ left: direction * 420, behavior: 'smooth' });
-  }
-
-  const activeSlide = heroSlides[slide];
-  const featuredBooks = books.slice(0, 3);
+  const displayedHero = books[bannerIndex] || firstReadableBook;
 
   return (
-    <div className="min-h-screen bg-white text-[#202b28]">
-      <div className="bg-[#f4f6f2] text-[#31564a]">
-        <div className="mx-auto flex min-h-8 max-w-[1440px] items-center justify-center gap-2 px-4 text-[10px] font-bold uppercase tracking-[0.1em] sm:text-xs">
-          <BookOpen size={13} />
-          <span>OpenBook — mỗi ngày mở ra một thế giới mới</span>
-          <a className="ml-2 inline-flex items-center gap-1 text-[#203a34] underline underline-offset-2" href="#book-shelf">
-            Khám phá ngay <ArrowRight size={12} />
-          </a>
-        </div>
-      </div>
-
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-[62px] max-w-[1440px] items-center gap-5 px-4 sm:px-7">
-          <Link className="flex shrink-0 items-center gap-2.5" to="/">
-            <span className="grid h-9 w-9 place-items-center bg-[#203a34] text-white"><BookOpen size={19} /></span>
-            <span className="text-lg font-black tracking-[0.1em] text-[#203a34]">OPENBOOK</span>
-          </Link>
-          <nav aria-label="Danh mục sách" className="hidden min-w-0 flex-1 items-center justify-center gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex">
-            {categories.map((item) => (
-              <button
-                aria-pressed={category === item.value}
-                className={`shrink-0 rounded-md border-b-2 px-2 py-2 text-xs font-semibold transition-colors ${
-                  category === item.value ? 'border-[#31564a] text-[#203a34]' : 'border-transparent text-slate-600 hover:text-[#31564a]'
-                }`}
-                key={item.label}
-                onClick={() => {
-                  setCategory(item.value);
-                  shelfRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                type="button"
+    <div className="booknest-home">
+      <div className="booknest-book">
+        {/* SIDEBAR: ảnh mẫu chỉ dùng icon, không dùng sideb  ar rộng có chữ. */}        
+          <aside
+            className={`booknest-sidebar ${
+              isSidebarCollapsed ? "is-collapsed" : ""
+            }`}
+            aria-label="Điều hướng"
+          >
+            <nav
+              className={`booknest-side-nav ${
+                isSidebarCollapsed ? "is-collapsed" : ""
+              }`}
+              aria-hidden={isSidebarCollapsed}
+            >
+              <Link
+                className="booknest-side-icon"
+                to="/"
+                aria-label="Trang chủ"
+                title="Trang chủ"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
               >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+                <Home size={30} strokeWidth={1.2} />
+              </Link>
+
+              <Link
+                className="booknest-side-icon"
+                to="/library"
+                aria-label="Tủ sách"
+                title="Tủ sách"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
+              >
+                <LibraryBig size={30} strokeWidth={1.2} />
+              </Link>
+
+              <Link
+                className="booknest-side-icon"
+                to="/books"
+                aria-label="Lịch sử đọc"
+                title="Lịch sử đọc"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
+              >
+                <Timer size={30} strokeWidth={1.2} />
+              </Link>
+
+              <Link
+                className="booknest-side-icon"
+                to="/favorites"
+                aria-label="Yêu thích"
+                title="Yêu thích"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
+              >
+                <Bookmark size={30} strokeWidth={1.2} />
+              </Link>
+
+              <Link
+                className="booknest-side-icon"
+                to="/settings"
+                aria-label="Cài đặt"
+                title="Cài đặt"
+                tabIndex={isSidebarCollapsed ? -1 : 0}
+              >
+                <Settings size={30} strokeWidth={1.2} />
+              </Link>
+            </nav>
+
             <button
-              aria-label={searchOpen ? 'Đóng tìm kiếm' : 'Tìm sách'}
-              className="grid h-9 w-9 place-items-center rounded-md text-slate-600 hover:bg-slate-100"
-              onClick={() => setSearchOpen((open) => !open)}
+              className="booknest-side-icon booknest-menu-button"
               type="button"
+              aria-label={isSidebarCollapsed ? "Mở rộng Sidebar" : "Thu gọn Sidebar"}
+              title={isSidebarCollapsed ? "Mở rộng Sidebar" : "Thu gọn Sidebar"}
+              aria-expanded={!isSidebarCollapsed}
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
             >
-              {searchOpen ? <X size={18} /> : <Search size={18} />}
+              <MoreHorizontal size={18} />
             </button>
-            <Link className="hidden px-2 text-xs font-semibold text-slate-600 hover:text-[#203a34] sm:inline-flex" to="/support">Hỗ trợ</Link>
-            {user ? (
-              <>
-                {user.role === 'ADMIN'
-                  ? <Link className="hidden items-center gap-1.5 px-2 text-xs font-semibold text-[#567160] sm:inline-flex" to="/admin/dashboard"><Crown size={14} /> Quản trị</Link>
-                  : <span className="hidden items-center gap-1.5 px-2 text-xs font-semibold text-[#567160] sm:inline-flex"><Crown size={14} /> Độc giả</span>}
-                <span className="hidden items-center gap-1.5 px-2 text-xs text-slate-600 xl:inline-flex"><UserRound size={14} />{user.name}</span>
-                <Link className="button-secondary !min-h-9 !px-3 !py-2" to="/account">Tài khoản</Link>
-                <button className="button-secondary !min-h-9 !px-3 !py-2" onClick={() => void handleLogout()} type="button">Đăng xuất</button>
-              </>
-            ) : (
-              <>
-                <Link className="hidden rounded-md px-3 py-2 text-xs font-semibold text-slate-600 hover:text-[#203a34] sm:inline-flex" to="/login">Đăng nhập</Link>
-                <Link className="button-primary !min-h-9 !px-3 !py-2" to="/register">Đăng ký</Link>
-              </>
-            )}
-          </div>
-        </div>
-        {searchOpen ? (
-          <form className="border-t border-slate-100 bg-white px-4 py-3 sm:px-7" onSubmit={submitSearch}>
-            <div className="mx-auto flex max-w-[1440px] gap-2">
-              <input
-                aria-label="Tìm theo tên sách hoặc tác giả"
-                autoFocus
-                className="form-input h-10"
-                onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Tìm theo tên sách hoặc tác giả"
-                value={searchInput}
-              />
-              <button className="button-primary !min-h-10" type="submit">Tìm sách</button>
-            </div>
+          </aside>
+
+
+
+        {/* PHẦN NỘI DUNG: hai "trang sách" chia bởi đường sống giữa. */}
+        <main className="booknest-pages">
+          {/* SEARCH BAR: nằm sát mép trên giống ảnh tham chiếu. */}
+          <form
+            className="booknest-search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              navigate(search.trim() ? `/?search=${encodeURIComponent(search.trim())}` : '/');
+            }}
+          >
+            <Search size={13} />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search book name, author, edition..."
+              aria-label="Search book name, author, edition"
+            />
           </form>
-        ) : null}
-        <nav aria-label="Danh mục sách trên điện thoại" className="flex gap-5 overflow-x-auto border-t border-slate-100 px-4 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden">
-          {categories.map((item) => (
-            <button
-              className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${category === item.value ? 'bg-[#f1f4ef] text-[#203a34]' : 'text-slate-500'}`}
-              key={item.label}
-              onClick={() => setCategory(item.value)}
-              type="button"
-            >
-              {item.label}
+
+          {/* USER CHIP: avatar nhỏ + tên + notification ở góc phải. */}
+          <div className="booknest-user">
+            <button className="booknest-notification" type="button" aria-label="Notifications">
+              <Bell size={14} />
             </button>
-          ))}
-        </nav>
-      </header>
-
-      <main>
-        <section aria-label="Giới thiệu OpenBook" className="relative overflow-hidden border-b border-slate-200 bg-[#fbfcfa]">
-          <div className="mx-auto grid min-h-[390px] max-w-[1440px] lg:min-h-[440px] lg:grid-cols-2">
-            <div className="relative z-10 flex flex-col justify-center px-6 py-12 text-center sm:px-12 lg:px-16 lg:text-left xl:px-24">
-              <p className="eyebrow">{activeSlide.eyebrow}</p>
-              <h1 className="mt-4 font-serif text-5xl font-semibold italic leading-[0.98] tracking-[-0.055em] text-[#203a34] sm:text-6xl xl:text-7xl">
-                {activeSlide.title}
-              </h1>
-              <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-slate-600 lg:mx-0">
-                {activeSlide.description}
-              </p>
-              <div className="mt-7 flex justify-center lg:justify-start">
-                <a className="button-primary !rounded-md" href="#book-shelf">
-                  {activeSlide.action}<ArrowRight size={15} />
-                </a>
-              </div>
-            </div>
-
-            <div className="relative hidden min-h-[380px] items-center justify-center overflow-hidden bg-[#f1f4ef] lg:flex">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_52%_45%,rgba(186,202,183,0.55),transparent_58%)]" />
-              <div className="absolute bottom-0 left-0 right-0 h-24 border-t border-white/80 bg-white/55" />
-              <div className="absolute right-[12%] top-[14%] h-28 w-28 border border-[#c9d5c8]" />
-              <div className="absolute right-[16%] top-[19%] h-28 w-28 border border-[#d7e0d5]" />
-              {featuredBooks.length ? (
-                <div className="relative z-10 flex h-[300px] items-end justify-center">
-                  {featuredBooks.map((book, index) => (
-                    <Link
-                      aria-label={`Xem sách ${book.title}`}
-                      className={`absolute bottom-0 block w-[145px] border border-white bg-white p-2 shadow-[0_18px_40px_rgba(32,58,52,0.16)] transition-transform hover:-translate-y-2 ${
-                        index === 0 ? '-translate-x-[118px] rotate-[-12deg]' : index === 2 ? 'translate-x-[118px] rotate-[12deg]' : 'z-10'
-                      }`}
-                      key={book._id}
-                      style={{ height: index === 1 ? 280 : 238, left: 'calc(50% - 72.5px)' }}
-                      to={`/books/${encodeURIComponent(book._id)}`}
-                    >
-                      <img
-                        alt=""
-                        className="h-full w-full border border-slate-100 object-cover"
-                        onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
-                        src={book.cover_url || '/book-cover-placeholder.svg'}
-                      />
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div aria-hidden="true" className="relative z-10 grid h-64 w-80 place-items-center">
-                  <div className="absolute bottom-7 h-5 w-72 border-y border-[#c8d3c7] bg-white" />
-                  <svg className="relative mb-8 h-52 w-64" fill="none" viewBox="0 0 256 208">
-                    <path d="M128 55C96 32 59 32 25 43v116c36-12 70-9 103 15V55Z" fill="#fff" stroke="#31564a" strokeWidth="3" />
-                    <path d="M128 55c32-23 69-23 103-12v116c-36-12-70-9-103 15V55Z" fill="#eef3ed" stroke="#31564a" strokeWidth="3" />
-                    <path d="M128 55v119M43 68c23-5 43-3 62 5M43 87c23-5 43-3 62 5M43 106c23-5 43-3 62 5M151 68c23-5 43-3 62 5m-62 14c23-5 43-3 62 5m-62 14c23-5 43-3 62 5" stroke="#9aab9c" strokeWidth="2" />
-                    <path d="m70 33 9-20 9 20m78 2 9-22 9 22" stroke="#c69b55" strokeWidth="3" />
-                  </svg>
-                </div>
-              )}
-              <span className="absolute right-8 top-8 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-[#567160]">
-                OPENBOOK<br /><span className="font-normal text-slate-500">Digital library</span>
+            <Link to="/account" className="booknest-profile">
+              <span className="booknest-avatar">
+                {(user?.name || 'A').slice(0, 1).toUpperCase()}
               </span>
-            </div>
-          </div>
-          <button
-            aria-label="Banner trước"
-            className="absolute left-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-[#31564a] hover:bg-white sm:left-6"
-            onClick={() => changeSlide(-1)}
-            type="button"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            aria-label="Banner tiếp theo"
-            className="absolute right-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-[#31564a] hover:bg-white sm:right-6"
-            onClick={() => changeSlide(1)}
-            type="button"
-          >
-            <ChevronRight size={18} />
-          </button>
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 lg:bottom-5 lg:left-auto lg:right-12 lg:translate-x-0">
-            {heroSlides.map((item, index) => (
-              <button
-                aria-label={`Hiển thị banner ${index + 1}`}
-                aria-pressed={slide === index}
-                className={`h-2 rounded-full transition-all ${slide === index ? 'w-6 bg-[#31564a]' : 'w-2 bg-slate-300'}`}
-                key={item.eyebrow}
-                onClick={() => setSlide(index)}
-                type="button"
-              />
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-[1440px] px-4 pb-16 pt-8 sm:px-7 sm:pt-10" id="book-shelf" ref={shelfRef}>
-          <div className="mb-4 flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Thư viện OpenBook</p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-[#27342e] sm:text-xl">
-                {category ? categories.find((item) => item.value === category)?.label : 'Sách mới mỗi ngày — Dành cho bạn!'}
-              </h2>
-            </div>
-            <div className="hidden items-center gap-2 sm:flex">
-              <button aria-label="Cuộn kệ sách sang trái" className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50" onClick={() => scrollShelf(-1)} type="button">
-                <ChevronLeft size={16} />
-              </button>
-              <button aria-label="Cuộn kệ sách sang phải" className="grid h-8 w-8 place-items-center rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50" onClick={() => scrollShelf(1)} type="button">
-                <ChevronRight size={16} />
-              </button>
-            </div>
+              <span>{user?.name || 'Alexander Mark'}</span>
+            </Link>
           </div>
 
-          {error ? <p className="mb-4 border-l-2 border-rose-500 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{error}</p> : null}
-          {loading ? <p className="py-12 text-center text-sm text-slate-500">Đang tải danh mục sách…</p>
-            : books.length ? (
-              <>
-                <div className="flex snap-x gap-3 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-4">
-                  {books.map((book) => (
-                    <Link
-                      className="group relative w-[126px] shrink-0 snap-start border border-slate-200 bg-white p-2 transition-colors hover:border-[#8da798] sm:w-[138px]"
-                      key={book._id}
-                      to={`/books/${encodeURIComponent(book._id)}`}
-                    >
-                      {book.access_level !== 'free' ? (
-                        <span className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 border border-[#ebd29b] bg-[#fff6df] px-1.5 py-1 text-[8px] font-bold uppercase tracking-wide text-[#805e1e]">
-                          <Crown size={10} /> Hội viên
-                        </span>
-                      ) : null}
-                      <img
-                        alt={`Bìa sách ${book.title}`}
-                        className="h-[154px] w-full border border-slate-100 bg-slate-50 object-cover sm:h-[170px]"
-                        onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
-                        src={book.cover_url || '/book-cover-placeholder.svg'}
-                      />
-                      <h3 className="mt-2 line-clamp-2 min-h-9 text-xs font-bold leading-4 text-[#26332e] group-hover:text-[#31564a]">
-                        {book.title}
-                      </h3>
-                      <p className="mt-1 line-clamp-1 text-[10px] text-slate-500">{book.author_name}</p>
-                    </Link>
-                  ))}
+          {/* LEFT PAGE */}
+          <section className="booknest-left-page">
+            <div className="booknest-welcome">
+              <h1>
+                {heroBook.title === 'Happy reading' ? (
+                  <>
+                    Happy reading
+                    <span>{heroBook.author}</span>
+                  </>
+                ) : (
+                  <>
+                    Happy reading
+                    <span>{heroBook.author}</span>
+                  </>
+                )}
+              </h1>
+              <p>
+                Wow! You&apos;ve deep dived into the wonderful world of reading.
+                <br />
+                Have fun&apos;s parents didn&apos;t yet? Oops, looks like you&apos;re not there yet. Get reading now!
+              </p>
+              <button className="booknest-start" onClick={openBook} type="button">
+                Start reading <span>→</span>
+              </button>
+            </div>
+
+            {/* Open-book artwork là asset có sẵn trong project, không phải ảnh từ web. */}
+            <div className="booknest-open-book">
+              <img src="/assets/open-book-spread.svg" alt="Open book preview" />
+            </div>
+
+            <section className="booknest-popular">
+              <div className="booknest-section-head">
+                <h2>Popular Now</h2>
+                <div className="booknest-mini-arrows">
+                  <button type="button" onClick={previousHero} aria-label="Previous">
+                    <ChevronLeft size={13} />
+                  </button>
+                  <button type="button" onClick={nextHero} aria-label="Next">
+                    <ChevronRight size={13} />
+                  </button>
                 </div>
-                {page < totalPages && <button className="button-secondary mt-3" disabled={loadingMore} onClick={() => setPage((current) => current + 1)} type="button">{loadingMore ? 'Đang tải…' : 'Tải thêm sách'}</button>}
-              </>
-            ) : (
-              <div className="border border-slate-200 bg-white px-5 py-10 text-center">
-                <BookOpen className="mx-auto text-slate-300" size={28} />
-                <p className="mt-3 text-sm text-slate-500">
-                  {search ? 'Không tìm thấy sách phù hợp. Hãy thử từ khóa khác.' : 'Thư viện đang cập nhật sách mới.'}
-                </p>
               </div>
-            )}
-        </section>
-      </main>
+
+              <div className="booknest-popular-grid">
+                {visualBooks.map((book) => (
+                  <Link className="booknest-popular-card" to={firstReadableBook?._id ? `/books/${encodeURIComponent(firstReadableBook._id)}` : '/catalog'} key={book.title}>
+                    <img src={book.cover} alt={book.title} />
+                    <strong>{book.title}</strong>
+                    <span>{book.author}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section className="booknest-series">
+              <div className="booknest-section-head">
+                <h2>New series collection</h2>
+                <button type="button" aria-label="More collections">
+                  <MoreHorizontal size={15} />
+                </button>
+              </div>
+              <Link className="booknest-series-card" to={firstReadableBook?._id ? `/books/${encodeURIComponent(firstReadableBook._id)}` : '/catalog'}>
+                <img src="/assets/hardcover-stack.svg" alt="" />
+                <span>
+                  <strong>Hard cover free book psd mockup</strong>
+                  <small>8 chapters eBook vol</small>
+                </span>
+                <b>2 vol</b>
+              </Link>
+            </section>
+          </section>
+
+          {/* RIGHT PAGE */}
+          <section className="booknest-right-page">
+            <div className="booknest-feature-book">
+              <img src="/assets/open-book-spread.svg" alt="" className="booknest-right-book-art" />
+              <div className="booknest-feature-copy">
+                <h2>{displayedHero?.title || 'The Cambers of Secrets'}</h2>
+                <span>154 / 300 pages</span>
+                <p>
+                  Harry has return to Hogwarts school with mischief, and to his 2nd year,
+                  only to discover that...
+                </p>
+                <em>- J.K Rowling&apos;s</em>
+              </div>
+            </div>
+
+            {/* AUDIO PLAYER: giao diện tĩnh theo ảnh nhưng nút play vẫn hoạt động. */}
+            <section className="booknest-audio">
+              <div className="booknest-section-head">
+                <h2>Audio Book</h2>
+                <div className="booknest-mini-arrows">
+                  <button type="button" aria-label="Previous audio"><ChevronLeft size={13} /></button>
+                  <button type="button" aria-label="Next audio"><ChevronRight size={13} /></button>
+                </div>
+              </div>
+
+              <div className="booknest-player">
+                <img src="/assets/atomic-habits-square.svg" alt="Atomic Habits" />
+                <div className="booknest-player-main">
+                  <strong>Atomic Habits</strong>
+                  <span>James Clear</span>
+                  <div className="booknest-progress">
+                    <i style={{ width: playing ? '48%' : '34%' }} />
+                  </div>
+                  <div className="booknest-time">
+                    <span>26:42</span>
+                    <span>01:23:42</span>
+                  </div>
+                </div>
+                <div className="booknest-player-controls">
+                  <button type="button" aria-label="Previous track"><ChevronLeft size={12} /></button>
+                  <button className="booknest-play" type="button" onClick={() => setPlaying((value) => !value)} aria-label={playing ? 'Pause' : 'Play'}>
+                    <Play size={10} fill="currentColor" />
+                  </button>
+                  <button type="button" aria-label="Next track"><ChevronRight size={12} /></button>
+                </div>
+              </div>
+            </section>
+
+            {/* CHAPTER LIST: giữ typography và khoảng cách của ảnh mẫu. */}
+            <section className="booknest-chapters">
+              <div className="booknest-section-head">
+                <h2>Chapters</h2>
+                <MoreHorizontal size={15} />
+              </div>
+
+              <div className="booknest-chapter-list">
+                {chapterPreview.map((chapter, index) => (
+                  <Link
+                    className="booknest-chapter"
+                    key={chapter.title}
+                    to={firstReadableBook?._id ? `/books/${encodeURIComponent(firstReadableBook._id)}/read` : '/catalog'}
+                  >
+                    <span className="booknest-chapter-dot" />
+                    <div>
+                      <strong>{chapter.title}</strong>
+                      <p>In the first chapters, James Clear introduces the core ideas: {chapter.text}</p>
+                    </div>
+                    <time>{chapter.time}</time>
+                    {index === 0 && <span className="booknest-chapter-line" />}
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            {loading && <span className="booknest-data-status">Updating library…</span>}
+            {error && <span className="booknest-data-status is-error">{error}</span>}
+          </section>
+        </main>
+      </div>
     </div>
   );
 }

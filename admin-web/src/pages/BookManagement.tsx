@@ -9,7 +9,7 @@ import {
   type BookFormPayload,
 } from '../api/client';
 import type { Book, PaginationData } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const token = localStorage.getItem('openbook.access_token') ?? '';
 const emptyPagination: PaginationData = { total: 0, page: 1, limit: 20, totalPages: 0 };
@@ -33,7 +33,40 @@ export function BookManagement() {
   const [uploadBook, setUploadBook] = useState<Book | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') ?? '';
+
+  useEffect(() => {
+    setSearchInput(urlSearch);
+    setSearch(urlSearch);
+    setPage(1);
+  }, [urlSearch]);
+
+  // Hỗ trợ điều hướng từ thanh tìm kiếm toàn cục và thao tác nhanh trên dashboard.
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') {
+      setSelectedBook(null);
+      setModalOpen(true);
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('action');
+      setSearchParams(nextParams, { replace: true });
+      return;
+    }
+
+    const editId = searchParams.get('edit');
+    if (editId && books.length > 0) {
+      const bookToEdit = books.find((book) => book._id === editId);
+      if (bookToEdit) {
+        setSelectedBook(bookToEdit);
+        setModalOpen(true);
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('edit');
+        setSearchParams(nextParams, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams, books]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -237,26 +270,26 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
         </div>
       </section>
 
-      <section aria-label="Thống kê sách" className="mb-5 grid gap-px border border-[#dfded7] bg-[#dfded7] sm:grid-cols-3">
-        <div className="bg-[#fbfaf7] px-5 py-4">
+      <section aria-label="Thống kê sách" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng đầu sách</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.total.toLocaleString('vi-VN')}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p>
         </div>
-        <div className="bg-[#fbfaf7] px-5 py-4">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p>
         </div>
-        <div className="bg-[#fbfaf7] px-5 py-4">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.limit}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.limit}</p>
         </div>
       </section>
 
-      <section className="border border-[#dfded7] bg-[#fbfaf7]">
-        <div className="flex flex-col gap-4 border-b border-[#e5e4de] px-4 py-4 sm:px-6">
+      <section className="border border-[#DDE9E6] bg-[#FFFFFF]">
+        <div className="flex flex-col gap-4 border-b border-[#EEF3F0] px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <Filter className="text-[#567160]" size={16} />
-            <h2 className="text-sm font-bold text-[#26332e]">Danh mục đầu sách</h2>
+            <Filter className="text-[#526B86]" size={16} />
+            <h2 className="text-sm font-bold text-[#153D31]">Danh mục đầu sách</h2>
             <span className="ml-auto hidden items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:flex">
               <ArrowDownWideNarrow size={13} /> Sắp xếp mới nhất
             </span>
@@ -351,14 +384,14 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
       {uploadBook && (
         <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setUploadBook(null); }} role="presentation">
           <section aria-labelledby="upload-book-title" aria-modal="true" className="modal-panel !max-w-[560px]" role="dialog">
-            <header className="flex items-start justify-between border-b border-[#e9e7df] px-6 py-5 sm:px-8">
+            <header className="flex items-start justify-between border-b border-[#DDE9E6] px-6 py-5 sm:px-8">
               <div><p className="eyebrow">Kho lưu trữ riêng tư</p><h2 className="mt-1 text-xl font-bold" id="upload-book-title">Tải file sách</h2></div>
               <button aria-label="Đóng cửa sổ" className="icon-button" disabled={saving} onClick={() => setUploadBook(null)} type="button"><X size={17} /></button>
             </header>
             <form onSubmit={submitBookFile}>
               <div className="space-y-4 px-6 py-6 sm:px-8">
-                <div className="flex items-center gap-3 border border-[#e9e7df] bg-[#f8f7f3] p-3">
-                  <img alt={`Bìa sách ${uploadBook.title}`} className="h-14 w-11 border border-[#e4e1d8] object-cover" onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }} src={uploadBook.cover_url || '/book-cover-placeholder.svg'} />
+                <div className="flex items-center gap-3 border border-[#DDE9E6] bg-[#F8FBF9] p-3">
+                  <img alt={`Bìa sách ${uploadBook.title}`} className="h-14 w-11 border border-[#DDE9E6] object-cover" onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }} src={uploadBook.cover_url || '/book-cover-placeholder.svg'} />
                   <div className="min-w-0"><p className="truncate text-sm font-bold">{uploadBook.title}</p><p className="mt-1 text-xs text-slate-500">{uploadBook.category}</p></div>
                 </div>
                 <label className="field-label block">File nội dung <span className="text-rose-600">*</span>
@@ -367,19 +400,19 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
                       : uploadBook.category === 'audiobook' ? '.mp3,.m4a,audio/mpeg,audio/mp4'
                         : uploadBook.category === 'comic' ? '.pdf,.epub,.mp4,.webm,application/pdf,application/epub+zip,video/mp4,video/webm'
                           : '.epub,.pdf,.mp3,.m4a,.mp4,.webm'}
-                    className="form-input mt-2 file:mr-3 file:border-0 file:bg-[#edf2ed] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#31564a]"
+                    className="form-input mt-2 file:mr-3 file:border-0 file:bg-[#E3F4EB] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#24795C]"
                     disabled={saving}
                     onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
                     required={!uploadFile}
                     type="file"
                   />
-                  {uploadFile && <span className="mt-1.5 block text-xs text-[#31564a]">Đã chọn: {uploadFile.name}</span>}
+                  {uploadFile && <span className="mt-1.5 block text-xs text-[#24795C]">Đã chọn: {uploadFile.name}</span>}
                   <span className="mt-1.5 block text-[11px] font-normal text-slate-500">Tối đa 100 MiB. Backend sẽ kiểm tra định dạng, MIME và chữ ký file.</span>
                 </label>
-                {uploadProgress > 0 && <div aria-live="polite"><div className="flex justify-between text-xs text-slate-600"><span>Đang tải lên</span><span>{uploadProgress}%</span></div><div className="mt-1 h-2 bg-[#e9e7df]"><div className="h-full bg-[#31564a] transition-[width]" style={{ width: `${uploadProgress}%` }} /></div></div>}
+                {uploadProgress > 0 && <div aria-live="polite"><div className="flex justify-between text-xs text-slate-600"><span>Đang tải lên</span><span>{uploadProgress}%</span></div><div className="mt-1 h-2 bg-[#DDE9E6]"><div className="h-full bg-[#24795C] transition-[width]" style={{ width: `${uploadProgress}%` }} /></div></div>}
                 {error && <p className="border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{error}</p>}
               </div>
-              <footer className="flex flex-col-reverse gap-2 border-t border-[#e9e7df] bg-[#fbfaf7] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+              <footer className="flex flex-col-reverse gap-2 border-t border-[#DDE9E6] bg-[#FFFFFF] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
                 <button className="button-secondary" disabled={saving} onClick={() => setUploadBook(null)} type="button">Hủy</button>
                 <button className="button-primary" disabled={saving || !uploadFile} type="submit">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <FileUp size={16} />}{saving ? 'Đang tải...' : 'Tải file lên'}</button>
               </footer>

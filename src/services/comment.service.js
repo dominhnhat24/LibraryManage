@@ -82,3 +82,27 @@ export const deleteComment = async (commentId, user) => {
     }
     return comment;
 };
+
+
+// Hàm getAllAdminComments: Trả toàn bộ bình luận hệ thống theo trang, mới nhất trước; dùng riêng cho màn kiểm duyệt ADMIN.
+export const getAllAdminComments = async (filters = {}) => {
+    const page = Math.max(PAGINATION.DEFAULT_PAGE, Number.parseInt(filters.page, 10) || PAGINATION.DEFAULT_PAGE);
+    const limit = Math.min(PAGINATION.MAX_LIMIT, Math.max(1,
+        Number.parseInt(filters.limit, 10) || PAGINATION.DEFAULT_LIMIT));
+    const query = {};
+    if (typeof filters.search === 'string' && filters.search.trim()) {
+        const escaped = filters.search.trim().slice(0, 120).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        query.body = { $regex: escaped, $options: 'i' };
+    }
+    const [comments, total] = await Promise.all([
+        Comment.find(query)
+            .populate('user', 'name email role')
+            .populate('book', 'title slug')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean(),
+        Comment.countDocuments(query)
+    ]);
+    return { comments, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+};

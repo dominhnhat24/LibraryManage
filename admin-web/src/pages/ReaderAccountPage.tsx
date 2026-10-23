@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { BookOpen, Bookmark, CreditCard, History, LogOut, MessageSquareText, Send, Trash2 } from 'lucide-react';
+import { Bookmark, CreditCard, History, LogOut, MessageSquareText, Send, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { ReaderShell } from '../components/ReaderShell';
 import {
   createReaderSubscription, deleteReaderBookmark, deleteReadingProgress, errorMessage,
   fetchMySubscription, fetchReaderBookmarks, fetchReadingProgress, submitReaderReport,
@@ -28,14 +29,18 @@ export function ReaderAccountPage() {
       return;
     }
     let active = true;
-    Promise.all([fetchReaderBookmarks(), fetchReadingProgress(), fetchMySubscription()])
-      .then(([bookmarkResult, progressResult, currentSubscription]) => {
+    Promise.allSettled([fetchReaderBookmarks(), fetchReadingProgress(), fetchMySubscription()])
+      .then(([bookmarkResult, progressResult, subscriptionResult]) => {
         if (!active) return;
-        setBookmarks(bookmarkResult.bookmarks);
-        setProgress(progressResult.progress);
-        setSubscription(currentSubscription);
+        const failures: string[] = [];
+        if (bookmarkResult.status === 'fulfilled') setBookmarks(bookmarkResult.value.bookmarks);
+        else failures.push(`Chương đã lưu: ${errorMessage(bookmarkResult.reason)}`);
+        if (progressResult.status === 'fulfilled') setProgress(progressResult.value.progress);
+        else failures.push(`Lịch sử đọc: ${errorMessage(progressResult.reason)}`);
+        if (subscriptionResult.status === 'fulfilled') setSubscription(subscriptionResult.value);
+        else failures.push(`Thuê bao: ${errorMessage(subscriptionResult.reason)}`);
+        if (failures.length) setError(`Một số dữ liệu tài khoản chưa tải được. ${failures.join(' · ')}`);
       })
-      .catch((loadError: unknown) => { if (active) setError(errorMessage(loadError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [authLoading, navigate, user]);
@@ -142,27 +147,15 @@ export function ReaderAccountPage() {
     return <div className="grid min-h-screen place-items-center bg-[#f7f8f6] text-sm text-slate-500">Đang kiểm tra phiên đăng nhập…</div>;
   }
   return (
-    <div className="min-h-screen bg-[#f7f8f6] text-[#202b28]">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-16 max-w-[1180px] items-center justify-between gap-3 px-4 sm:px-7">
-          <Link className="inline-flex items-center gap-2 font-extrabold tracking-[0.08em] text-[#203a34]" to="/">
-            <BookOpen size={20} /> OPENBOOK
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="hidden text-xs text-slate-500 sm:inline">{user.name} · {user.email}</span>
-            {user.role === 'ADMIN' && <Link className="button-secondary !min-h-9 !px-3 !py-2" to="/admin/dashboard">Quản trị</Link>}
-            <button className="button-secondary !min-h-9 !px-3 !py-2" disabled={saving} onClick={() => void handleLogout()} type="button">
-              <LogOut size={14} /> Đăng xuất
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[1180px] space-y-6 px-4 py-7 sm:px-7 sm:py-10">
-        <section>
+    <ReaderShell title="Cài đặt tài khoản" subtitle="Quản lý thông tin cá nhân và tùy chỉnh trải nghiệm đọc.">
+      <div className="reader-account-page">
+      <main className="space-y-6">
+        <section className="account-summary-panel">
           <p className="eyebrow">Không gian độc giả</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#203a34]">Tài khoản của tôi</h1>
-          <p className="mt-2 text-sm text-slate-500">Quản lý chương đã lưu, lịch sử đọc, gói thành viên và yêu cầu hỗ trợ.</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight">Tài khoản của tôi</h1>
+          <p className="mt-2 text-sm text-slate-500">{user.name} · {user.email}</p>
+          {user.role === 'ADMIN' && <Link className="button-secondary !min-h-9 !px-3 !py-2" to="/admin/dashboard">Quản trị</Link>}
+          <button className="button-secondary !min-h-9 !px-3 !py-2" disabled={saving} onClick={() => void handleLogout()} type="button"><LogOut size={14} /> Đăng xuất</button>
         </section>
         {error && <p className="border-l-2 border-rose-500 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{error}</p>}
         {notice && <p className="border-l-2 border-emerald-600 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{notice}</p>}
@@ -243,7 +236,8 @@ export function ReaderAccountPage() {
           </>
         )}
       </main>
-    </div>
+      </div>
+    </ReaderShell>
   );
 }
 

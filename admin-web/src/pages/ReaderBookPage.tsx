@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, Bookmark, BookOpen, LoaderCircle, Star, Trash2 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -13,6 +13,7 @@ export function ReaderBookPage() {
   const { bookId = '' } = useParams();
   const { user, loading: loadingAuth } = useAuth();
   const navigate = useNavigate();
+  const previousBookIdRef = useRef(bookId);
   const [book, setBook] = useState<Book | null>(null);
   const [loadingBook, setLoadingBook] = useState(true);
   const [error, setError] = useState('');
@@ -21,6 +22,7 @@ export function ReaderBookPage() {
   const [commentPagination, setCommentPagination] = useState<PaginationData | null>(null);
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [commentError, setCommentError] = useState('');
+  const [commentRetryKey, setCommentRetryKey] = useState(0);
   const [commentNotice, setCommentNotice] = useState('');
   const [commentBody, setCommentBody] = useState('');
   const [commentRating, setCommentRating] = useState(5);
@@ -31,13 +33,39 @@ export function ReaderBookPage() {
   const [chapterPage, setChapterPage] = useState(1);
   const [chapterLoading, setChapterLoading] = useState(false);
   const [chapterError, setChapterError] = useState('');
+  const [chapterRetryKey, setChapterRetryKey] = useState(0);
   const [activeChapter, setActiveChapter] = useState<ReadChapterResult | null>(null);
   const [readingChapter, setReadingChapter] = useState(false);
   const [savedBookmarks, setSavedBookmarks] = useState<BookmarkType[]>([]);
   const [savingBookmark, setSavingBookmark] = useState(false);
 
   useEffect(() => {
+    if (previousBookIdRef.current === bookId) return;
+    previousBookIdRef.current = bookId;
+    setBook(null);
+    setLoadingBook(true);
+    setError('');
+    setComments([]);
+    setCommentPage(1);
+    setCommentPagination(null);
+    setCommentsLoading(true);
+    setCommentError('');
+    setCommentNotice('');
+    setCommentBody('');
+    setEditingComment(null);
+    setChapters([]);
+    setChapterPagination(null);
+    setChapterPage(1);
+    setChapterLoading(false);
+    setChapterError('');
+    setActiveChapter(null);
+    setSavedBookmarks([]);
+  }, [bookId]);
+
+  useEffect(() => {
     let active = true;
+    setLoadingBook(true);
+    setError('');
     fetchPublicBook(bookId)
       .then((result) => { if (active) setBook(result); })
       .catch((loadError: unknown) => { if (active) setError(errorMessage(loadError)); })
@@ -50,17 +78,27 @@ export function ReaderBookPage() {
     let active = true;
     setChapterLoading(true);
     setChapterError('');
-    Promise.all([fetchReadableChapters(bookId, chapterPage), fetchReaderBookmarks()])
-      .then(([catalog, saved]) => {
-        if (!active) return;
-        setChapters((current) => chapterPage === 1 ? catalog.chapters : [...current, ...catalog.chapters]);
-        setChapterPagination(catalog.pagination);
-        setSavedBookmarks(saved.bookmarks);
+    Promise.allSettled([fetchReadableChapters(bookId, chapterPage), fetchReaderBookmarks()])
+      .then(([catalogResult, bookmarkResult]) => {
+        if (!active || previousBookIdRef.current !== bookId) return;
+        const messages: string[] = [];
+        if (catalogResult.status === 'fulfilled') {
+          const catalog = catalogResult.value;
+          setChapters((current) => chapterPage === 1 ? catalog.chapters : [...current, ...catalog.chapters]);
+          setChapterPagination(catalog.pagination);
+        } else {
+          messages.push(`Không thể tải danh sách chương: ${errorMessage(catalogResult.reason)}`);
+        }
+        if (bookmarkResult.status === 'fulfilled') {
+          setSavedBookmarks(bookmarkResult.value.bookmarks);
+        } else {
+          messages.push(`Không thể tải chương đã lưu: ${errorMessage(bookmarkResult.reason)}`);
+        }
+        if (messages.length) setChapterError(messages.join(' '));
       })
-      .catch((loadError: unknown) => { if (active) setChapterError(errorMessage(loadError)); })
       .finally(() => { if (active) setChapterLoading(false); });
     return () => { active = false; };
-  }, [bookId, chapterPage, loadingAuth, user]);
+  }, [bookId, chapterPage, chapterRetryKey, loadingAuth, user]);
 
   useEffect(() => {
     let active = true;
@@ -68,14 +106,14 @@ export function ReaderBookPage() {
     setCommentError('');
     fetchBookComments(bookId, commentPage)
       .then((result) => {
-        if (!active) return;
+        if (!active || previousBookIdRef.current !== bookId) return;
         setComments((current) => commentPage === 1 ? result.comments : [...current, ...result.comments]);
         setCommentPagination(result.pagination);
       })
       .catch((loadError: unknown) => { if (active) setCommentError(errorMessage(loadError)); })
       .finally(() => { if (active) setCommentsLoading(false); });
     return () => { active = false; };
-  }, [bookId, commentPage]);
+  }, [bookId, commentPage, commentRetryKey]);
 
   const currentUserId = user?._id ?? user?.id;
   const myComment = comments.find((comment) => referenceId(comment.user) === currentUserId);
@@ -195,7 +233,7 @@ function extractId(item: any): string {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f3ef] text-[#202b28]">
+    <div className="reader-book-detail min-h-screen bg-[#f4f3ef] text-[#202b28]">
       <header className="border-b border-[#deddd6] bg-[#fbfaf7]">
         <div className="mx-auto flex min-h-[68px] max-w-[1100px] items-center justify-between px-4 sm:px-8">
           <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#31564a]" to="/"><ArrowLeft size={16} /> Về thư viện</Link>
@@ -228,7 +266,7 @@ function extractId(item: any): string {
                 <div><p className="eyebrow">Đọc theo chương</p><h2 className="mt-1 text-xl font-bold text-[#203a34]" id="book-chapters">Nội dung sách</h2></div>
                 <span className="text-xs text-slate-500">{chapterPagination?.total ?? chapters.length} chương có thể đọc</span>
               </div>
-              {chapterError && <p className="mt-4 text-sm text-rose-700" role="alert">{chapterError}</p>}
+              {chapterError && <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-rose-700" role="alert"><span>{chapterError}</span><button className="button-secondary !min-h-8 !px-3 !py-1" onClick={() => setChapterRetryKey((key) => key + 1)} type="button">Thử lại</button></div>}
               {chapterLoading && chapters.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">Đang tải danh sách chương…</p>
                 : chapters.length ? <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(230px,0.7fr)_minmax(0,1.3fr)]">
                   <ol className="max-h-[560px] divide-y divide-[#e9e8e2] overflow-y-auto border border-[#e5e4de] bg-white">
@@ -346,16 +384,16 @@ function extractId(item: any): string {
                     );
                   })}
                 </ul>
-              ) : !commentsLoading ? <p className="py-8 text-center text-sm text-slate-500">Chưa có đánh giá. Hãy chia sẻ cảm nhận đầu tiên.</p> : null}
+              ) : !commentsLoading && !commentError ? <p className="py-8 text-center text-sm text-slate-500">Chưa có đánh giá. Hãy chia sẻ cảm nhận đầu tiên.</p> : null}
               {commentPagination && commentPage < commentPagination.totalPages && (
                 <button className="button-secondary mt-3 w-full" disabled={commentsLoading} onClick={() => setCommentPage((page) => page + 1)} type="button">
                   {commentsLoading ? 'Đang tải…' : 'Xem thêm đánh giá'}
                 </button>
               )}
-              {commentError && comments.length > 0 ? <p className="mt-3 text-sm text-rose-700" role="alert">{commentError}</p> : null}
+              {commentError && <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-rose-700" role="alert"><span>{commentError}</span><button className="button-secondary !min-h-8 !px-3 !py-1" onClick={() => setCommentRetryKey((key) => key + 1)} type="button">Tải lại đánh giá</button></div>}
             </section>
           </>
-        ) : <p className="py-16 text-center text-sm text-slate-500">Không tìm thấy sách.</p>}
+        ) : <div className="py-16 text-center"><p className="text-sm text-slate-500">{error || 'Không tìm thấy sách.'}</p>{error && <button className="button-secondary mt-4" onClick={() => window.location.reload()} type="button">Thử tải lại</button>}</div>}
       </main>
     </div>
   );

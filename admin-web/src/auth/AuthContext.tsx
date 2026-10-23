@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
-  clearSession, fetchCurrentUser, signIn, signInAdmin, signOut, verifyRegistrationEmail,
-} from '../api/client';
+  changeMyPassword, clearSession, fetchCurrentUser, signIn, signInAdmin, signOut, updateMyProfile, verifyRegistrationEmail,
+} from '../api/client.ts';
 import type { User } from '../types';
+
 
 interface AuthContextValue {
   user: User | null;
@@ -11,7 +12,10 @@ interface AuthContextValue {
   loginAdmin: (email: string, password: string) => Promise<User>;
   verifyEmail: (email: string, otp: string) => Promise<User>;
   logout: () => Promise<void>;
+  updateProfile: (payload: { name: string; phone_number?: string | null }) => Promise<User>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -22,10 +26,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    const handleExpired = () => {
+      if (!active) return;
+      setUser(null);
+      setLoading(false);
+    };
+
+    // Always listen for expiration. The app often starts logged out, then a login
+    // happens without a reload; returning before this listener was registered left
+    // the context stale when a later API refresh failed.
+    window.addEventListener('openbook:session-expired', handleExpired);
+
     const token = localStorage.getItem('openbook.access_token');
     if (!token) {
       setLoading(false);
-      return () => { active = false; };
+      return () => {
+        active = false;
+        window.removeEventListener('openbook:session-expired', handleExpired);
+      };
     }
 
     fetchCurrentUser()
@@ -36,11 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => { if (active) setLoading(false); });
 
-    const handleExpired = () => {
-      setUser(null);
-      setLoading(false);
-    };
-    window.addEventListener('openbook:session-expired', handleExpired);
     return () => {
       active = false;
       window.removeEventListener('openbook:session-expired', handleExpired);
@@ -64,6 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentUser = await verifyRegistrationEmail(email, otp);
       setUser(currentUser);
       return currentUser;
+    },
+    async updateProfile(payload) {
+      const updated = await updateMyProfile(payload);
+      setUser(updated);
+      return updated;
+    },
+    async changePassword(currentPassword, newPassword) {
+      await changeMyPassword(currentPassword, newPassword);
     },
     async logout() {
       try {

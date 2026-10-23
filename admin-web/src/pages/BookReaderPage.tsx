@@ -82,7 +82,7 @@ export function BookReaderPage() {
   const returnPath = book?._id ? `/books/${encodeURIComponent(book._id)}` : '/';
 
   return (
-    <main className={`flex h-screen min-h-[420px] flex-col overflow-hidden ${darkWorkspace ? 'bg-[#20252b]' : 'bg-[#edf2f7]'}`}>
+    <main className={`reader-pdf-workspace ${darkWorkspace ? 'reader-pdf-dark' : 'reader-pdf-light'} flex h-screen min-h-[420px] flex-col overflow-hidden ${darkWorkspace ? 'bg-[#20252b]' : 'bg-[#edf2f7]'}`}>
       <header className={`z-10 grid min-h-[58px] shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b px-3 sm:px-5 ${
         darkWorkspace ? 'border-slate-700 bg-[#171b20] text-slate-100' : 'border-slate-200 bg-white text-[#26332e]'
       }`}>

@@ -1,14 +1,28 @@
 // [MIDDLEWARE QUẢNG CÁO 3 CHƯƠNG] Hiển thị một quảng cáo sau mỗi ba lượt mở chương của tài khoản USER.
 import ReadingProgress from '../models/reading-progress.model.js';
+import ReadingEvent from '../models/reading-event.model.js';
 import { asyncHandler } from '../utils/async-handler.js';
 
 // [CHU KỲ QUẢNG CÁO] Một quảng cáo sau ba lượt mở chương; dùng chung trong cập nhật atomic và kiểm thử.
 export const ADS_CHAPTER_INTERVAL = 3;
+
 // Hàm shouldShowAd: Xác định cần hiển thị quảng cáo khi bộ đếm đã quay về đầu chu kỳ ba chương.
 export const shouldShowAd = (chaptersSinceLastAd) => chaptersSinceLastAd === 0;
 
 // [ĐẾM LƯỢT ĐỌC] Người Premium/VIP không nhận quảng cáo; Free được tính độc lập theo từng sách.
 export const trackChapterRead = asyncHandler(async (req, res, next) => {
+    // Lưu một sự kiện đọc thật để dashboard có thể thống kê theo ngày. Sự kiện phân tích
+    // không được làm gián đoạn luồng đọc nếu thao tác ghi log gặp lỗi. Lượt đọc Premium/VIP
+    // cũng được ghi nhận, dù họ không đi qua bộ đếm quảng cáo.
+    void ReadingEvent.create({
+        user: req.authUser._id,
+        book: req.book._id,
+        chapter: req.chapter?._id ?? null,
+        action: req.params.chapterId ? 'chapter' : 'file'
+    }).catch((error) => {
+        console.error('OpenBook could not record a reading event:', error?.message || error);
+    });
+
     if (req.authUser.hasActivePremium()) {
         req.adDecision = { showAd: false, reason: 'premium' };
         return next();

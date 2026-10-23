@@ -3,6 +3,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import { approveSubscription, rejectSubscription } from '../controllers/subscription.controller.js';
 import { deleteReport, getPendingSubscriptions, getRecentUsers, getReport, getReports, grantVip, updateReportStatus, uploadBookFile } from '../controllers/admin.controller.js';
+import { getAdminDashboard } from '../controllers/dashboard.controller.js';
+import { listAdminComments } from '../controllers/interaction.controller.js';
 import { createBook, deleteBook, listAdminBooks, updateBook } from '../controllers/book.controller.js';
 import { createUser, deleteUser, getAllUsers, getUser, updateUser } from '../controllers/user.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
@@ -19,6 +21,8 @@ const upload = multer({
 
 const router = Router();
 router.use(verifyToken, requireAdmin);
+router.get('/dashboard', getAdminDashboard);
+router.get('/comments', listAdminComments);
 router.get('/users', validateQuery(modelValidation.userList), getAllUsers);
 router.post('/users', validateBody(modelValidation.user.create), createUser);
 router.get('/users/recent', getRecentUsers);

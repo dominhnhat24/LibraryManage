@@ -10,6 +10,7 @@ import {
 } from '../api/client';
 import type { PaginationData, User } from '../types';
 import { useAuth } from '../auth/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 
 const emptyPagination: PaginationData = { total: 0, page: 1, limit: 20, totalPages: 0 };
 
@@ -46,6 +47,14 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'vip' | null>(null);
   const [pendingDelete, setPendingDelete] = useState<User | null>(null);
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') ?? '';
+
+  useEffect(() => {
+    setSearchInput(urlSearch);
+    setSearch(urlSearch);
+    setPage(1);
+  }, [urlSearch]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -183,14 +192,14 @@ export function UserManagement() {
         </div>
       </section>
 
-      <section aria-label="Thống kê người dùng" className="mb-5 grid gap-px border border-[#dfded7] bg-[#dfded7] sm:grid-cols-3">
-        <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng tài khoản</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.total.toLocaleString('vi-VN')}</p></div>
-        <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p></div>
-        <div className="bg-[#fbfaf7] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p><p className="mt-2 text-2xl font-bold text-[#203a34]">{pagination.limit}</p></div>
+      <section aria-label="Thống kê người dùng" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+        <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng tài khoản</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p></div>
+        <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p></div>
+        <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.limit}</p></div>
       </section>
 
-      <section className="border border-[#dfded7] bg-[#fbfaf7]">
-        <div className="grid gap-2 border-b border-[#e5e4de] px-4 py-4 sm:grid-cols-[minmax(220px,1fr)_200px] sm:px-6">
+      <section className="border border-[#DDE9E6] bg-[#FFFFFF]">
+        <div className="grid gap-2 border-b border-[#EEF3F0] px-4 py-4 sm:grid-cols-[minmax(220px,1fr)_200px] sm:px-6">
           <label className="relative block">
             <span className="sr-only">Tìm theo tên hoặc email</span>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -209,14 +218,14 @@ export function UserManagement() {
         {loading ? <div className="grid min-h-64 place-items-center text-sm font-semibold text-slate-500"><span className="flex items-center gap-2"><LoaderCircle className="animate-spin" size={17} />Đang tải người dùng...</span></div>
           : users.length === 0 ? <div className="grid min-h-64 place-items-center px-6 text-center"><div><UserRound className="mx-auto text-slate-400" size={28} /><h3 className="mt-3 text-sm font-bold">Chưa tìm thấy người dùng</h3><p className="mt-1 text-sm text-slate-500">Hãy đổi từ khóa hoặc bộ lọc để thử lại.</p></div></div>
             : <div className="overflow-x-auto"><table className="w-full min-w-[900px] border-collapse text-left">
-              <thead><tr className="border-y border-[#e9e8e2] bg-[#f8f7f3] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500"><th className="px-5 py-3.5">Tài khoản</th><th className="px-4 py-3.5">Role</th><th className="px-4 py-3.5">Quyền đọc</th><th className="px-4 py-3.5">Ngày tham gia</th><th className="px-5 py-3.5 text-right">Thao tác</th></tr></thead>
-              <tbody className="divide-y divide-[#efeee9]">{users.map((item) => {
+              <thead><tr className="border-y border-[#e9e8e2] bg-[#F8FBF9] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500"><th className="px-5 py-3.5">Tài khoản</th><th className="px-4 py-3.5">Role</th><th className="px-4 py-3.5">Quyền đọc</th><th className="px-4 py-3.5">Ngày tham gia</th><th className="px-5 py-3.5 text-right">Thao tác</th></tr></thead>
+              <tbody className="divide-y divide-[#EEF3F0]">{users.map((item) => {
                 const isCurrentUser = item.id === currentUser?.id || userId(item) === currentUser?.id;
                 const vipActive = Boolean(item.is_vip && item.vip_expires_at && new Date(item.vip_expires_at) > new Date());
-                return <tr className="hover:bg-[#fbfaf7]" key={userId(item)}>
-                  <td className="px-5 py-3.5"><div className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center border border-[#e4e1d8] bg-[#f1f0ea] text-[#496a55]"><UserRound size={16} /></span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#202b28]">{item.name}{isCurrentUser && <span className="ml-2 text-[10px] font-medium text-slate-400">(Bạn)</span>}</p><p className="truncate text-xs text-slate-500">{item.email}</p><p className="mt-0.5 text-[11px] text-slate-400">{item.phone_number || 'Chưa có số điện thoại'}</p></div></div></td>
-                  <td className="px-4 py-3.5"><span className={`inline-flex border px-2.5 py-1 text-[10px] font-bold ${item.role === 'ADMIN' ? 'border-[#cbd9d0] bg-[#edf2ed] text-[#31564a]' : 'border-[#e9e7df] bg-white text-slate-600'}`}>{item.role === 'ADMIN' ? 'ADMIN · Quản trị' : 'USER · Độc giả'}</span></td>
-                  <td className="px-4 py-3.5"><div className="space-y-1"><span className={`block text-xs font-semibold ${vipActive ? 'text-[#94743c]' : 'text-slate-500'}`}>{vipActive ? 'VIP đang hoạt động' : item.is_premium ? 'Premium đang hoạt động' : 'Free'}</span>{vipActive && <span className="block text-[10px] text-slate-400">Hạn {formatDate(item.vip_expires_at)}</span>}</div></td>
+                return <tr className="hover:bg-[#FFFFFF]" key={userId(item)}>
+                  <td className="px-5 py-3.5"><div className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center border border-[#DDE9E6] bg-[#f1f0ea] text-[#496a55]"><UserRound size={16} /></span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#202b28]">{item.name}{isCurrentUser && <span className="ml-2 text-[10px] font-medium text-slate-400">(Bạn)</span>}</p><p className="truncate text-xs text-slate-500">{item.email}</p><p className="mt-0.5 text-[11px] text-slate-400">{item.phone_number || 'Chưa có số điện thoại'}</p></div></div></td>
+                  <td className="px-4 py-3.5"><span className={`inline-flex border px-2.5 py-1 text-[10px] font-bold ${item.role === 'ADMIN' ? 'border-[#cbd9d0] bg-[#E3F4EB] text-[#24795C]' : 'border-[#DDE9E6] bg-white text-slate-600'}`}>{item.role === 'ADMIN' ? 'ADMIN · Quản trị' : 'USER · Độc giả'}</span></td>
+                  <td className="px-4 py-3.5"><div className="space-y-1"><span className={`block text-xs font-semibold ${vipActive ? 'text-[#B8860B]' : 'text-slate-500'}`}>{vipActive ? 'VIP đang hoạt động' : item.is_premium ? 'Premium đang hoạt động' : 'Free'}</span>{vipActive && <span className="block text-[10px] text-slate-400">Hạn {formatDate(item.vip_expires_at)}</span>}</div></td>
                   <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(item.createdAt)}</td>
                   <td className="px-5 py-3.5"><div className="flex justify-end gap-2">
                     {item.role !== 'ADMIN' && <button aria-label={`Cấp VIP cho ${item.name}`} className="icon-button" onClick={() => { setSelectedUser(item); setModalMode('vip'); }} title="Cấp VIP" type="button"><ShieldCheck size={15} /></button>}
@@ -280,15 +289,15 @@ function UserModal({ mode, user, canChangeRole, saving, onClose, onSave }: {
   }
 
   return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }} role="presentation"><section aria-labelledby="user-modal-title" aria-modal="true" className="modal-panel !max-w-[560px]" role="dialog">
-    <header className="flex items-start justify-between border-b border-[#e9e7df] px-6 py-5"><div><p className="eyebrow">Quản trị tài khoản</p><h2 className="mt-1 text-xl font-bold" id="user-modal-title">{mode === 'create' ? 'Tạo tài khoản USER' : 'Chỉnh sửa tài khoản'}</h2></div><button aria-label="Đóng cửa sổ" className="icon-button" disabled={saving} onClick={onClose} type="button"><X size={17} /></button></header>
+    <header className="flex items-start justify-between border-b border-[#DDE9E6] px-6 py-5"><div><p className="eyebrow">Quản trị tài khoản</p><h2 className="mt-1 text-xl font-bold" id="user-modal-title">{mode === 'create' ? 'Tạo tài khoản USER' : 'Chỉnh sửa tài khoản'}</h2></div><button aria-label="Đóng cửa sổ" className="icon-button" disabled={saving} onClick={onClose} type="button"><X size={17} /></button></header>
     <form onSubmit={submit}><div className="grid gap-4 px-6 py-5 sm:grid-cols-2">
       <label className="field-label sm:col-span-2">Họ và tên<input autoComplete="name" className="form-input mt-2" maxLength={100} onChange={(event) => setName(event.target.value)} required value={name} /></label>
       <label className="field-label">Email<input autoComplete="email" className="form-input mt-2" maxLength={254} onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
       <label className="field-label">Số điện thoại<input autoComplete="tel" className="form-input mt-2" maxLength={12} onChange={(event) => setPhone(event.target.value)} type="tel" value={phone} /></label>
       <label className="field-label sm:col-span-2">Mật khẩu {mode === 'edit' && <span className="font-normal text-slate-500">(để trống nếu không đổi)</span>}<input autoComplete={mode === 'create' ? 'new-password' : 'off'} className="form-input mt-2" minLength={8} maxLength={128} onChange={(event) => setPassword(event.target.value)} required={mode === 'create'} type="password" value={password} /></label>
-      {mode === 'edit' && <label className="field-label sm:col-span-2">Role hệ thống{canChangeRole ? <select className="form-input mt-2" onChange={(event) => setRole(event.target.value as User['role'])} value={role}><option value="USER">USER · Độc giả</option><option value="ADMIN">ADMIN · Quản trị</option></select> : <span className="mt-2 flex min-h-10 items-center border border-[#deddd5] bg-[#f8f7f3] px-3 text-sm">{role} · Không thể tự thay đổi role của phiên đang đăng nhập</span>}<span className="mt-1 block text-[11px] font-normal text-slate-500">Premium/VIP là quyền đọc độc lập, không phải role.</span></label>}
+      {mode === 'edit' && <label className="field-label sm:col-span-2">Role hệ thống{canChangeRole ? <select className="form-input mt-2" onChange={(event) => setRole(event.target.value as User['role'])} value={role}><option value="USER">USER · Độc giả</option><option value="ADMIN">ADMIN · Quản trị</option></select> : <span className="mt-2 flex min-h-10 items-center border border-[#DDE9E6] bg-[#F8FBF9] px-3 text-sm">{role} · Không thể tự thay đổi role của phiên đang đăng nhập</span>}<span className="mt-1 block text-[11px] font-normal text-slate-500">Premium/VIP là quyền đọc độc lập, không phải role.</span></label>}
       {formError && <p className="sm:col-span-2 border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{formError}</p>}
-    </div><footer className="flex flex-col-reverse gap-2 border-t border-[#e9e7df] bg-[#fbfaf7] px-6 py-4 sm:flex-row sm:justify-end"><button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button><button className="button-primary" disabled={saving} type="submit">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <Check size={16} />}{saving ? 'Đang lưu...' : mode === 'create' ? 'Tạo tài khoản' : 'Lưu thay đổi'}</button></footer></form>
+    </div><footer className="flex flex-col-reverse gap-2 border-t border-[#DDE9E6] bg-[#FFFFFF] px-6 py-4 sm:flex-row sm:justify-end"><button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button><button className="button-primary" disabled={saving} type="submit">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <Check size={16} />}{saving ? 'Đang lưu...' : mode === 'create' ? 'Tạo tài khoản' : 'Lưu thay đổi'}</button></footer></form>
   </section></div>;
 }
 

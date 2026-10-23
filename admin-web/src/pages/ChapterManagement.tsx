@@ -156,26 +156,26 @@ export function ChapterManagement() {
 
       </section>
 
-      <section aria-label="Thống kê chương" className="mb-5 grid gap-px border border-[#dfded7] bg-[#dfded7] sm:grid-cols-3">
-        <div className="bg-[#fbfaf7] px-5 py-4">
+      <section aria-label="Thống kê chương" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng chương phù hợp</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.total.toLocaleString('vi-VN')}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p>
         </div>
-        <div className="bg-[#fbfaf7] px-5 py-4">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p>
         </div>
-        <div className="bg-[#fbfaf7] px-5 py-4">
+        <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#203a34]">{pagination.limit}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.limit}</p>
         </div>
       </section>
 
-      <section className="border border-[#dfded7] bg-[#fbfaf7]">
-        <div className="flex flex-col gap-4 border-b border-[#e5e4de] px-4 py-4 sm:px-6">
+      <section className="border border-[#DDE9E6] bg-[#FFFFFF]">
+        <div className="flex flex-col gap-4 border-b border-[#EEF3F0] px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <Filter className="text-[#567160]" size={16} />
-            <h2 className="text-sm font-bold text-[#26332e]">Danh mục chương</h2>
+            <Filter className="text-[#526B86]" size={16} />
+            <h2 className="text-sm font-bold text-[#153D31]">Danh mục chương</h2>
             {hasFilters && (
               <button className="button-secondary ml-auto !min-h-8 !px-2.5 !py-1.5" onClick={clearFilters} type="button">
                 <X size={13} /> Xóa bộ lọc

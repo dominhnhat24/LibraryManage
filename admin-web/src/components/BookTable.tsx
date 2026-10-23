@@ -158,7 +158,7 @@ const handleBulkDelete = async () => {
   <div className="overflow-x-auto rounded-xl border border-[#e9e8e2] shadow-sm bg-white">
     <table className="w-full min-w-[950px] border-collapse text-left">
       <thead>
-        <tr className="border-b border-[#e9e8e2] bg-[#f8f7f3] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+        <tr className="border-b border-[#e9e8e2] bg-[#F8FBF9] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
           <th className="p-4 w-12 text-center">
             <input
               type="checkbox"
@@ -175,11 +175,11 @@ const handleBulkDelete = async () => {
               <th className="px-6 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#efeee9]">
+          <tbody className="divide-y divide-[#EEF3F0]">
             {books.map((book) => {
               const isSelected = selectedIds.includes(book._id);
               return (
-                <tr className={`group transition-colors hover:bg-[#fbfaf7] ${isSelected ? 'bg-indigo-50/40' : ''}`} key={book._id}>
+                <tr className={`group transition-colors hover:bg-[#FFFFFF] ${isSelected ? 'bg-indigo-50/40' : ''}`} key={book._id}>
                   <td className="p-4 text-center">
                     <input
                       type="checkbox"
@@ -191,7 +191,7 @@ const handleBulkDelete = async () => {
                   <td className="px-6 py-3.5">
                     <div className="flex min-w-64 items-center gap-3.5">
                       <img
-                        className="h-[62px] w-12 shrink-0 border border-[#e4e1d8] bg-[#f1eee6] object-cover"
+                        className="h-[62px] w-12 shrink-0 border border-[#DDE9E6] bg-[#f1eee6] object-cover"
                         src={book.cover_url || '/book-cover-placeholder.svg'}
                         alt={`Bìa sách ${book.title}`}
                         onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
@@ -204,7 +204,7 @@ const handleBulkDelete = async () => {
                     </div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <span className="inline-flex border border-[#e9e7df] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                    <span className="inline-flex border border-[#DDE9E6] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
                       {categories[book.category] || book.category}
                     </span>
                   </td>

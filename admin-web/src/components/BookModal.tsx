@@ -68,9 +68,9 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
       if (event.target === event.currentTarget && !saving) onClose();
     }}>
       <section aria-labelledby="book-modal-title" aria-modal="true" className="modal-panel" role="dialog">
-        <header className="flex items-start justify-between border-b border-[#e9e7df] px-6 py-5 sm:px-8">
+        <header className="flex items-start justify-between border-b border-[#DDE9E6] px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center bg-[#e9eee9] text-[#31564a]"><BookOpen size={19} /></span>
+            <span className="grid h-10 w-10 place-items-center bg-[#e9eee9] text-[#24795C]"><BookOpen size={19} /></span>
             <div>
               <p className="eyebrow">Danh mục thư viện</p>
               <h2 className="mt-1 text-xl font-bold tracking-tight text-[#202b28]" id="book-modal-title">
@@ -141,7 +141,7 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
               File PDF (tùy chọn)
               <input
                 accept="application/pdf,.pdf"
-                className="form-input mt-2 file:mr-3 file:border-0 file:bg-[#edf2ed] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#31564a]"
+                className="form-input mt-2 file:mr-3 file:border-0 file:bg-[#E3F4EB] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#24795C]"
                 disabled={saving || !pdfSupported}
                 onChange={(event) => setPdfFile(event.target.files?.[0] ?? null)}
                 type="file"
@@ -154,7 +154,7 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
             </label>
             {formError && <p className="sm:col-span-2 border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800">{formError}</p>}
           </div>
-          <footer className="flex flex-col-reverse gap-2 border-t border-[#e9e7df] bg-[#fbfaf7] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+          <footer className="flex flex-col-reverse gap-2 border-t border-[#DDE9E6] bg-[#FFFFFF] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
             <button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button>
             <button className="button-primary" disabled={saving} type="submit">
               {saving ? `Đang lưu${pdfFile ? ` PDF ${uploadProgress}%` : '...'}` : book ? 'Lưu thay đổi' : 'Tạo đầu sách'}

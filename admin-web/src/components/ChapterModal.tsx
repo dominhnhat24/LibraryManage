@@ -120,9 +120,9 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
       if (event.target === event.currentTarget && !saving) onClose();
     }} role="presentation">
       <section aria-labelledby="chapter-modal-title" aria-modal="true" className="modal-panel" role="dialog">
-        <header className="flex items-start justify-between border-b border-[#e9e7df] px-6 py-5 sm:px-8">
+        <header className="flex items-start justify-between border-b border-[#DDE9E6] px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center bg-[#e9eee9] text-[#31564a]">
+            <span className="grid h-10 w-10 place-items-center bg-[#e9eee9] text-[#24795C]">
               {chapter ? <BookOpen size={19} /> : <BookPlus size={19} />}
             </span>
             <div>
@@ -142,9 +142,9 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
             <label className="field-label sm:col-span-2">
               Sách cha <span className="text-rose-600">*</span>
               {chapter ? (
-                <div className="mt-2 flex min-h-11 items-center gap-3 border border-[#deddd5] bg-[#f8f7f3] px-3">
-                  <BookOpen className="shrink-0 text-[#567160]" size={16} />
-                  <span className="truncate text-sm font-semibold text-[#26332e]">{getBookReference(chapter.book_id).title}</span>
+                <div className="mt-2 flex min-h-11 items-center gap-3 border border-[#DDE9E6] bg-[#F8FBF9] px-3">
+                  <BookOpen className="shrink-0 text-[#526B86]" size={16} />
+                  <span className="truncate text-sm font-semibold text-[#153D31]">{getBookReference(chapter.book_id).title}</span>
                   <span className="ml-auto text-[10px] text-slate-500">Không thể đổi sách cha khi sửa</span>
                 </div>
               ) : (
@@ -164,7 +164,7 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
                   />
                   {searchingBooks && <LoaderCircle className="absolute right-3 top-3 animate-spin text-slate-400" size={16} />}
                   {bookResults.length > 0 && (
-                    <div className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto border border-[#deddd5] bg-white shadow-lg" role="listbox">
+                    <div className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto border border-[#DDE9E6] bg-white shadow-lg" role="listbox">
                       {bookResults.map((book) => (
                         <button
                           aria-selected={selectedBook?._id === book._id}
@@ -176,12 +176,12 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
                         >
                           <img
                             alt=""
-                            className="h-10 w-8 shrink-0 border border-[#e4e1d8] object-cover"
+                            className="h-10 w-8 shrink-0 border border-[#DDE9E6] object-cover"
                             onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
                             src={book.cover_url || '/book-cover-placeholder.svg'}
                           />
                           <span className="min-w-0">
-                            <span className="block truncate text-xs font-bold text-[#26332e]">{book.title}</span>
+                            <span className="block truncate text-xs font-bold text-[#153D31]">{book.title}</span>
                             <span className="mt-0.5 block truncate text-[11px] text-slate-500">{book.author_name}</span>
                           </span>
                         </button>
@@ -191,7 +191,7 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
                 </div>
               )}
               {!chapter && selectedBook && (
-                <span className="mt-1.5 block text-[11px] font-semibold text-[#45704f]">Đã chọn: {selectedBook.title}</span>
+                <span className="mt-1.5 block text-[11px] font-semibold text-[#24795C]">Đã chọn: {selectedBook.title}</span>
               )}
               {!chapter && bookSearch.trim().length > 0 && bookSearch.trim().length < 2 && (
                 <span className="mt-1.5 block text-[11px] font-normal text-slate-500">Nhập thêm để tìm sách.</span>
@@ -226,7 +226,7 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
             </label>
             {formError && <p className="sm:col-span-2 border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{formError}</p>}
           </div>
-          <footer className="flex flex-col-reverse gap-2 border-t border-[#e9e7df] bg-[#fbfaf7] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
+          <footer className="flex flex-col-reverse gap-2 border-t border-[#DDE9E6] bg-[#FFFFFF] px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
             <button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button>
             <button className="button-primary" disabled={saving} type="submit">
               {saving ? <LoaderCircle className="animate-spin" size={16} /> : <BookPlus size={16} />}

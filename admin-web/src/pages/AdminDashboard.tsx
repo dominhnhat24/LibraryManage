@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  AlertCircle, ArrowRight, BookOpen, BookText, Calendar, ChevronRight,
+  AlertCircle, ArrowRight, BookOpen, Calendar, ChevronRight,
   Clock, CreditCard, FileText, MoreVertical, Plus, Star, Trash2, Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../components/AdminLayout';
 import {
-  errorMessage, fetchBooks, fetchChapters, fetchPendingSubscriptions,
-  fetchRecentUsers, fetchReports, fetchUsers, fetchBookComments, deleteBookComment,
+  errorMessage, fetchAdminComments, fetchAdminDashboard, fetchBooks, fetchRecentUsers,
+  fetchReports, fetchSubscriptions, deleteBookComment, type AdminDashboardResponse,
 } from '../api/client';
-import type { Book, User, Report } from '../types';
+import type { Book, User, Report, Subscription } from '../types';
 import { useAuth } from '../auth/AuthContext';
 
 /* ───── Comment type (kept from original) ───── */
@@ -23,131 +23,168 @@ export interface CommentItem {
   bookTitle?: string;
 }
 
-/* ───── Dashboard counts ───── */
+/* ───── Dashboard data ───── */
 interface DashboardCounts {
   books: number | null;
   chapters: number | null;
   users: number | null;
-  pendingSubscriptions: number | null;
+  activeSubscriptions: number | null;
   openReports: number | null;
 }
 
 const emptyCounts: DashboardCounts = {
-  books: null, chapters: null, users: null, pendingSubscriptions: null, openReports: null,
+  books: null, chapters: null, users: null, activeSubscriptions: null, openReports: null,
 };
 
 /* ═══════════════════════════════════════════════ */
 export function AdminDashboard() {
   const { user: currentUser } = useAuth();
-  const [counts, setCounts] = useState<DashboardCounts>(emptyCounts);
+  const [summary, setSummary] = useState<AdminDashboardResponse | null>(null);
   const [recentBooks, setRecentBooks] = useState<Book[]>([]);
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [recentReports, setRecentReports] = useState<Report[]>([]);
+  const [recentSubscriptions, setRecentSubscriptions] = useState<Subscription[]>([]);
   const [comments, setComments] = useState<(CommentItem & { bookTitle?: string })[]>([]);
+  const [period, setPeriod] = useState<7 | 30 | 90>(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  /* Current date / time for the greeting */
-  const now = useMemo(() => new Date(), []);
+  /* Date/time is refreshed on each dashboard load rather than hard-coded. */
+  const now = useMemo(() => new Date(), [summary]);
   const dateStr = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
-  /* ── Load data ── */
+  const counts: DashboardCounts = summary ? {
+    books: summary.metrics.totalBooks,
+    chapters: summary.metrics.totalChapters,
+    users: summary.metrics.totalUsers,
+    activeSubscriptions: summary.metrics.activeSubscriptions,
+    openReports: summary.metrics.openReports,
+  } : emptyCounts;
+
+  /* Load persisted data through the real admin endpoints. Each panel can still render
+     when an unrelated endpoint fails, and the dashboard never substitutes sample values. */
   useEffect(() => {
     let active = true;
     async function load() {
       setLoading(true);
       setError('');
-      try {
-        const results = await Promise.allSettled([
-          fetchBooks({ page: 1, limit: 5 }),
-          fetchChapters({ page: 1, limit: 1 }),
-          fetchUsers({ page: 1, limit: 1 }),
-          fetchPendingSubscriptions(),
-          fetchReports({ page: 1, limit: 5, status: 'open' }),
-          fetchRecentUsers(),
-        ]);
-        if (!active) return;
+      const results = await Promise.allSettled([
+        fetchAdminDashboard(period),
+        fetchBooks({ page: 1, limit: 5 }),
+        fetchRecentUsers(),
+        fetchReports({ page: 1, limit: 5, status: 'open' }),
+        fetchAdminComments({ page: 1, limit: 10 }),
+        fetchSubscriptions({ page: 1, limit: 5 }),
+      ]);
+      if (!active) return;
 
-        const booksResult = results[0].status === 'fulfilled' ? results[0].value : null;
-        setCounts({
-          books: booksResult ? booksResult.pagination.total : null,
-          chapters: results[1].status === 'fulfilled' ? results[1].value.pagination.total : null,
-          users: results[2].status === 'fulfilled' ? results[2].value.pagination.total : null,
-          pendingSubscriptions: results[3].status === 'fulfilled' ? results[3].value.pagination.total : null,
-          openReports: results[4].status === 'fulfilled' ? results[4].value.pagination.total : null,
-        });
-        if (booksResult) setRecentBooks(booksResult.books);
-        if (results[5].status === 'fulfilled') setRecentUsers(results[5].value.slice(0, 6));
-        if (results[4].status === 'fulfilled') setRecentReports(results[4].value.reports.slice(0, 5));
-
-        // Fetch comments from books
-        if (booksResult && booksResult.books.length > 0) {
-          let all: (CommentItem & { bookTitle?: string })[] = [];
-          for (const book of booksResult.books) {
-            try {
-              const res = await fetchBookComments(book._id);
-              if (res?.comments) all = [...all, ...res.comments.map((c) => ({ ...c, bookTitle: book.title }))];
-            } catch { /* skip */ }
-          }
-          setComments(all.slice(0, 10));
-        }
-
-        const failed = results.find((r) => r.status === 'rejected');
-        if (failed?.status === 'rejected') setError(errorMessage(failed.reason));
-      } catch (e) {
-        if (active) setError(errorMessage(e));
-      } finally {
-        if (active) setLoading(false);
+      if (results[0].status === 'fulfilled') setSummary(results[0].value);
+      else setError(errorMessage(results[0].reason));
+      if (results[1].status === 'fulfilled') setRecentBooks(results[1].value.books);
+      if (results[2].status === 'fulfilled') setRecentUsers(results[2].value.slice(0, 6));
+      if (results[3].status === 'fulfilled') setRecentReports(results[3].value.reports.slice(0, 5));
+      if (results[4].status === 'fulfilled') {
+        setComments(results[4].value.comments.map((comment) => ({
+          ...comment,
+          bookTitle: typeof comment.book === 'object' && comment.book !== null ? comment.book.title ?? 'Sách' : 'Sách',
+        })));
       }
+      if (results[5].status === 'fulfilled') setRecentSubscriptions(results[5].value.subscriptions);
+
+      const firstFailure = results.find((result) => result.status === 'rejected');
+      if (firstFailure?.status === 'rejected') {
+        setError((currentError) => currentError || `Một số dữ liệu trên dashboard chưa tải được: ${errorMessage(firstFailure.reason)}`);
+      }
+      setLoading(false);
     }
     void load();
     return () => { active = false; };
-  }, []);
+  }, [period]);
 
-  // Hàm xử lý xóa bình luận thật qua API
+  // Hàm xử lý xóa bình luận thật qua API.
   async function handleDeleteComment(commentId: string) {
     if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?')) return;
     try {
       await deleteBookComment(commentId);
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
+      setComments((prev) => prev.filter((comment) => comment._id !== commentId));
     } catch (err: unknown) {
-      alert(errorMessage(err) || 'Không thể xóa bình luận.');
+      window.alert(errorMessage(err) || 'Không thể xóa bình luận.');
     }
   }
 
   /* ── Stat cards config ── */
   const stats = [
-    { label: 'Tổng số sách', value: counts.books, icon: BookOpen, color: '#24795C' },
-    { label: 'Người dùng', value: counts.users, icon: Users, color: '#5DAEFF' },
-    { label: 'Thuê bao đang hoạt động', value: counts.pendingSubscriptions, icon: CreditCard, color: '#57A982' },
-    { label: 'Báo cáo chờ xử lý', value: counts.openReports, icon: FileText, color: '#E8913A' },
+    { label: 'Tổng số sách', value: counts.books, icon: BookOpen, color: '#24795C', href: '/admin/books' },
+    { label: 'Người dùng', value: counts.users, icon: Users, color: '#5DAEFF', href: '/admin/users' },
+    { label: 'Thuê bao đang hoạt động', value: counts.activeSubscriptions, icon: CreditCard, color: '#57A982', href: '/admin/subscriptions' },
+    { label: 'Báo cáo chờ xử lý', value: counts.openReports, icon: FileText, color: '#E8913A', href: '/admin/reports' },
   ];
 
   /* ── Quick actions ── */
   const quickActions = [
-    { title: 'Thêm sách mới', desc: 'Tạo đầu sách và tải file PDF', href: '/admin/books', icon: Plus },
+    { title: 'Thêm sách mới', desc: 'Tạo đầu sách và tải file PDF', href: '/admin/books?action=create', icon: Plus },
     { title: 'Quản lý người dùng', desc: 'Xem và chỉnh sửa tài khoản', href: '/admin/users', icon: Users },
     { title: 'Xử lý thuê bao', desc: 'Duyệt yêu cầu và cấp VIP', href: '/admin/subscriptions', icon: CreditCard },
     { title: 'Xem báo cáo', desc: 'Thống kê và phản hồi', href: '/admin/reports', icon: FileText },
   ];
 
-  const categoryLabel: Record<string, string> = { ebook: 'Ebook', audiobook: 'Audiobook', comic: 'Truyện tranh', webnovel: 'Webnovel' };
-  const categoryColor: Record<string, string> = { ebook: '#24795C', audiobook: '#5DAEFF', comic: '#8B5CF6', webnovel: '#F59E0B' };
+  const categoryLabel: Record<string, string> = {
+    ebook: 'E-book', audiobook: 'Sách nói', comic: 'Truyện tranh', webnovel: 'Web novel',
+    science: 'Khoa học', programming: 'Lập trình', database: 'Cơ sở dữ liệu',
+    backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile',
+    software_engineering: 'Kỹ nghệ phần mềm', computer_science: 'Khoa học máy tính',
+    technology: 'Công nghệ', other: 'Khác',
+  };
+  const categoryColor: Record<string, string> = {
+    ebook: '#24795C', audiobook: '#5DAEFF', comic: '#8B5CF6', webnovel: '#F59E0B',
+    science: '#5DAEFF', programming: '#24795C', database: '#F59E0B', backend: '#8B5CF6',
+    frontend: '#16A6A0', mobile: '#D97706', software_engineering: '#64748B',
+    computer_science: '#DB2777', technology: '#0D9488', other: '#94A3B8',
+  };
 
-  /* Genre distribution from real books */
+  /* Genre counts come from a MongoDB aggregation over all books, not only recent rows. */
   const genreDist = useMemo(() => {
-    const map: Record<string, number> = {};
-    recentBooks.forEach((b) => { map[b.category] = (map[b.category] || 0) + 1; });
-    const total = Object.values(map).reduce((s, v) => s + v, 0) || 1;
-    return Object.entries(map).map(([cat, count]) => ({
-      category: cat,
-      label: categoryLabel[cat] || cat,
+    const categories = summary?.categories ?? [];
+    const total = categories.reduce((sum, item) => sum + item.count, 0) || 1;
+    return categories.map(({ category, count }) => ({
+      category,
+      label: categoryLabel[category.toLowerCase()] || category.replaceAll('_', ' '),
       count,
       pct: Math.round((count / total) * 100),
-      color: categoryColor[cat] || '#24795C',
+      color: categoryColor[category.toLowerCase()] || '#24795C',
     }));
-  }, [recentBooks]);
+  }, [summary]);
+
+  const recentActivity = useMemo(() => {
+    const activities = [
+      ...recentUsers.map((item) => ({
+        id: `user-${item._id ?? item.id}`, type: 'user' as const, title: 'Người dùng mới đăng ký',
+        detail: item.name, date: item.createdAt, icon: Users, href: '/admin/users',
+      })),
+      ...recentBooks.map((item) => ({
+        id: `book-${item._id}`, type: 'book' as const, title: 'Sách mới được thêm',
+        detail: item.title, date: item.createdAt, icon: BookOpen, href: '/admin/books',
+      })),
+      ...recentReports.map((item) => ({
+        id: `report-${item._id ?? item.id}`, type: 'report' as const, title: 'Báo cáo cần xử lý',
+        detail: item.subject || item.email, date: item.createdAt, icon: FileText, href: '/admin/reports',
+      })),
+      ...recentSubscriptions.map((item) => ({
+        id: `subscription-${item._id ?? item.id}`, type: 'subscription' as const, title: 'Yêu cầu thuê bao',
+        detail: item.plan === 'vip_monthly' ? 'Gói VIP tháng' : 'Gói Premium tháng',
+        date: item.createdAt, icon: CreditCard, href: '/admin/subscriptions',
+      })),
+    ];
+    return activities
+      .filter((item) => item.date && !Number.isNaN(new Date(item.date).getTime()))
+      .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
+      .slice(0, 5);
+  }, [recentBooks, recentUsers, recentReports, recentSubscriptions]);
+
+  const readingActivity = summary?.readingActivity ?? [];
+  const maxReads = Math.max(1, ...readingActivity.map((item) => item.count));
+  const totalReads = summary?.readingActivityTotal ?? 0;
 
   const statusBadge = (status: string) => {
     if (status === 'published') return 'border-[#C3E5D0] bg-[#EAFAF0] text-[#24795C]';
@@ -184,19 +221,19 @@ export function AdminDashboard() {
       </div>
 
       {/* ═══ TWO-COLUMN DASHBOARD GRID ═══ */}
-      <div className="grid grid-cols-[minmax(0,1fr)_292px] gap-4 items-start">
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_292px]">
         {/* ──── LEFT / MAIN COLUMN ──── */}
         <div className="min-w-0 space-y-4">
           {/* ── 4 Stat Cards ── */}
-          <div className="grid grid-cols-4 gap-3">
-            {stats.map(({ label, value, icon: Icon, color }) => (
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            {stats.map(({ label, value, icon: Icon, color, href }) => (
               <div
                 key={label}
                 className="relative rounded-xl border border-[#DDE9E6] bg-white p-5 shadow-[0_2px_8px_rgba(31,78,59,0.04)]"
               >
-                <button className="absolute right-3 top-3 text-[#97A8B8] hover:text-[#526B86]" type="button">
+                <Link aria-label={`Mở mục ${label.toLowerCase()}`} className="absolute right-3 top-3 text-[#97A8B8] hover:text-[#526B86]" to={href}>
                   <MoreVertical size={16} />
-                </button>
+                </Link>
                 <span
                   className="mb-4 grid h-[50px] w-[50px] place-items-center rounded-full"
                   style={{ backgroundColor: color + '18', color }}
@@ -212,8 +249,8 @@ export function AdminDashboard() {
           </div>
 
           {/* ── 2 Charts ── */}
-          <div className="grid grid-cols-[1.34fr_1fr] gap-3">
-            {/* Reading Activity (placeholder bar chart) */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.34fr_1fr]">
+            {/* Reading activity returned by the MongoDB-backed admin dashboard endpoint. */}
             <div className="rounded-xl border border-[#DDE9E6] bg-white p-5 shadow-[0_2px_8px_rgba(31,78,59,0.04)]">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -223,39 +260,50 @@ export function AdminDashboard() {
                   <h3 className="text-[14px] font-semibold text-[#153D31]">Thống kê lượt đọc</h3>
                 </div>
                 <div className="flex gap-1">
-                  <button className="rounded-lg bg-[#24795C] px-3 py-1 text-[11px] font-medium text-white" type="button">7 ngày</button>
-                  <button className="rounded-lg border border-[#DDE9E6] px-3 py-1 text-[11px] font-medium text-[#526B86]" type="button">30 ngày</button>
-                  <button className="rounded-lg border border-[#DDE9E6] px-3 py-1 text-[11px] font-medium text-[#526B86]" type="button">Tháng</button>
+                  {([7, 30, 90] as const).map((days) => (
+                    <button
+                      key={days}
+                      aria-pressed={period === days}
+                      className={`rounded-lg px-3 py-1 text-[11px] font-medium transition-colors ${period === days ? 'bg-[#24795C] text-white' : 'border border-[#DDE9E6] text-[#526B86] hover:bg-[#F8FBF9]'}`}
+                      onClick={() => setPeriod(days)}
+                      type="button"
+                    >{days === 90 ? '90 ngày' : `${days} ngày`}</button>
+                  ))}
                 </div>
               </div>
-              {/* Simple CSS bar chart (no extra dependency) */}
-              <div className="flex h-[180px] items-end gap-[18px] border-b border-[#EEF3F0] pt-2">
-                {[65, 45, 80, 55, 70, 40, 90].map((h, i) => (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                    <div
-                      className="w-full rounded-t-[4px] transition-all"
-                      style={{
-                        height: `${h}%`,
-                        backgroundColor: i === 6 ? '#24795C' : '#A8DCBE',
-                      }}
-                    />
-                  </div>
+              <div className="mb-2 flex items-center justify-between text-[11px] text-[#526B86]">
+                <span>{totalReads.toLocaleString('vi-VN')} lượt mở trong {period} ngày</span>
+                <span>Đọc chương / mở tệp</span>
+              </div>
+              <div className="flex h-[160px] items-end gap-1 border-b border-[#EEF3F0] pt-2 sm:gap-1.5">
+                {readingActivity.map((item, index) => {
+                  const height = item.count > 0 ? Math.max(5, (item.count / maxReads) * 100) : 0;
+                  const isLatest = index === readingActivity.length - 1;
+                  return (
+                    <div key={item.date} className="flex h-full min-w-0 flex-1 items-end" title={`${item.date}: ${item.count} lượt đọc`}>
+                      <div
+                        className="w-full rounded-t-[3px] transition-[height] duration-200"
+                        style={{ height: `${height}%`, backgroundColor: isLatest ? '#24795C' : '#A8DCBE' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex justify-between text-[10px] text-[#526B86]">
+                {readingActivity.filter((_, index) => {
+                  if (period === 7) return true;
+                  const step = period === 30 ? 5 : 15;
+                  return index % step === 0 || index === readingActivity.length - 1;
+                }).map((item) => (
+                  <span key={item.date}>{new Date(`${item.date}T12:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}</span>
                 ))}
               </div>
-              <div className="mt-2 flex gap-[18px] text-[11px] text-[#526B86]">
-                {(() => {
-                  const labels: string[] = [];
-                  for (let d = 6; d >= 0; d--) {
-                    const dt = new Date(now);
-                    dt.setDate(dt.getDate() - d);
-                    labels.push(`${dt.getDate()}/${dt.getMonth() + 1}`);
-                  }
-                  return labels.map((l) => <span key={l} className="flex-1 text-center">{l}</span>);
-                })()}
-              </div>
+              {summary && totalReads === 0 && (
+                <p className="mt-3 text-center text-[11px] text-[#97A8B8]">Chưa có sự kiện đọc được ghi nhận trong giai đoạn này.</p>
+              )}
             </div>
 
-            {/* Genre Distribution (donut placeholder) */}
+            {/* Genre distribution aggregated across the full book collection. */}
             <div className="rounded-xl border border-[#DDE9E6] bg-white p-5 shadow-[0_2px_8px_rgba(31,78,59,0.04)]">
               <h3 className="mb-4 text-[14px] font-semibold text-[#153D31]">Thể loại sách</h3>
               <div className="flex items-center gap-4">
@@ -263,17 +311,16 @@ export function AdminDashboard() {
                 <div className="relative h-[140px] w-[140px] shrink-0">
                   <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
                     {(() => {
-                      const colors = ['#24795C', '#5DAEFF', '#8B5CF6', '#F59E0B'];
                       let offset = 0;
                       const total = genreDist.reduce((s, g) => s + g.count, 0) || 1;
-                      return genreDist.map((g, i) => {
+                      return genreDist.map((g) => {
                         const pct = (g.count / total) * 100;
                         const el = (
                           <circle
                             key={g.category}
                             cx="18" cy="18" r="15.9155"
                             fill="transparent"
-                            stroke={colors[i % colors.length]}
+                            stroke={g.color}
                             strokeWidth="3.5"
                             strokeDasharray={`${pct} ${100 - pct}`}
                             strokeDashoffset={`${-offset}`}
@@ -353,9 +400,9 @@ export function AdminDashboard() {
                         <td className="px-3 py-3">
                           <span
                             className="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                            style={{ backgroundColor: (categoryColor[book.category] || '#24795C') + '18', color: categoryColor[book.category] || '#24795C' }}
+                            style={{ backgroundColor: (categoryColor[book.category.toLowerCase()] || '#24795C') + '18', color: categoryColor[book.category.toLowerCase()] || '#24795C' }}
                           >
-                            {categoryLabel[book.category] || book.category}
+                            {categoryLabel[book.category.toLowerCase()] || book.category.replaceAll('_', ' ')}
                           </span>
                         </td>
                         <td className="px-3 py-3">
@@ -367,9 +414,9 @@ export function AdminDashboard() {
                           {new Date(book.createdAt).toLocaleDateString('vi-VN')}
                         </td>
                         <td className="px-3 py-3">
-                          <button className="text-[#97A8B8] hover:text-[#526B86]" type="button">
+                          <Link aria-label={`Chỉnh sửa ${book.title}`} className="text-[#97A8B8] hover:text-[#526B86]" to={`/admin/books?edit=${encodeURIComponent(book._id)}`}>
                             <MoreVertical size={16} />
-                          </button>
+                          </Link>
                         </td>
                       </tr>
                     ))}
@@ -544,31 +591,36 @@ export function AdminDashboard() {
               </Link>
             </div>
             <div className="divide-y divide-[#EEF3F0]">
-              {recentUsers.length > 0 ? recentUsers.slice(0, 5).map((u, i) => (
-                <div key={u._id ?? u.id ?? i} className="flex items-start gap-3 px-5 py-3">
-                  <span className="mt-0.5 grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full bg-[#E3F4EB] text-[#24795C]">
-                    <Users size={16} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-medium text-[#153D31]">Người dùng mới đăng ký</p>
-                    <p className="text-[11px] text-[#526B86]">{u.name}</p>
-                  </div>
-                  <span className="shrink-0 text-[10px] text-[#97A8B8]">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString('vi-VN') : ''}
-                  </span>
-                </div>
-              )) : (
-                <p className="px-5 py-6 text-[12px] text-[#526B86]">Chưa có hoạt động.</p>
+              {recentActivity.length > 0 ? recentActivity.map((activity) => {
+                const ActivityIcon = activity.icon;
+                return (
+                  <Link key={activity.id} to={activity.href} className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-[#F8FBF9]">
+                    <span className="mt-0.5 grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full bg-[#E3F4EB] text-[#24795C]">
+                      <ActivityIcon size={16} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[12px] font-medium text-[#153D31]">{activity.title}</span>
+                      <span className="block truncate text-[11px] text-[#526B86]">{activity.detail}</span>
+                    </span>
+                    <span className="shrink-0 text-[10px] text-[#97A8B8]">
+                      {new Date(activity.date!).toLocaleDateString('vi-VN')}
+                    </span>
+                  </Link>
+                );
+              }) : (
+                <p className="px-5 py-6 text-[12px] text-[#526B86]">Chưa có hoạt động mới.</p>
               )}
             </div>
-            {/* System status */}
+            {/* System status is reported by the authenticated backend endpoint. */}
             <div className="rounded-b-xl bg-[#E3F4EB] px-5 py-3">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#24795C]" />
-                <p className="text-[12px] font-semibold text-[#153D31]">Hệ thống hoạt động ổn định</p>
+                <span className={`h-2 w-2 rounded-full ${summary?.system.api === 'connected' && summary.system.database === 'connected' ? 'bg-[#24795C]' : 'bg-amber-500'}`} />
+                <p className="text-[12px] font-semibold text-[#153D31]">
+                  {summary?.system.api === 'connected' && summary.system.database === 'connected' ? 'API và cơ sở dữ liệu đã kết nối' : 'Chưa xác minh được trạng thái hệ thống'}
+                </p>
               </div>
               <p className="mt-1 text-[11px] text-[#526B86]">
-                API server: Đang kiểm tra · MongoDB: Đang kiểm tra
+                API server: {summary?.system.api === 'connected' ? 'Đã kết nối' : 'Không xác định'} · MongoDB: {summary?.system.database === 'connected' ? 'Đã kết nối' : 'Không xác định'}
               </p>
             </div>
           </div>
