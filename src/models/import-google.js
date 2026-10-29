@@ -56,7 +56,7 @@ async function generateAndUploadPdf(bookTitle, bookAuthor, bookDesc) {
     doc.moveDown();
     doc.text(bookDesc || 'Không có mô tả chi tiết.');
     doc.moveDown(3);
-    doc.fontSize(10).fillColor('blue').text('--- Tài liệu số hóa độc quyền bởi OpenBook Library System ---', { align: 'center' });
+    doc.fontSize(10).fillColor('blue').text('--- Tài liệu số hóa bởi HarveyBook ---', { align: 'center' });
     doc.end();
   });
 }

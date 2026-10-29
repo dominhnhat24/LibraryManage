@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { approveSubscription, rejectSubscription } from '../controllers/subscription.controller.js';
-import { deleteReport, getPendingSubscriptions, getRecentUsers, getReport, getReports, grantVip, updateReportStatus, uploadBookFile } from '../controllers/admin.controller.js';
+import { deleteReport, getPendingSubscriptions, getRecentUsers, getReport, getReports, grantPremium, grantVip, updateReportStatus, uploadBookFile } from '../controllers/admin.controller.js';
 import { getAdminDashboard } from '../controllers/dashboard.controller.js';
 import { listAdminComments } from '../controllers/interaction.controller.js';
 import { createBook, deleteBook, listAdminBooks, updateBook } from '../controllers/book.controller.js';
@@ -12,6 +12,7 @@ import { requireAdmin } from '../middlewares/role.middleware.js';
 import { validateBody, validateParams, validateQuery } from '../middlewares/validation.middleware.js';
 import { modelValidation } from '../validations/model.validation.js';
 import { getAllSubscriptions, getSubscription, updateSubscription, deleteSubscription } from '../controllers/subscription.controller.js';
+import { importBookCandidate, searchBookImportCandidates } from '../controllers/book-import.controller.js';
 
 // [GIỚI HẠN UPLOAD] Đọc vào bộ nhớ với dung lượng tối đa để tránh public temp folder hoặc upload tùy ý.
 const upload = multer({
@@ -47,7 +48,11 @@ router.patch('/subscriptions/:subscriptionId', validateParams(modelValidation.pa
 router.delete('/subscriptions/:subscriptionId', validateParams(modelValidation.params.subscription), deleteSubscription);
 router.patch('/users/:userId/vip', validateParams(modelValidation.params.user),
     validateBody(modelValidation.vipGrant), grantVip);
+router.patch('/users/:userId/premium', validateParams(modelValidation.params.user),
+    validateBody(modelValidation.premiumGrant), grantPremium);
 router.get('/books', validateQuery(modelValidation.book.list), listAdminBooks);
+router.get('/book-import/search', searchBookImportCandidates);
+router.post('/book-import/import', importBookCandidate);
 router.post('/books', upload.single('file'), validateBody(modelValidation.book.create), createBook);
 router.put('/books/:bookId', validateParams(modelValidation.params.book),
     validateBody(modelValidation.book.update), updateBook);

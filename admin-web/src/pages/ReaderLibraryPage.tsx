@@ -1,119 +1,108 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookOpen, Clock3, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { deleteReaderBookmark, errorMessage, fetchReadableChapters, fetchReaderBookmarks, fetchReadingProgress } from '../api/client';
-import type { Bookmark, ReadingProgress } from '../types';
+import { BookOpen, ChevronLeft, ChevronRight, GraduationCap, Grid2X2, List, Search } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { errorMessage, fetchPublicBooks } from '../api/client';
+import type { Book } from '../types';
 import { ReaderShell } from '../components/ReaderShell';
-import "../reader-ui.css";
+import './reader-library.css';
 
-function refId(value: unknown): string { return typeof value === 'string' ? value : (value as { _id?: string; id?: string } | null)?.id || (value as { _id?: string } | null)?._id || ''; }
-type BookValue = {
-  _id?: string;
-  id?: string;
-  title?: string;
-  slug?: string;
-  cover_url?: string;
-};
-
-function bookValue(
-  value: string | BookValue | undefined
-): BookValue | null {
-  if (!value) return null;
-
-  if (typeof value === "string") {
-    return {
-      _id: value,
-      id: value,
-    };
-  }
-
-  return value;
-}
+const PAGE_SIZE = 10;
+const API_PAGE_SIZE = 50;
+const categories: Array<{ key: NonNullable<Book['genre']>; label: string }> = [
+  { key: 'van_hoc_viet_nam', label: 'Văn học Việt Nam' },
+  { key: 'truyen_ngan_viet_nam', label: 'Truyện ngắn' },
+  { key: 'tho_viet_nam', label: 'Thơ Việt Nam' },
+  { key: 'van_hoc_dan_gian', label: 'Văn học dân gian' },
+  { key: 'van_hoc_the_gioi', label: 'Văn học thế giới' },
+  { key: 'kinh_doanh', label: 'Kinh doanh' },
+  { key: 'phat_trien_ban_than', label: 'Phát triển bản thân' },
+  { key: 'tam_ly_hoc', label: 'Tâm lý học' },
+  { key: 'lich_su', label: 'Lịch sử' },
+  { key: 'khoa_hoc', label: 'Khoa học' },
+];
 
 export function ReaderLibraryPage() {
-  const navigate = useNavigate();
-  const [progress, setProgress] = useState<ReadingProgress[]>([]);
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [searchParams] = useSearchParams();
+  const [books, setBooks] = useState<Book[]>([]);
+  const [query, setQuery] = useState(() => searchParams.get('search') || '');
+  const [genreFilter, setGenreFilter] = useState('all');
+  const [pages, setPages] = useState<Record<string, number>>({});
+  const [sort, setSort] = useState('title');
+  const [view, setView] = useState<'grid' | 'list'>('grid');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [chapterTotals, setChapterTotals] = useState<Record<string, number>>({});
-  const [activeTab, setActiveTab] = useState<'reading' | 'done' | 'unread'>('reading');
 
   useEffect(() => {
     let active = true;
-    setLoading(true); setError('');
-    Promise.all([fetchReadingProgress(1, 50), fetchReaderBookmarks(1, 50)])
-      .then(async ([progressResult, bookmarkResult]) => {
-        if (!active) return;
-        setProgress(progressResult.progress); setBookmarks(bookmarkResult.bookmarks);
-        const ids = [...new Set(bookmarkResult.bookmarks.map((item) => refId(item.book)).filter(Boolean))];
-        const totals = await Promise.all(ids.slice(0, 20).map(async (id) => {
-          try { const result = await fetchReadableChapters(id, 1, 1); return [id, result.pagination.total] as const; }
-          catch { return [id, 0] as const; }
-        }));
-        if (active) setChapterTotals(Object.fromEntries(totals));
-      })
-      .catch((err) => { if (active) setError(errorMessage(err)); })
-      .finally(() => { if (active) setLoading(false); });
+    const loadAllBooks = async () => {
+      setLoading(true); setError('');
+      try {
+        const first = await fetchPublicBooks('', undefined, 1, API_PAGE_SIZE);
+        const allBooks = [...first.books];
+        for (let page = 2; page <= first.pagination.totalPages; page += 1) {
+          const result = await fetchPublicBooks('', undefined, page, API_PAGE_SIZE);
+          allBooks.push(...result.books);
+        }
+        if (active) setBooks(allBooks);
+      } catch (loadError) { if (active) setError(errorMessage(loadError)); }
+      finally { if (active) setLoading(false); }
+    };
+    void loadAllBooks();
     return () => { active = false; };
   }, []);
 
-  const rows = useMemo(() => {
-    const byBook = new Map<string, { progress?: ReadingProgress; bookmark?: Bookmark }>();
-    progress.forEach((item) => { const id = refId(item.book); if (id) byBook.set(id, { ...(byBook.get(id) || {}), progress: item }); });
-    bookmarks.forEach((item) => { const id = refId(item.book); if (id) byBook.set(id, { ...(byBook.get(id) || {}), bookmark: item }); });
-    return [...byBook.entries()].map(([id, item]) => ({ id, ...item }));
-  }, [progress, bookmarks]);
+  const normalizedQuery = query.trim().toLocaleLowerCase('vi');
+  const visibleBooks = useMemo(() => books.filter((book) => {
+    if (genreFilter !== 'all' && (book.genre || 'van_hoc_viet_nam') !== genreFilter) return false;
+    if (!normalizedQuery) return true;
+    return `${book.title} ${book.author_name}`.toLocaleLowerCase('vi').includes(normalizedQuery);
+  }).sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title, 'vi') : (b.createdAt || '').localeCompare(a.createdAt || '')),
+  [books, genreFilter, normalizedQuery, sort]);
 
-  const filtered = rows.filter((row) => {
-    if (activeTab === 'reading') return Boolean(row.bookmark || row.progress);
-    if (activeTab === 'done') return Boolean((row.progress?.total_chapter_reads || 0) >= 20);
-    return !row.bookmark && !row.progress;
-  });
+  const sections = categories
+    .filter((category) => genreFilter === 'all' || genreFilter === category.key)
+    .map((category) => ({ ...category, books: visibleBooks.filter((book) => (book.genre || 'van_hoc_viet_nam') === category.key) }))
+    .filter((category) => category.books.length > 0);
+  function changePage(category: string, page: number) { setPages((current) => ({ ...current, [category]: page })); }
 
-  async function removeBookmark(item: Bookmark) {
-    if (!window.confirm('Bỏ sách này khỏi tủ sách của bạn?')) return;
-    try { await deleteReaderBookmark(item._id); setBookmarks((current) => current.filter((bookmark) => bookmark._id !== item._id)); }
-    catch (err) { setError(errorMessage(err)); }
-  }
-
-  return <ReaderShell title="Tủ sách của tôi" subtitle="Quản lý và theo dõi tiến độ đọc sách của bạn.">
-    <div className="ob2-tabs">
-      {([['reading', 'Đang đọc'], ['done', 'Đã đọc'], ['unread', 'Chưa đọc']] as const).map(([value, label]) => <button key={value} type="button" className={activeTab === value ? 'is-active' : ''} onClick={() => setActiveTab(value)}>{label}</button>)}
-    </div>
-    <div className="ob2-two-col">
-      <section>
-        {error && <div className="ob2-error">{error}</div>}
-        {loading ? <div className="ob2-empty">Đang tải tủ sách…</div> : filtered.length ? <div className="ob2-list">{filtered.map((row) => {
-          const book = bookValue(row.bookmark?.book || row.progress?.book);
-          const chapter = typeof row.bookmark?.chapter === 'object' ? row.bookmark.chapter : null;
-          const total = chapterTotals[row.id] || 0;
-          const current = chapter?.chapter_number || 0;
-          const percent = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0;
-          return <article className="ob2-row" key={row.id}>
-            <img className="ob2-row-cover" src={book?.cover_url || '/book-cover-placeholder.svg'} alt="" />
-            <div className="ob2-row-main">
-              <strong>{book?.title || 'Sách'}</strong>
-              <p>{chapter?.chapter_number ? `Chương ${chapter.chapter_number}: ${chapter.title || ''}` : `${row.progress?.total_chapter_reads || 0} lượt đọc chương`}</p>
-              <div className="ob2-progress"><span style={{ width: `${percent}%` }} /></div>
-              <div className="ob2-progress-meta"><span>{percent ? `${percent}%` : 'Đang cập nhật tiến độ'}</span><span>{total ? `${current}/${total} chương` : ''}</span></div>
-            </div>
-            <div className="ob2-row-actions">
-              <Link className="ob2-mini-btn" to={`/books/${encodeURIComponent(row.id)}`}>Tiếp tục đọc</Link>
-              {row.bookmark && <button className="ob2-icon-btn" title="Bỏ lưu" onClick={() => void removeBookmark(row.bookmark!)} type="button"><Trash2 size={14} /></button>}
-            </div>
-          </article>;
-        })}</div> : <div className="ob2-empty"><BookOpen size={22} /><p>Chưa có sách trong mục này.</p><button className="ob2-btn-light" onClick={() => navigate('/')} type="button">Khám phá sách</button></div>}
+  return <ReaderShell hideSearch>
+    <div className="harvey-library">
+      <section className="harvey-library-hero">
+        <div><p className="harvey-eyebrow">HARVEYBOOK · TỦ SÁCH</p><h1>Tủ sách</h1><p>Khám phá những tác phẩm hay, từ văn học Việt Nam đến các câu chuyện vượt thời gian.</p></div>
+        <div className="harvey-library-quote" aria-hidden="true"><div className="harvey-book-illustration"><BookOpen size={70} strokeWidth={1} /><span><i /><i /><i /></span></div><blockquote>“Mỗi cuốn sách là một cánh cửa mở ra một thế giới mới.”<small>— HarveyBook</small></blockquote></div>
       </section>
-      <aside className="ob2-panel">
-        <h2><Clock3 size={15} /> Tổng quan đọc sách</h2>
-        <div className="ob2-stats" style={{ gridTemplateColumns: '1fr' }}>
-          <div className="ob2-stat"><strong>{progress.length}</strong><span>Sách có lịch sử đọc</span></div>
-          <div className="ob2-stat"><strong>{bookmarks.length}</strong><span>Sách/chương đã lưu</span></div>
-          <div className="ob2-stat"><strong>{progress.reduce((sum, item) => sum + item.total_chapter_reads, 0)}</strong><span>Lượt đọc chương</span></div>
+
+      <div className="harvey-library-toolbar">
+        <section className="harvey-category-filter" aria-label="Lọc theo danh mục sách">
+          <div className="harvey-genre-pills">
+            <button className={genreFilter === 'all' ? 'is-active' : ''} onClick={() => { setGenreFilter('all'); setPages({}); }} type="button">Tất cả</button>
+            {categories.map((category) => <button className={genreFilter === category.key ? 'is-active' : ''} key={category.key} onClick={() => { setGenreFilter(category.key); setPages({}); }} type="button">{category.label}</button>)}
+          </div>
+        </section>
+        <div className="harvey-search-area">
+          <section className="harvey-search-controls" aria-label="Tìm kiếm và sắp xếp sách">
+            <label className="harvey-library-search"><Search size={16} /><input aria-label="Tìm sách hoặc tác giả" onChange={(event) => { setQuery(event.target.value); setPages({}); }} placeholder="Tìm tên sách, tác giả..." value={query} /></label>
+            <label className="harvey-sort"><select aria-label="Sắp xếp sách" onChange={(event) => setSort(event.target.value)} value={sort}><option value="title">Tên sách</option><option value="newest">Mới thêm</option></select></label>
+            <div className="harvey-view-toggle"><button aria-label="Xem dạng lưới" className={view === 'grid' ? 'is-active' : ''} onClick={() => setView('grid')} type="button"><Grid2X2 size={16} /></button><button aria-label="Xem dạng danh sách" className={view === 'list' ? 'is-active' : ''} onClick={() => setView('list')} type="button"><List size={16} /></button></div>
+          </section>
         </div>
-        <p>Dữ liệu được lấy trực tiếp từ tài khoản hiện tại và đồng bộ qua API OpenBook.</p>
-      </aside>
+      </div>
+
+      <p className="harvey-library-count">{visibleBooks.length.toLocaleString('vi-VN')} cuốn sách</p>
+      {error && <div className="shelf-message is-error">{error}</div>}
+      {loading ? <div className="shelf-message">Đang tải sách…</div> : sections.length ? sections.map((section) => {
+        const totalPages = Math.ceil(section.books.length / PAGE_SIZE);
+        const page = Math.min(pages[section.key] || 1, totalPages);
+        const pageBooks = section.books.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+        return <section className={`harvey-shelf-section ${view === 'list' ? 'is-list' : ''}`} key={section.key}>
+          <header><div><BookOpen size={18} /><h2>{section.label}</h2><span>{section.books.length} cuốn</span></div><span className="harvey-shelf-page">{totalPages > 1 ? `${page} / ${totalPages}` : ''}</span></header>
+          <div className="harvey-shelf-grid">{pageBooks.map((book) => <Link className="harvey-book-card" key={book._id} to={`/books/${encodeURIComponent(book._id)}`}>
+            <img alt={`Bìa sách ${book.title}`} onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }} src={book.cover_url || '/book-cover-placeholder.svg'} />
+            <span><strong>{book.title}</strong><small>{book.author_name}</small></span>
+          </Link>)}</div>
+          {totalPages > 1 && <nav className="harvey-pagination" aria-label={`Phân trang ${section.label}`}><button disabled={page <= 1} onClick={() => changePage(section.key, page - 1)} type="button"><ChevronLeft size={15} /> Trước</button><span>Trang {page} / {totalPages}</span><button disabled={page >= totalPages} onClick={() => changePage(section.key, page + 1)} type="button">Tiếp <ChevronRight size={15} /></button></nav>}
+        </section>;
+      }) : <div className="shelf-message"><GraduationCap size={23} /><span>Chưa có sách trong thể loại này.</span></div>}
     </div>
   </ReaderShell>;
 }

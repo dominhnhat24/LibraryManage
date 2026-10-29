@@ -7,8 +7,8 @@ import { removePrivateBookFile, savePrivateBookFile } from '../utils/private-boo
 import { mapDtoList, toBookDto } from '../utils/api-dto.js';
 import * as bookService from '../services/book.service.js';
 import XLSX from 'xlsx';
-import { uploadFileToSupabase } from '../services/supabase.service.js';
 import { deleteBooksBulkService } from '../services/book.service.js'
+import { resolveBookReaderMode } from '../utils/book-reader-mode.js';
 
 export const importBooksExcelController = async (req, res, next) => {
   try {
@@ -87,6 +87,13 @@ export const listBooks = asyncHandler(async (req, res) => {
         }
         filters.category = req.query.category;
     }
+    if (req.query.genre) {
+        const genres = ['van_hoc_viet_nam', 'truyen_ngan_viet_nam', 'tho_viet_nam', 'van_hoc_dan_gian', 'van_hoc_the_gioi', 'kinh_doanh', 'phat_trien_ban_than', 'tam_ly_hoc', 'lich_su', 'khoa_hoc'];
+        if (typeof req.query.genre !== 'string' || !genres.includes(req.query.genre)) {
+            throw new ApiError(400, 'Book genre is invalid');
+        }
+        filters.genre = req.query.genre;
+    }
     if (req.query.year) {
         const year = Number(req.query.year);
         if (!Number.isInteger(year) || year < 1 || year > 3000) {
@@ -128,12 +135,22 @@ export const getMyBooks = asyncHandler(async (req, res) => {
 export const getBook = asyncHandler(async (req, res) => {
     const book = await bookService.getBookByIdOrSlug(req.params.bookId);
     if (book.status !== 'published') throw new ApiError(404, 'Book not found');
+    const hasReadableChapters = Boolean(await Chapter.exists({
+        book_id: book._id,
+        content: { $type: 'string', $regex: /\S/ }
+    }));
+    const data = toBookDto(book, {
+        publicView: true,
+        canReadPaid: Boolean(req.authUser?.hasActivePremium())
+    });
+    data.reader_mode = resolveBookReaderMode({
+        file_format: book.file_format,
+        file_key: book.file_key,
+        hasReadableChapters
+    });
     return res.json({
         status: 'success',
-        data: toBookDto(book, {
-            publicView: true,
-            canReadPaid: Boolean(req.authUser?.hasActivePremium())
-        })
+        data
     });
 });
 
@@ -142,10 +159,10 @@ const findAccessibleBook = async (req) => {
     const book = await Book.findOne({ _id: req.params.bookId, status: 'published' })
         .select('+file_key');
     if (!book) throw new ApiError(404, 'Book not found');
-    if (book.access_level === 'vip' && !req.authUser.hasActiveVip()) {
+    if (book.access_level === 'vip' && (!req.authUser || !req.authUser.hasActiveVip())) {
         throw new ApiError(403, 'An active VIP subscription is required to read this book');
     }
-    if (book.access_level === 'premium' && !req.authUser.hasActivePremium()) {
+    if (book.access_level === 'premium' && (!req.authUser || !req.authUser.hasActivePremium())) {
         throw new ApiError(403, 'An active Premium subscription is required to read this book');
     }
     return book;
@@ -162,10 +179,10 @@ export const loadReadableBook = asyncHandler(async (req, res, next) => {
     const book = await findAccessibleBook(req);
     const chapter = await Chapter.findOne({ _id: req.params.chapterId, book_id: book._id });
     if (!chapter) throw new ApiError(404, 'Chapter not found');
-    if (chapter.access_level === 'vip' && !req.authUser.hasActiveVip()) {
+    if (chapter.access_level === 'vip' && (!req.authUser || !req.authUser.hasActiveVip())) {
         throw new ApiError(403, 'An active VIP subscription is required to read this chapter');
     }
-    if (chapter.access_level === 'premium' && !req.authUser.hasActivePremium()) {
+    if (chapter.access_level === 'premium' && (!req.authUser || !req.authUser.hasActivePremium())) {
         throw new ApiError(403, 'An active Premium subscription is required to read this book');
     }
     req.book = book;
@@ -175,35 +192,28 @@ export const loadReadableBook = asyncHandler(async (req, res, next) => {
 
 // Hàm createBook: Tạo metadata sách và PDF private cùng một request, dọn file nếu lưu bản ghi thất bại.
 export const createBook = asyncHandler(async (req, res) => {
-    let fileUrl = '';
-    
-    // Nếu có file PDF được gửi lên từ form (qua Multer memoryStorage)
-    if (req.file) {
-        try {
-            fileUrl = await uploadFileToSupabase(req.file);
-        } catch (uploadError) {
-            throw new ApiError(500, `Không thể tải file lên Cloud: ${uploadError.message}`);
-        }
-    }
-
+    let privateFile = null;
+    if (req.file) privateFile = await savePrivateBookFile(req.file, req.body.category);
     let book;
     try {
-        // GÁN TRỰC TIẾP OWNER VÀO OBJECT TRUYỀN VÀO ĐỂ CHẮC CHẮN KHÔNG BỊ THIẾU
-        book = await bookService.createBook(
-            { 
-                ...req.body, 
-                file_url: fileUrl, // Lưu link public của Supabase vào schema
-                owner: req.authUser._id 
-            }, 
-            req.authUser._id
-        );
+        book = await bookService.createBook({
+            ...req.body,
+            owner: req.authUser._id,
+            ...(privateFile ? {
+                file_key: privateFile.file_key,
+                file_original_name: privateFile.original_name,
+                file_size: req.file.size,
+                file_format: req.file.originalname.split('.').pop()?.toUpperCase() || null
+            } : {})
+        });
     } catch (error) {
+        if (privateFile?.file_key) await removePrivateBookFile(privateFile.file_key);
         throw error;
     }
 
     return res.status(201).json({ 
         status: 'success', 
-        message: 'Tạo sách và upload lên Supabase thành công!',
+        message: 'Book created successfully',
         data: toBookDto(book) 
     });
 });
@@ -216,10 +226,10 @@ export const updateBook = asyncHandler(async (req, res) => {
 
 // [XÓA SÁCH] Xóa record sách; tệp lưu riêng được quản lý bởi tuyến upload, không public trực tiếp.
 export const deleteBook = asyncHandler(async (req, res) => {
-    const book = await Book.findById(req.params.bookId).select('+file_key');
+    const book = await Book.findById(req.params.bookId).select('+file_key +cover_file_key');
     if (!book) throw new ApiError(404, 'Book not found');
     await bookService.deleteBook(req.params.bookId);
-    await removePrivateBookFile(book.file_key);
+    await Promise.all([removePrivateBookFile(book.file_key), removePrivateBookFile(book.cover_file_key)]);
     return res.json({ status: 'success', message: 'Book deleted successfully' });
 });
 

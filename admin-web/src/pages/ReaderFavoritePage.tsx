@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Heart, Search, Trash2 } from 'lucide-react';
+import { Bookmark as BookmarkIcon, Search, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { deleteReaderBookmark, errorMessage, fetchReaderBookmarks } from '../api/client';
 import type { Bookmark } from '../types';
@@ -42,9 +42,9 @@ export function ReaderFavoritesPage() {
     <div className="ob2-toolbar"><div className="ob2-search" style={{ maxWidth: 360 }}><Search size={15} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tìm trong sách yêu thích..." /></div><select className="ob2-sort" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}><option value="newest">Mới nhất</option><option value="title">Tên sách</option></select></div>
     {error && <div className="ob2-error">{error}</div>}
     {loading ? <div className="ob2-empty">Đang tải sách yêu thích…</div> : books.length ? <div className="ob2-book-grid">{books.map((item) => { const book = asObject(item.book); const id = refId(item.book); return <article className="ob2-book-card" key={item._id} style={{ position: 'relative' }}>
-      <button className="ob2-icon-btn" style={{ position: 'absolute', right: 10, top: 10, zIndex: 2, color: '#d16b76' }} onClick={() => void remove(item)} title="Bỏ yêu thích" type="button"><Heart size={14} fill="currentColor" /></button>
+      <button className="ob2-icon-btn" style={{ position: 'absolute', right: 10, top: 10, zIndex: 2, color: '#d0a82f' }} onClick={() => void remove(item)} title="Bỏ lưu" type="button"><BookmarkIcon size={14} fill="currentColor" /></button>
       <Link to={`/books/${encodeURIComponent(id)}`}><img className="ob2-cover" src={book?.cover_url || '/book-cover-placeholder.svg'} alt={`Bìa sách ${book?.title || 'sách'}`} /><strong className="ob2-book-title">{book?.title || 'Sách'}</strong><span className="ob2-book-author">{book?.author_name || 'Đang cập nhật tác giả'}</span><span className="ob2-badge">Đã lưu</span></Link>
       <button className="ob2-remove-text" onClick={() => void remove(item)} type="button"><Trash2 size={12}/> Bỏ lưu</button>
-    </article>; })}</div> : <div className="ob2-empty"><Heart size={24}/><p>Chưa có sách yêu thích. Mở một cuốn sách và lưu chương để thêm vào đây.</p><Link className="ob2-btn-primary" to="/">Khám phá sách</Link></div>}
+    </article>; })}</div> : <div className="ob2-empty"><BookmarkIcon size={24}/><p>Chưa có sách yêu thích. Mở một cuốn sách và lưu để thêm vào đây.</p><Link className="ob2-btn-primary" to="/">Khám phá sách</Link></div>}
   </ReaderShell>;
 }

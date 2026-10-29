@@ -22,5 +22,9 @@ subscriptionSchema.index({ user: 1 }, {
     unique: true,
     partialFilterExpression: { status: 'pending' }
 });
+subscriptionSchema.index({ gateway: 1, transaction_id: 1 }, {
+    unique: true,
+    partialFilterExpression: { transaction_id: { $type: 'string' } }
+});
 
 export default mongoose.models.Subscription || mongoose.model('Subscription', subscriptionSchema);

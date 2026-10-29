@@ -6,12 +6,10 @@ import { asyncHandler } from '../utils/async-handler.js';
 
 // Hàm verifyToken: Đọc Bearer access token, xác minh chữ ký/mục đích token và nạp tài khoản hiện hành từ MongoDB.
 export const verifyToken = asyncHandler(async (req, res, next) => {
-
     const match = /^Bearer\s+(\S+)$/i.exec(req.get('authorization') || '');
     if (!match) throw new ApiError(401, 'A valid Bearer access token is required');
 
     let claims;
-
     try {
         claims = jwt.verify(match[1], process.env.JWT_SECRET);
     } catch (error) {
@@ -20,13 +18,10 @@ export const verifyToken = asyncHandler(async (req, res, next) => {
         }
         throw error;
     }
-
-    /*console.log("CLAIMS GIẢI MÃ ĐƯỢC:", claims);
-
     if (!claims || typeof claims !== 'object' || claims.token_use !== 'access'
         || typeof claims.sub !== 'string' || !['ADMIN', 'USER'].includes(claims.role)) {
         throw new ApiError(401, 'Access token is invalid');
-    }*/
+    }
     const user = await User.findById(claims.sub);
     if (!user) throw new ApiError(401, 'Account no longer exists');
     if (claims.role !== user.role) throw new ApiError(401, 'Access token role is no longer current');

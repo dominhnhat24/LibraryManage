@@ -9,6 +9,18 @@ const categories: Record<Book['category'], string> = {
   comic: 'Truyện tranh',
   webnovel: 'Web novel',
 };
+const genres: Record<NonNullable<Book['genre']>, string> = {
+  van_hoc_viet_nam: 'Văn học Việt Nam',
+  truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
+  tho_viet_nam: 'Thơ Việt Nam',
+  van_hoc_dan_gian: 'Văn học dân gian',
+  van_hoc_the_gioi: 'Văn học thế giới',
+  kinh_doanh: 'Kinh doanh',
+  phat_trien_ban_than: 'Phát triển bản thân',
+  tam_ly_hoc: 'Tâm lý học',
+  lich_su: 'Lịch sử',
+  khoa_hoc: 'Khoa học',
+};
 
 const accessNames: Record<Book['access_level'], string> = {
   free: 'Miễn phí',
@@ -168,7 +180,8 @@ const handleBulkDelete = async () => {
             />
           </th>
               <th className="px-6 py-3.5">Đầu sách</th>
-              <th className="px-4 py-3.5">Thể loại</th>
+              <th className="px-4 py-3.5">Thể loại nội dung</th>
+              <th className="px-4 py-3.5">Định dạng</th>
               <th className="px-4 py-3.5">Giá / gói</th>
               <th className="px-4 py-3.5">Trạng thái</th>
               <th className="px-4 py-3.5">Năm</th>
@@ -202,6 +215,11 @@ const handleBulkDelete = async () => {
                         <p className="mt-1 truncate font-mono text-[10px] text-slate-400">{book.slug || book._id}</p>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="inline-flex border border-[#DDE9E6] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                      {genres[book.genre || 'van_hoc_viet_nam']}
+                    </span>
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="inline-flex border border-[#DDE9E6] bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">

@@ -31,7 +31,7 @@ async function seed() {
       category: 'ebook',
       publication_year: 1988,
       description: 'Mọi thứ bạn cần đều ở ngay bên trong bạn. Hãy đi theo những dấu hiệu của vũ trụ để tìm thấy kho báu đích thực của cuộc đời mình.',
-      cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -43,7 +43,7 @@ async function seed() {
       category: 'webnovel',
       publication_year: 1936,
       description: 'Nghệ thuật thu phục lòng người và đạt được thành công trong cuộc sống cũng như giao tiếp thường nhật.',
-      cover_url: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -55,7 +55,7 @@ async function seed() {
       category: 'Science',
       publication_year: 2011,
       description: 'Hành trình tiến hóa và phát triển đầy kinh ngạc của loài người từ thuở hồng hoang cho đến thời đại hiện đại.',
-      cover_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -67,7 +67,7 @@ async function seed() {
       category: 'webnovel',
       publication_year: 2018,
       description: 'Những thay đổi tí hon mang lại kết quả phi thường. Phương pháp khoa học xây dựng thói quen tốt và từ bỏ thói quen xấu.',
-      cover_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -79,7 +79,7 @@ async function seed() {
       category: 'webnovel',
       publication_year: 2016,
       description: 'Làm việc chuyên sâu - Quy tắc để tập trung cao độ và gặt hái thành công vượt trội trong một thế giới đầy xao nhãng.',
-      cover_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -91,7 +91,7 @@ async function seed() {
       category: 'Science',
       publication_year: 2011,
       description: 'Khám phá hai hệ thống thúc đẩy cách chúng ta suy nghĩ và đưa ra các quyết định quan trọng trong cuộc đời.',
-      cover_url: 'https://images.unsplash.com/photo-1532012164546-f432f2e37b73?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -103,7 +103,7 @@ async function seed() {
       category: 'ebook',
       publication_year: 1886,
       description: 'Tác phẩm văn học kinh điển của thiếu nhi Ý ghi lại nhật ký về tình thầy trò, tình bè bạn và tình yêu thương con người.',
-      cover_url: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -115,7 +115,7 @@ async function seed() {
       category: 'ebook',
       publication_year: 1998,
       description: 'Nghệ thuật sống an vui, bình thản và tìm thấy hạnh phúc chân thực giữa những thăng trầm của đời sống.',
-      cover_url: 'https://images.unsplash.com/photo-1495640388908-05fa85288e61?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -127,7 +127,7 @@ async function seed() {
       category: 'comic',
       publication_year: 1965,
       description: 'Kiệt tác khoa học viễn tưởng vĩ đại bậc nhất mọi thời đại về cuộc chiến sinh tồn trên hành tinh cát Arrakis.',
-      cover_url: 'https://images.unsplash.com/photo-1506466010722-395aa2bef877?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
@@ -139,10 +139,46 @@ async function seed() {
       category: 'ebook',
       publication_year: 2005,
       description: 'Câu chuyện cảm động về tinh thần vượt khó và khao khát học tập của mười đứa trẻ trên hòn đảo nghèo Belitong.',
-      cover_url: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=600',
+      cover_url: '',
       access_level: 'free',
       status: 'published',
       owner: adminUser._id,
+    },
+    {
+      title: 'Đọc vị bất kỳ ai', slug: 'doc-vi-bat-ky-ai', author_name: 'David J. Lieberman', category: 'ebook',
+      genre: 'tam_ly_hoc', publication_year: 2007,
+      description: 'Sách phổ biến kiến thức về giao tiếp và cách nhận biết tín hiệu trong tương tác giữa người với người.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
+    },
+    {
+      title: 'Đọc vị khách hàng', slug: 'doc-vi-khach-hang', author_name: 'Michael Wilkinson', category: 'ebook',
+      genre: 'kinh_doanh',
+      description: 'Giới thiệu các phong cách giao tiếp và cách điều chỉnh tư vấn bán hàng theo nhu cầu khách hàng.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
+    },
+    {
+      title: 'Hẹn bạn trên đỉnh thành công', slug: 'hen-ban-tren-dinh-thanh-cong', author_name: 'Zig Ziglar', category: 'ebook',
+      genre: 'phat_trien_ban_than', publication_year: 1998,
+      description: 'Tác phẩm truyền cảm hứng về mục tiêu, thái độ tích cực và phát triển năng lực cá nhân.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
+    },
+    {
+      title: 'Trump: Think Big and Kick Ass', slug: 'trump-think-big-and-kick-ass', author_name: 'Donald J. Trump, Bill Zanker', category: 'ebook',
+      genre: 'kinh_doanh', publication_year: 2007,
+      description: 'Donald Trump chia sẻ quan điểm về kinh doanh, đàm phán và theo đuổi mục tiêu lớn.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
+    },
+    {
+      title: 'Differentiate or Die', slug: 'differentiate-or-die', author_name: 'Jack Trout, Steve Rivkin', category: 'ebook',
+      genre: 'kinh_doanh', publication_year: 2000,
+      description: 'Sách về định vị thương hiệu và tạo khác biệt trong thị trường cạnh tranh.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
+    },
+    {
+      title: 'Tuổi trẻ đáng giá bao nhiêu', slug: 'tuoi-tre-dang-gia-bao-nhieu', author_name: 'Rosie Nguyễn', category: 'ebook',
+      genre: 'phat_trien_ban_than', publication_year: 2016,
+      description: 'Những chia sẻ về học tập, trải nghiệm và định hướng phát triển bản thân của người trẻ.',
+      cover_url: '', access_level: 'free', status: 'published', owner: adminUser._id,
     }
   ];
 
@@ -155,7 +191,8 @@ async function seed() {
     } else {
       existing.title = b.title;
       existing.author_name = b.author_name;
-      existing.cover_url = b.cover_url;
+      existing.genre = b.genre || existing.genre;
+      if (b.cover_url) existing.cover_url = b.cover_url;
       existing.description = b.description;
       await existing.save();
       console.log('Updated book:', existing.title);

@@ -130,17 +130,15 @@ export function AdminDashboard() {
   ];
 
   const categoryLabel: Record<string, string> = {
-    ebook: 'E-book', audiobook: 'Sách nói', comic: 'Truyện tranh', webnovel: 'Web novel',
-    science: 'Khoa học', programming: 'Lập trình', database: 'Cơ sở dữ liệu',
-    backend: 'Backend', frontend: 'Frontend', mobile: 'Mobile',
-    software_engineering: 'Kỹ nghệ phần mềm', computer_science: 'Khoa học máy tính',
-    technology: 'Công nghệ', other: 'Khác',
+    van_hoc_viet_nam: 'Văn học Việt Nam', truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
+    tho_viet_nam: 'Thơ Việt Nam', van_hoc_dan_gian: 'Văn học dân gian', van_hoc_the_gioi: 'Văn học thế giới',
+    kinh_doanh: 'Kinh doanh', phat_trien_ban_than: 'Phát triển bản thân', tam_ly_hoc: 'Tâm lý học',
+    lich_su: 'Lịch sử', khoa_hoc: 'Khoa học',
   };
   const categoryColor: Record<string, string> = {
-    ebook: '#24795C', audiobook: '#5DAEFF', comic: '#8B5CF6', webnovel: '#F59E0B',
-    science: '#5DAEFF', programming: '#24795C', database: '#F59E0B', backend: '#8B5CF6',
-    frontend: '#16A6A0', mobile: '#D97706', software_engineering: '#64748B',
-    computer_science: '#DB2777', technology: '#0D9488', other: '#94A3B8',
+    van_hoc_viet_nam: '#24795C', truyen_ngan_viet_nam: '#5DAEFF', tho_viet_nam: '#8B5CF6',
+    van_hoc_dan_gian: '#F59E0B', van_hoc_the_gioi: '#16A6A0', kinh_doanh: '#D97706',
+    phat_trien_ban_than: '#64748B', tam_ly_hoc: '#DB2777', lich_su: '#0D9488', khoa_hoc: '#5DAEFF',
   };
 
   /* Genre counts come from a MongoDB aggregation over all books, not only recent rows. */
@@ -202,8 +200,8 @@ export function AdminDashboard() {
       )}
 
       {/* ─── GREETING + DATE ─── */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-[20px] font-semibold text-[#153D31]">
             Xin chào, {currentUser?.name ?? 'Admin'} 👋
           </h1>
@@ -211,10 +209,10 @@ export function AdminDashboard() {
             Chào mừng bạn quay lại! Dưới đây là tổng quan hoạt động hệ thống.
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[#526B86]">
-          <Calendar size={20} />
+        <div className="flex shrink-0 items-start gap-3 self-start text-[#526B86] sm:self-auto">
+          <Calendar className="mt-0.5 shrink-0" size={20} />
           <div className="text-right">
-            <p className="text-[13px] font-medium text-[#153D31]">{dateStr}</p>
+            <p className="whitespace-nowrap text-[13px] font-medium text-[#153D31]">{dateStr}</p>
             <p className="text-[13px] text-[#526B86]">{timeStr}</p>
           </div>
         </div>

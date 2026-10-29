@@ -59,7 +59,7 @@ export const getAdminDashboard = asyncHandler(async (req, res) => {
         Subscription.countDocuments({ status: 'pending' }),
         Report.countDocuments({ status: 'open' }),
         Book.aggregate([
-            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $group: { _id: '$genre', count: { $sum: 1 } } },
             { $sort: { count: -1, _id: 1 } }
         ]),
         ReadingEvent.aggregate([

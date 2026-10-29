@@ -28,7 +28,7 @@
 - Một số màu sắc và border radius chưa hoàn toàn khớp với thiết kế tham chiếu; cần tinh chỉnh CSS vars.
 
 
-OpenBook là nền tảng đọc nội dung số gồm REST API Node.js/Express 5, MongoDB/Mongoose và ứng dụng Expo trong `library-mobile-app/`. Backend hiện tập trung vào sách số, thuê bao, bình luận, quảng cáo theo lượt đọc và tải sách riêng tư; các nghiệp vụ mượn/trả thủ công, thủ thư và tiền phạt của dự án cũ đã được gỡ khỏi API.
+HarveyBook là nền tảng đọc nội dung số gồm REST API Node.js/Express 5, MongoDB/Mongoose và ứng dụng Expo trong `library-mobile-app/`. Backend hiện tập trung vào sách số, thuê bao, bình luận, quảng cáo theo lượt đọc và tải sách riêng tư; các nghiệp vụ mượn/trả thủ công, thủ thư và tiền phạt của dự án cũ đã được gỡ khỏi API.
 
 ## Công nghệ và chạy local
 
@@ -43,6 +43,21 @@ Copy-Item .env.example .env
 Đặt `MONGODB_URI`, một `JWT_SECRET` ngẫu nhiên dài ít nhất 32 ký tự, cấu hình email nếu cần gửi report và cấu hình `BOOK_STORAGE_DIR`. Kho file mặc định `private-books/` không được phục vụ static và đã bị loại khỏi Git.
 
 Trong production, đặt `RATE_LIMIT_REDIS_URL` (hoặc `REDIS_URL`) để chia sẻ bộ đếm rate limit giữa các instance; server từ chối khởi động production nếu chưa cấu hình Redis. Nếu API đứng sau reverse proxy, đặt `TRUST_PROXY` bằng số hop tin cậy hoặc danh sách IP/CIDR proxy cụ thể, ví dụ `TRUST_PROXY=1` cho đúng một proxy. Không đặt `TRUST_PROXY=true`; cấu hình trust proxy sai có thể khiến địa chỉ IP dùng cho rate limit bị giả mạo. Upload sách đối chiếu phần mở rộng, MIME type và magic bytes trước khi ghi file.
+
+## Docker và Render
+
+`Dockerfile` build frontend React/Vite và backend Node.js vào cùng một image. Trong production, frontend gọi `/api/v1` trên cùng origin; Express phục vụ SPA và endpoint kiểm tra sức khỏe `/health`.
+
+Build và chạy thử image ở máy local:
+
+```powershell
+docker build -t harveybook .
+docker run --rm -p 10000:10000 --env-file .env -e PORT=10000 harveybook
+```
+
+Khi tạo Render Web Service, chọn triển khai bằng Docker từ repository này và đặt Health Check Path là `/health`. Khai báo các biến môi trường production trên Render: `MONGODB_URI`, `JWT_SECRET`, `RATE_LIMIT_REDIS_URL` (hoặc `REDIS_URL`), `TRUST_PROXY=1`, cùng các biến email/Supabase nếu ứng dụng đang dùng. Render cấp URL HTTPS `onrender.com`; có thể thêm domain riêng sau khi service đã chạy rồi mới khai báo URL webhook SePay.
+
+Lưu ý: sách và ảnh đại diện hiện lưu trong `BOOK_STORAGE_DIR` và `AVATAR_STORAGE_DIR` trên filesystem. Filesystem container không phải kho lưu trữ bền vững; trước khi nhận upload trên production, cần gắn persistent disk vào Render và đặt cả hai biến này vào thư mục được mount (ví dụ `/var/data/private-books` và `/var/data/private-avatars`), hoặc chuyển các file đó sang object storage. MongoDB và Redis cần là dịch vụ ngoài container để dữ liệu/rate limit tồn tại khi deploy lại.
 
 Tạo admin đầu tiên bằng các biến `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` (ít nhất 12 ký tự); có thể truyền `ADMIN_PHONE` để lưu số điện thoại, sau đó chạy:
 
@@ -85,8 +100,8 @@ Role quản trị chỉ có `USER` và `ADMIN`. Free/Premium/VIP là trạng th�
 | Role / entitlement | Quyền đọc | Quảng cáo khi đọc | Tải offline |
 | --- | --- | --- | --- |
 | `USER`, không có gói còn hạn (Free) | Nội dung `free` | Có thể xuất hiện theo chu kỳ lượt đọc | Không |
-| `USER`, Premium còn hạn | Nội dung `free` và `premium` | Không | Không |
-| `USER`, VIP còn hạn | Nội dung `free`, `premium` và `vip` | Không | Có |
+| `USER`, VIP còn hạn | Nội dung `free` và `vip` | Không | Không |
+| `USER`, Premium còn hạn | Nội dung `free`, `premium` và `vip` | Không | Có |
 | `ADMIN` | Quản trị API và đọc nội dung | Không | Có |
 
 Yêu cầu thuê bao tháng được tạo qua API và chỉ có hiệu lực sau khi ADMIN đối soát/duyệt. Model hiện chấp nhận `premium_monthly` và `vip_monthly`; phí lưu theo bản ghi thuê bao (mặc định 20.000 VND/tháng).
@@ -112,7 +127,7 @@ Tất cả URL bên dưới dùng tiền tố `/api/v1`. API yêu cầu đăng n
 | `GET` | `/books/:bookId/comments`, `POST` cùng URL | Đọc công khai; tạo bình luận/đánh giá cần đăng nhập |
 | `PATCH`, `DELETE` | `/comments/:commentId` | Chủ bình luận hoặc admin |
 | `POST`, `GET` | `/subscriptions`, `/subscriptions/me` | Gửi yêu cầu thuê bao/chuyển khoản và xem yêu cầu mới nhất |
-| `GET` | `/downloads/:bookId` | Chỉ VIP còn hạn/admin; tải file từ kho private |
+| `GET` | `/downloads/:bookId` | Chỉ Premium còn hạn/admin; tải file từ kho private |
 | `POST`, `PUT`, `DELETE` | `/admin/books`, `/admin/books/:bookId` | Chỉ admin; tạo sách nhận JSON hoặc multipart `FormData` (metadata và PDF field `file` trong một request, tối đa 100 MiB), cập nhật/xóa sách |
 | `POST` | `/admin/books/:bookId/file` | Admin; multipart field `file`, tối đa 100 MiB |
 | `DELETE` | `/admin/users/:userId` | Admin; xóa user cùng bookmark, tiến độ, bình luận, báo cáo, thuê bao, sách/chương sở hữu và file sách private |

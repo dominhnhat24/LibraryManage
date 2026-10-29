@@ -1,6 +1,7 @@
 // [KIỂM THỬ API] Kiểm tra hợp đồng không cần MongoDB cho health check, xác thực và gỡ API thư viện cũ.
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
+import jwt from 'jsonwebtoken';
 
 // [KHỞI TẠO ỨNG DỤNG] Đặt secret trước khi nạp server; import app không mở kết nối MongoDB.
 process.env.JWT_SECRET = 'openbook-test-secret-with-more-than-32-characters';
@@ -49,25 +50,6 @@ test('auth endpoints validate missing fields with a stable error envelope', asyn
         method: 'POST', body: JSON.stringify({})
     });
 
-    // [BODY REQUEST] Request body bị thiếu hoặc JSON hỏng không được biến thành lỗi 500.
-    test('missing or malformed request bodies return client errors', async () => {
-        const empty = await request('/api/v1/auth/login', { method: 'POST' });
-        assert.equal(empty.response.status, 400);
-
-        const malformed = await fetch(`${baseUrl}/api/v1/auth/register`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: '{"name":'
-        });
-        assert.equal(malformed.status, 400);
-    });
-
-    // [VALIDATION TÌM KIẾM] Danh mục không thuộc catalog được từ chối trước khi truy cập cơ sở dữ liệu.
-    test('book search rejects unsupported content categories', async () => {
-        const { response, body } = await request('/api/v1/books?category=physical');
-        assert.equal(response.status, 400);
-        assert.equal(body.status, 'error');
-    });
     assert.equal(register.response.status, 400);
     assert.equal(register.body.message, 'Request validation failed');
     assert.ok(register.body.violations.some(({ field }) => field === 'password'));
@@ -83,6 +65,26 @@ test('auth endpoints validate missing fields with a stable error envelope', asyn
     });
     assert.equal(adminLogin.response.status, 400);
     assert.equal(adminLogin.body.status, 'error');
+});
+
+// [BODY REQUEST] Request body thiếu hoặc JSON hỏng phải trả lỗi client, không thành lỗi 500.
+test('missing or malformed request bodies return client errors', async () => {
+    const empty = await request('/api/v1/auth/login', { method: 'POST' });
+    assert.equal(empty.response.status, 400);
+
+    const malformed = await fetch(`${baseUrl}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{"name":'
+    });
+    assert.equal(malformed.status, 400);
+});
+
+// [VALIDATION TÌM KIẾM] Danh mục không thuộc catalog bị từ chối trước khi truy cập cơ sở dữ liệu.
+test('book search rejects unsupported content categories', async () => {
+    const { response, body } = await request('/api/v1/books?category=physical');
+    assert.equal(response.status, 400);
+    assert.equal(body.status, 'error');
 });
 
 // [VALIDATION REFRESH] Request refresh token sai cấu trúc phải bị Joi từ chối trước khi decode JWT.
@@ -133,16 +135,20 @@ test('authentication endpoints are rate limited', async () => {
 });
 
 // [BẢO VỆ API] Tải xuống, đọc chương và quản trị chặn request chưa có access token.
-test('protected reading, download, subscription and admin routes require authentication', async () => {
+test('private downloads, completion, subscription and admin routes require authentication', async () => {
     const paths = [
         ['/api/v1/downloads/507f1f77bcf86cd799439011', 'GET'],
-        ['/api/v1/books/507f1f77bcf86cd799439011/stream', 'GET'],
-        ['/api/v1/books/507f1f77bcf86cd799439011/chapters', 'GET'],
-        ['/api/v1/books/507f1f77bcf86cd799439011/chapters/507f1f77bcf86cd799439012/read', 'POST'],
+        ['/api/v1/books/507f1f77bcf86cd799439011/download', 'GET'],
+        ['/api/v1/books/507f1f77bcf86cd799439011/chapters/507f1f77bcf86cd799439012/complete', 'POST'],
+        ['/api/v1/auth/me', 'PATCH'],
+        ['/api/v1/auth/me/avatar', 'POST'],
+        ['/api/v1/auth/change-password', 'POST'],
         ['/api/v1/subscriptions', 'POST'],
         ['/api/v1/admin/users/recent', 'GET'],
         ['/api/v1/admin/users', 'GET'],
         ['/api/v1/admin/books', 'GET'],
+        ['/api/v1/admin/book-import/search?q=test', 'GET'],
+        ['/api/v1/admin/book-import/import', 'POST'],
         ['/api/v1/admin/chapters', 'GET'],
         ['/api/v1/bookmarks', 'GET'],
         ['/api/v1/reading-progress', 'GET']
@@ -154,6 +160,19 @@ test('protected reading, download, subscription and admin routes require authent
         });
         assert.equal(response.status, 401, `${method} ${path} must require authentication`);
     }
+});
+
+// [RÀNG BUỘC ACCESS TOKEN] Refresh token có chữ ký hợp lệ không được dùng để gọi API quản trị.
+test('admin routes reject a signed refresh token before querying the database', async () => {
+    const refreshToken = jwt.sign({ token_use: 'refresh', role: 'ADMIN' }, process.env.JWT_SECRET, {
+        subject: '507f1f77bcf86cd799439011', expiresIn: '5m'
+    });
+    const { response, body } = await request('/api/v1/admin/users', {
+        headers: { authorization: `Bearer ${refreshToken}` }
+    });
+    assert.equal(response.status, 401);
+    assert.equal(body.status, 'error');
+    assert.equal(body.message, 'Access token is invalid');
 });
 
 // [BẢO VỆ UPLOAD] Xác minh ADMIN được chạy trước Multer để request trái phép không chiếm bộ nhớ upload.

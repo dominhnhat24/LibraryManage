@@ -8,7 +8,7 @@ export const authValidation = Object.freeze({
         name: Joi.string().trim().min(1).max(100),
         full_name: Joi.string().trim().min(1).max(100),
         email,
-        phone_number: Joi.string().trim().max(12).allow('', null),
+        phone_number: Joi.string().trim().pattern(/^\+?[0-9()\s-]{7,12}$/).allow('', null),
         password: Joi.string().min(8).max(128).required()
     }).xor('name', 'full_name'),
     login: Joi.object({
@@ -27,6 +27,14 @@ export const authValidation = Object.freeze({
     }),
     resendVerification: Joi.object({
         email
+    }),
+    updateProfile: Joi.object({
+        name: Joi.string().trim().min(1).max(100),
+        phone_number: Joi.string().trim().max(12).allow('', null)
+    }).min(1),
+    changePassword: Joi.object({
+        current_password: Joi.string().min(1).max(128).required(),
+        new_password: Joi.string().min(8).max(128).required()
     })
 });
 

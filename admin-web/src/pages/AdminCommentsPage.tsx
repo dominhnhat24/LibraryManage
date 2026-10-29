@@ -64,7 +64,7 @@ export function AdminCommentsPage() {
     <AdminLayout>
       <section className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="eyebrow">OpenBook · Kiểm duyệt</p>
+          <p className="eyebrow">HarveyBook · Kiểm duyệt</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#153D31] sm:text-3xl">Quản lý bình luận & đánh giá</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#526B86]">Tìm kiếm và kiểm duyệt phản hồi của độc giả trên toàn bộ thư viện.</p>
         </div>

@@ -7,6 +7,7 @@ import { ROLES } from '../constants/roles.constant.js';
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
+    avatar_url: { type: String, default: null, trim: true, maxlength: 2048 },
     phone_number: { type: String, default: null, trim: true, maxlength: 12 },
     password_hash: { type: String, required: true, select: false },
     role: { type: String, enum: Object.values(ROLES), default: ROLES.USER, required: true },
@@ -19,18 +20,22 @@ const userSchema = new mongoose.Schema({
     premium_expires_at: { type: Date, default: null },
     is_vip: { type: Boolean, default: false, required: true },
     vip_expires_at: { type: Date, default: null },
-    refresh_token_hash: { type: String, default: null, select: false }
+    refresh_token_hash: { type: String, default: null, select: false },
+    password_otp_hash: { type: String, default: null, select: false },
+    password_otp_expires_at: { type: Date, default: null, select: false },
+    password_otp_sent_at: { type: Date, default: null, select: false },
+    password_otp_attempts: { type: Number, default: 0, select: false }
 }, { timestamps: true });
 
 // Hàm hasActivePremium: Kiểm tra quyền Premium còn hạn, bao gồm quyền VIP đang hoạt động và quyền Admin.
 userSchema.methods.hasActivePremium = function hasActivePremium(now = new Date()) {
-    return this.role === ROLES.ADMIN || this.hasActiveVip(now)
+    return this.role === ROLES.ADMIN
         || (this.is_premium && this.premium_expires_at instanceof Date && this.premium_expires_at > now);
 };
 
 // Hàm hasActiveVip: Kiểm tra cờ VIP và ngày hết hạn độc lập với role phân quyền ADMIN/USER.
 userSchema.methods.hasActiveVip = function hasActiveVip(now = new Date()) {
-    return this.role === ROLES.ADMIN || (this.is_vip
+    return this.role === ROLES.ADMIN || this.hasActivePremium(now) || (this.is_vip
         && this.vip_expires_at instanceof Date && this.vip_expires_at > now);
 };
 
@@ -49,10 +54,11 @@ userSchema.methods.toPublicJSON = function toPublicJSON() {
         email: this.email,
         role: this.role,
         is_premium: activePremium,
-        premium_expires_at: activePremium && this.role !== ROLES.ADMIN
-            ? (activeVip ? this.vip_expires_at : this.premium_expires_at) : null,
+        premium_expires_at: activePremium && this.role !== ROLES.ADMIN ? this.premium_expires_at : null,
         is_vip: activeVip,
-        vip_expires_at: activeVip && this.role !== ROLES.ADMIN ? this.vip_expires_at : null
+        vip_expires_at: activeVip && this.role !== ROLES.ADMIN
+            ? (activePremium ? this.premium_expires_at : this.vip_expires_at) : null,
+        avatar_url: this.avatar_url || null
     };
 };
 

@@ -9,8 +9,11 @@ const optionalText = (max) => Joi.string().trim().max(max);
 const trimmedString = () => Joi.string().trim();
 const accessLevel = Joi.string().valid('free', 'premium', 'vip');
 const category = Joi.string().valid('ebook', 'audiobook', 'comic', 'webnovel');
+const genre = Joi.string().valid('van_hoc_viet_nam', 'truyen_ngan_viet_nam', 'tho_viet_nam', 'van_hoc_dan_gian', 'van_hoc_the_gioi', 'kinh_doanh', 'phat_trien_ban_than', 'tam_ly_hoc', 'lich_su', 'khoa_hoc');
 const page = Joi.number().integer().min(1).default(1);
 const limit = Joi.number().integer().min(1).max(50).default(20);
+// Accept the previous reader client's page size; the service still clamps results to MAX_LIMIT (50).
+const readingProgressLimit = Joi.number().integer().min(1).max(100).default(20);
 const search = Joi.string().trim().max(100);
 const paginationQuery = { page, limit };
 
@@ -60,6 +63,7 @@ export const modelValidation = Object.freeze({
             title: Joi.string().trim().max(200),
             author: Joi.string().trim().max(120),
             category,
+            genre,
             status: Joi.string().valid(...Object.values(STATUS.BOOK)),
             year: Joi.number().integer().min(1).max(3000)
         }),
@@ -67,6 +71,7 @@ export const modelValidation = Object.freeze({
             title: optionalText(200).required(),
             author_name: optionalText(120).required(),
             category: category.required(),
+            genre,
             publication_year: Joi.number().integer().min(1).max(3000).allow(null),
             description: optionalText(5000).allow(''),
             cover_url: trimmedString().allow(''),
@@ -77,6 +82,7 @@ export const modelValidation = Object.freeze({
             title: optionalText(200),
             author_name: optionalText(120),
             category,
+            genre,
             publication_year: Joi.number().integer().min(1).max(3000).allow(null),
             description: optionalText(5000).allow(''),
             cover_url: trimmedString().allow(''),
@@ -166,19 +172,20 @@ export const modelValidation = Object.freeze({
         })
     }),
     readingProgress: Object.freeze({
-        list: Joi.object({ ...paginationQuery, book: objectId }),
+        list: Joi.object({ ...paginationQuery, limit: readingProgressLimit, book: objectId, search }),
         create: Joi.object({
             book: objectId.required(),
-            chapters_since_ad: Joi.number().integer().min(0).max(2).default(0),
-            total_chapter_reads: Joi.number().integer().min(0).default(0)
         }),
         update: makeUpdateSchema({
-            chapters_since_ad: Joi.number().integer().min(0).max(2),
-            total_chapter_reads: Joi.number().integer().min(0)
+            chapters_since_ad: Joi.number().valid(0),
+            total_chapter_reads: Joi.number().valid(0)
         })
     }),
     vipGrant: Joi.object({
         vip_expires_at: Joi.date().iso().greater('now').required()
+    }),
+    premiumGrant: Joi.object({
+        premium_expires_at: Joi.date().iso().greater('now').required()
     }),
     userList: Joi.object({
         ...paginationQuery,

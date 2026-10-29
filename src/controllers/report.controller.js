@@ -3,7 +3,7 @@ import ApiError from '../utils/api-error.js';
 import { asyncHandler } from '../utils/async-handler.js';
 import * as reportService from '../services/report.service.js';
 import { toReportDto } from '../utils/api-dto.js';
-import { createSmtpTransport } from '../config/mailer.js';
+import { createSmtpTransport, sendSupportReceipt } from '../config/mailer.js';
 
 // [NHẬN BÁO CÁO] Ghi yêu cầu trước để không mất nội dung; nếu SMTP lỗi sẽ trả lỗi có mã tra cứu.
 export const createReport = asyncHandler(async (req, res) => {
@@ -24,7 +24,8 @@ export const createReport = asyncHandler(async (req, res) => {
     const report = await reportService.createReport(
         { email, subject, message, type }, req.authUser || null
     );
-    if (!process.env.ADMIN_EMAIL) {
+    const supportInbox = process.env.ADMIN_EMAIL || process.env.MAIL_USER || process.env.SMTP_USER;
+    if (!supportInbox) {
         throw new ApiError(503, 'Report was recorded but email delivery is not configured', [
             { field: 'report_id', message: report.id }
         ]);
@@ -42,10 +43,11 @@ export const createReport = asyncHandler(async (req, res) => {
     try {
         await transporter.sendMail({
             from,
-            to: process.env.ADMIN_EMAIL,
+            to: supportInbox,
             replyTo: email,
-            subject: `[OpenBook ${type}] ${subject}`,
-            text: `Report ID: ${report.id}\nFrom: ${email}\n\n${message}`
+            subject: `[HarveyBook ${type}] ${subject}`,
+            text: `Report ID: ${report.id}\nFrom: ${email}\n\n${message}`,
+            html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#29261f"><h2>[HarveyBook ${type}] ${subject.replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[character])}</h2><p><strong>Report ID:</strong> ${report.id}<br><strong>From:</strong> ${email}</p><pre style="white-space:pre-wrap;font:inherit">${message.replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[character])}</pre></div>`
         });
     } catch (error) {
         console.error(`[MAIL] Could not deliver report ${report.id}`, error);
@@ -53,9 +55,17 @@ export const createReport = asyncHandler(async (req, res) => {
             { field: 'report_id', message: report.id }
         ]);
     }
+    let confirmationEmailSent = true;
+    try {
+        await sendSupportReceipt({ email, reportId: report.id, subject, type });
+    } catch {
+        confirmationEmailSent = false;
+    }
     return res.status(201).json({
         status: 'success',
-        message: 'Report was sent to the administrator',
-        data: toReportDto({ id: report.id, status: report.status })
+        message: confirmationEmailSent
+            ? 'Support request received and confirmation email sent'
+            : 'Support request received, but the confirmation email could not be delivered',
+        data: { ...toReportDto({ id: report.id, status: report.status }), confirmation_email_sent: confirmationEmailSent }
     });
 });

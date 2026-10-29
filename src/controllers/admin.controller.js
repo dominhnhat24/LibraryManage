@@ -90,3 +90,8 @@ export const grantVip = asyncHandler(async (req, res) => {
     const user = await userService.grantVipToUser(req.params.userId, req.body.vip_expires_at);
     return res.json({ status: 'success', data: toUserDto(user) });
 });
+
+export const grantPremium = asyncHandler(async (req, res) => {
+    const user = await userService.grantPremiumToUser(req.params.userId, req.body.premium_expires_at);
+    return res.json({ status: 'success', data: toUserDto(user) });
+});

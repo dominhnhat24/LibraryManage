@@ -25,7 +25,7 @@ import mongoose from 'mongoose';
 
     // 2. Lấy danh sách sách có phân trang và lọc
     export const getAllBooks = async (filter, options) => {
-        const { search, category, status, page = 1, limit = 10 } = filter;
+        const { search, category, genre, status, page = 1, limit = 10 } = filter;
         const query = {};
 
         // Tìm kiếm theo từ khóa (tiêu đề sách)
@@ -36,6 +36,10 @@ import mongoose from 'mongoose';
         // Lọc theo thể loại
         if (category) {
             query.category = category;
+        }
+
+        if (genre) {
+            query.genre = genre;
         }
 
         // Lọc theo trạng thái
@@ -76,7 +80,7 @@ import mongoose from 'mongoose';
             query,
             { $inc: { views_count: 1 } },
             { new: true }
-        ).populate('category', 'name slug');
+        ).select('+file_key').populate('category', 'name slug');
 
         if (!book) {
             throw new Error('Không tìm thấy cuốn sách này.');

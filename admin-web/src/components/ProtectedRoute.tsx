@@ -17,7 +17,10 @@ export function ProtectedRoute({ requireAdmin = false }: { requireAdmin?: boolea
     );
   }
 
-  if (!user) return <Navigate to={requireAdmin ? '/admin/login' : '/login'} replace state={{ from: location.pathname }} />;
+  if (!user) {
+    const from = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to={requireAdmin ? '/admin/login' : '/login'} replace state={{ from }} />;
+  }
   if (requireAdmin && user.role !== 'ADMIN') return <Navigate to="/admin/login?forbidden=1" replace />;
   if (!requireAdmin && user.role !== 'USER') return <Navigate to="/admin/dashboard" replace />;
   return <Outlet />;

@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, useSearchParams, Navigate } from 'react-router-dom';
 import { 
-  Library, Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound, 
+  Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound,
   LoaderCircle, ArrowRight 
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
@@ -9,6 +9,21 @@ import {
   errorMessage, requestRegistrationCode, resendRegistrationCode, 
   verifyRegistrationEmail 
 } from '../api/client';
+
+function safeReturnPath(value: unknown, fallback: string, allowedPrefix: '/admin' | '/'): string {
+  if (typeof value !== 'string' || !value) return fallback;
+  try {
+    const destination = new URL(value, window.location.origin);
+    const path = destination.pathname;
+    const allowed = allowedPrefix === '/admin'
+      ? path === '/admin' || path.startsWith('/admin/')
+      : !path.startsWith('/admin');
+    if (destination.origin !== window.location.origin || !allowed || path === '/login' || path === '/register') return fallback;
+    return `${path}${destination.search}${destination.hash}`;
+  } catch {
+    return fallback;
+  }
+}
  
 
 export function LoginPage({ admin = false }: { admin?: boolean }) {
@@ -25,16 +40,35 @@ export function AuthPage({ admin = false }: { admin?: boolean }) {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [isRightPanelActive, setIsRightPanelActive] = useState(false);
+  const [isRightPanelActive, setIsRightPanelActive] = useState(location.pathname === '/register');
+  const authNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setIsRightPanelActive(location.pathname === '/register');
+  }, [location.pathname]);
+
+  useEffect(() => () => {
+    if (authNavigationTimer.current) clearTimeout(authNavigationTimer.current);
+  }, []);
+
+  function switchAuthMode(register: boolean) {
+    setIsRightPanelActive(register);
+    if (authNavigationTimer.current) clearTimeout(authNavigationTimer.current);
+    authNavigationTimer.current = setTimeout(() => {
+      authNavigationTimer.current = null;
+      navigate(register ? '/register' : '/login', { state: location.state });
+    }, 720);
+  }
 
   // ================= 1. LOGIC ĐĂNG NHẬP & VALIDATION =================
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginEmail, setLoginEmail] = useState(searchParams.get('email') ?? '');
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState(
     searchParams.get('forbidden') ? 'Tài khoản này không có quyền quản trị.' : ''
   );
   const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const emailVerified = searchParams.get('verified') === '1';
 
   // Validation lỗi cho ô đăng nhập
   const [loginEmailError, setLoginEmailError] = useState('');
@@ -121,8 +155,8 @@ function SocialAuthButtons() {
     setLoginSubmitting(true);
     try {
       const account = admin
-        ? await loginAdmin(loginEmail.trim(), loginPassword)
-        : await login(loginEmail.trim(), loginPassword);
+        ? await loginAdmin(loginEmail.trim().toLowerCase(), loginPassword)
+        : await login(loginEmail.trim().toLowerCase(), loginPassword);
 
       if (account && account.role !== (admin ? 'ADMIN' : 'USER')) {
         await logout();
@@ -133,8 +167,8 @@ function SocialAuthButtons() {
       }
 
       const target = admin
-        ? ((location.state as { from?: string } | null)?.from || '/admin/dashboard')
-        : ((location.state as { from?: string } | null)?.from || '/');
+        ? safeReturnPath((location.state as { from?: string } | null)?.from, '/admin/dashboard', '/admin')
+        : safeReturnPath((location.state as { from?: string } | null)?.from, '/', '/');
       navigate(target, { replace: true });
     } catch (err: unknown) {
       setLoginError(errorMessage(err) || 'Đăng nhập thất bại.');
@@ -174,8 +208,8 @@ function SocialAuthButtons() {
       isValid = false;
     }
 
-    if (!regPhone.trim()) {
-      setRegPhoneError('Vui lòng nhập Số điện thoại');
+    if (regPhone.trim() && !/^\+?[0-9()\s-]{7,12}$/.test(regPhone.trim())) {
+      setRegPhoneError('Số điện thoại không hợp lệ (7–12 ký tự số)');
       isValid = false;
     }
 
@@ -190,8 +224,8 @@ function SocialAuthButtons() {
     if (!regPassword) {
       setRegPasswordError('Vui lòng nhập Mật khẩu');
       isValid = false;
-    } else if (regPassword.length < 8) {
-      setRegPasswordError('Mật khẩu tối thiểu 8 ký tự');
+    } else if (regPassword.length < 8 || regPassword.length > 128) {
+      setRegPasswordError('Mật khẩu cần từ 8 đến 128 ký tự');
       isValid = false;
     }
 
@@ -206,7 +240,7 @@ function SocialAuthButtons() {
 
     setRegSubmitting(true);
     try {
-      await requestRegistrationCode(regName.trim(), regPhone.trim(), regEmail.trim(), regPassword);
+      await requestRegistrationCode(regName.trim(), regPhone.trim(), regEmail.trim().toLowerCase(), regPassword);
       setStepOtp(true);
     } catch (err: unknown) {
       setRegError(errorMessage(err) || 'Gửi mã xác nhận thất bại.');
@@ -227,7 +261,7 @@ function SocialAuthButtons() {
 
     setRegSubmitting(true);
     try {
-      await verifyRegistrationEmail(regEmail.trim(), otp.trim());
+      await verifyRegistrationEmail(regEmail.trim().toLowerCase(), otp.trim());
       setVerified(true);
       await logout();
     } catch (err: unknown) {
@@ -241,7 +275,7 @@ function SocialAuthButtons() {
     setRegError('');
     setRegSubmitting(true);
     try {
-      await resendRegistrationCode(regEmail.trim());
+      await resendRegistrationCode(regEmail.trim().toLowerCase());
       alert('Đã gửi lại mã OTP!');
     } catch (err: unknown) {
       setRegError(errorMessage(err) || 'Không thể gửi lại OTP.');
@@ -277,11 +311,7 @@ function SocialAuthButtons() {
                   Tài khoản đã sẵn sàng! Vui lòng đăng nhập.
                 </div>
                 <button 
-                  onClick={() => {
-                    setVerified(false);
-                    setStepOtp(false);
-                    setIsRightPanelActive(false);
-                  }} 
+                  onClick={() => navigate(`/login?verified=1&email=${encodeURIComponent(regEmail.trim().toLowerCase())}`, { replace: true })} 
                   type="button"
                   className="button-primary w-full justify-center !rounded-full"
                 >
@@ -294,7 +324,7 @@ function SocialAuthButtons() {
                 <p className="text-xs text-slate-500">Mã 6 chữ số gửi tới <br/><strong className="text-slate-800">{regEmail}</strong></p>
 
                 <div className="text-left w-full">
-                  <input 
+                  <input
                     type="text" 
                     maxLength={6} 
                     placeholder="••••••" 
@@ -332,7 +362,7 @@ function SocialAuthButtons() {
             ) : (
               <form onSubmit={handleRegisterSubmit} noValidate className="w-full space-y-2">
                 <h2 className="text-2xl font-bold text-[#202b28]">Tạo tài khoản</h2>
-                <p className="text-xs text-slate-500 mb-1">Đăng ký để khám phá OpenBook</p>
+                <p className="text-xs text-slate-500 mb-1">Đăng ký để khám phá HarveyBook</p>
 
                 {/* Ô Họ tên */}
                 <div className="text-left w-full">
@@ -356,7 +386,7 @@ function SocialAuthButtons() {
                     <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                     <input 
                       type="tel" 
-                      placeholder="Số điện thoại" 
+                      placeholder="Số điện thoại (không bắt buộc)" 
                       value={regPhone} 
                       onChange={(e) => { setRegPhone(e.target.value); setRegPhoneError(''); }} 
                       className={`form-input !pl-10 ${regPhoneError ? '!border-rose-500 bg-rose-50/20' : ''}`} 
@@ -422,9 +452,10 @@ function SocialAuthButtons() {
             <h2 className="text-2xl font-bold text-[#202b28] mb-1">
               {admin ? 'Đăng nhập Quản trị' : 'Đăng nhập'}
             </h2>
-            <p className="text-xs text-slate-500 mb-4">Chủ động quản lý và đọc sách cùng OpenBook</p>
+            <p className="text-xs text-slate-500 mb-4">Chủ động quản lý và đọc sách cùng HarveyBook</p>
 
             <form onSubmit={handleLoginSubmit} noValidate className="w-full space-y-3">
+              {emailVerified && <p className="text-xs text-emerald-800 bg-emerald-50 p-2 border-l-2 border-emerald-500 text-left" role="status">Email đã được xác minh. Bạn có thể đăng nhập.</p>}
               {/* Ô Email Login */}
               <div className="text-left w-full">
                 <div className="relative">
@@ -477,7 +508,7 @@ function SocialAuthButtons() {
         </div>
 
         {/* ================= OVERLAY BANNER KHUNG BO VÒM TRƯỢT ================= */}
-        <div className="overlay-container">
+        {!admin && <div className="overlay-container">
           <div className="overlay-panel-inner relative h-full w-full text-white overflow-hidden">
             
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center transition-transform duration-1000 scale-105"></div>
@@ -487,15 +518,12 @@ function SocialAuthButtons() {
             <div className={`absolute top-0 flex flex-col items-center justify-center h-full w-1/2 px-8 text-center transition-transform duration-700 ease-in-out z-10 ${
               isRightPanelActive ? 'translate-x-0' : '-translate-x-[20%]'
             }`}>
-              <div className="grid h-12 w-12 place-items-center bg-white/10 rounded-2xl mb-3 border border-white/20 shadow-lg">
-                <Library size={24} className="text-emerald-300" />
-              </div>
               <h1 className="text-2xl font-bold mb-2 tracking-tight">Chào mừng trở lại!</h1>
               <p className="text-xs text-slate-200 leading-relaxed mb-6 font-medium">
-                Để tiếp tục quản lý và khám phá không gian thư viện số OpenBook, vui lòng đăng nhập.
+                Để tiếp tục quản lý và khám phá không gian thư viện số HarveyBook, vui lòng đăng nhập.
               </p>
               <button 
-                onClick={() => setIsRightPanelActive(false)} 
+                onClick={() => switchAuthMode(false)}
                 type="button"
                 className="uppercase tracking-wider text-xs font-bold border border-white/80 py-3 px-10 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-sm shadow-md"
               >
@@ -507,15 +535,12 @@ function SocialAuthButtons() {
             <div className={`absolute top-0 right-0 flex flex-col items-center justify-center h-full w-1/2 px-8 text-center transition-transform duration-700 ease-in-out z-10 ${
               isRightPanelActive ? 'translate-x-[20%]' : 'translate-x-0'
             }`}>
-              <div className="grid h-12 w-12 place-items-center bg-white/10 rounded-2xl mb-3 border border-white/20 shadow-lg">
-                <Library size={24} className="text-emerald-300" />
-              </div>
               <h1 className="text-2xl font-bold mb-2 tracking-tight">Xin chào, Bạn mới!</h1>
               <p className="text-xs text-slate-200 leading-relaxed mb-6 font-medium">
                 Khởi tạo tài khoản ngay hôm nay để trải nghiệm hệ thống quản lý và đọc sách thông minh.
               </p>
               <button 
-                onClick={() => setIsRightPanelActive(true)} 
+                onClick={() => switchAuthMode(true)}
                 type="button"
                 className="uppercase tracking-wider text-xs font-bold border border-white/80 py-3 px-10 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-sm shadow-md"
               >
@@ -524,7 +549,7 @@ function SocialAuthButtons() {
             </div>
 
           </div>
-        </div>
+        </div>}
 
       </div>
     </main>

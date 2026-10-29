@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { AuthProvider } from './auth/AuthContext';
 import './styles.css';
+import './harvey.css';
 
 // Hàm renderApplication: Gắn router, provider xác thực và ứng dụng vào DOM của Vite.
 createRoot(document.getElementById('root')!).render(

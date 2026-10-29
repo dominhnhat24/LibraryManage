@@ -4,12 +4,27 @@ import { createClient } from 'redis';
 import { RedisStore } from 'rate-limit-redis';
 
 const redisUrl = process.env.RATE_LIMIT_REDIS_URL || process.env.REDIS_URL;
-let redisClient;
+const redisClient = redisUrl ? createClient({ url: redisUrl }) : undefined;
+let redisConnectionPromise;
+
+if (redisClient) {
+    redisClient.on('error', (error) => console.error('[RATE_LIMIT_REDIS] Redis client error', error));
+}
+
+const connectRedisClient = async () => {
+    if (!redisClient || redisClient.isOpen) return redisClient;
+    redisConnectionPromise ??= redisClient.connect();
+    await redisConnectionPromise;
+    return redisClient;
+};
 
 const createStore = (prefix) => redisUrl
     ? new RedisStore({
         prefix,
-        sendCommand: (...args) => redisClient.sendCommand(args)
+        sendCommand: async (...args) => {
+            const client = await connectRedisClient();
+            return client.sendCommand(args);
+        }
     })
     : undefined;
 
@@ -56,14 +71,14 @@ export const connectRateLimitStore = async () => {
         }
         return;
     }
-    redisClient = createClient({ url: redisUrl });
-    redisClient.on('error', (error) => console.error('[RATE_LIMIT_REDIS] Redis client error', error));
-    await redisClient.connect();
+    await connectRedisClient();
 };
 
 // Hàm closeRateLimitStore: Đóng kết nối Redis khi tiến trình backend cần shutdown có kiểm soát.
 export const closeRateLimitStore = async () => {
+    await redisConnectionPromise?.catch(() => {});
     if (redisClient?.isOpen) await redisClient.quit();
+    redisConnectionPromise = undefined;
 };
 
 // Hàm parseTrustProxy: Chỉ nhận số hop hoặc danh sách proxy/CIDR tin cậy, không cho bật trust proxy dạng wildcard.

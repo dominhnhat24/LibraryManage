@@ -7,7 +7,7 @@ import ApiError from '../utils/api-error.js';
 import { asyncHandler } from '../utils/async-handler.js';
 import { toUserDto } from '../utils/api-dto.js';
 import { ROLES } from '../constants/roles.constant.js';
-import { sendRegistrationOtp } from '../config/mailer.js';
+import { sendPasswordChangeOtp, sendRegistrationOtp } from '../config/mailer.js';
 
 // [BẢO VỆ TOKEN] Chỉ lưu SHA-256 của refresh token trong DB; token nguyên bản chỉ trả một lần cho client.
 const hashToken = (token) => createHash('sha256').update(token).digest('hex');
@@ -252,6 +252,118 @@ export const profile = asyncHandler(async (req, res) => res.json({
     status: 'success',
     data: toUserDto(req.authUser)
 }));
+
+export const updateProfile = asyncHandler(async (req, res) => {
+    const updated = await User.findByIdAndUpdate(req.authUser._id, {
+        $set: {
+            ...(req.body.name !== undefined ? { name: req.body.name } : {}),
+            ...(req.body.phone_number !== undefined ? { phone_number: req.body.phone_number } : {})
+        }
+    }, { new: true, runValidators: true });
+    if (!updated) throw new ApiError(404, 'User not found');
+    return res.json({ status: 'success', data: toUserDto(updated) });
+});
+
+export const changePassword = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.authUser._id).select('+password_hash');
+    if (!user) throw new ApiError(404, 'User not found');
+    if (!(await user.verifyPassword(req.body.current_password))) {
+        throw new ApiError(401, 'Current password is incorrect');
+    }
+    if (await user.verifyPassword(req.body.new_password)) {
+        throw new ApiError(400, 'New password must be different from the current password');
+    }
+
+    const passwordHash = await bcrypt.hash(req.body.new_password, 12);
+    const changed = await User.findOneAndUpdate({
+        _id: user._id,
+        password_hash: user.password_hash
+    }, { $set: { password_hash: passwordHash, refresh_token_hash: null } }, { new: true, runValidators: true });
+    if (!changed) throw new ApiError(409, 'Password changed in another request; please try again');
+    return res.json({ status: 'success', message: 'Password updated; sign in again.' });
+});
+
+export const requestPasswordChangeOtp = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.authUser._id)
+        .select('+password_hash +password_otp_hash +password_otp_expires_at +password_otp_sent_at +password_otp_attempts');
+    if (!user) throw new ApiError(404, 'User not found');
+    const now = new Date();
+    const retryAt = user.password_otp_sent_at
+        ? user.password_otp_sent_at.getTime() + OTP_RESEND_DELAY_MS : 0;
+    if (now.getTime() < retryAt) {
+        throw new ApiError(429, `Please wait ${Math.ceil((retryAt - now.getTime()) / 1000)} seconds before requesting another code`);
+    }
+
+    const otp = createOtp();
+    const otpHash = hashOtp(otp);
+    user.password_otp_hash = otpHash;
+    user.password_otp_expires_at = new Date(now.getTime() + OTP_TTL_MS);
+    user.password_otp_sent_at = now;
+    user.password_otp_attempts = 0;
+    await user.save();
+    try {
+        await sendPasswordChangeOtp(user.email, otp);
+    } catch (error) {
+        await User.updateOne({ _id: user._id, password_otp_hash: otpHash }, { $set: {
+            password_otp_hash: null,
+            password_otp_expires_at: null,
+            password_otp_attempts: 0
+        } });
+        throw error;
+    }
+    return res.json({
+        status: 'success',
+        message: 'Password verification code sent to the account email address.',
+        data: { expires_in_seconds: OTP_TTL_MS / 1000, retry_after_seconds: OTP_RESEND_DELAY_MS / 1000 }
+    });
+});
+
+export const changePasswordWithOtp = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.authUser._id).select(
+        '+password_otp_hash +password_otp_expires_at +password_otp_attempts'
+    );
+    if (!user || !user.password_otp_hash) throw new ApiError(400, 'Password verification code is invalid or expired');
+    if (user.password_otp_attempts >= OTP_MAX_ATTEMPTS) {
+        throw new ApiError(429, 'Too many incorrect verification codes; request a new code');
+    }
+    if (!user.password_otp_expires_at || user.password_otp_expires_at <= new Date()) {
+        await User.updateOne({ _id: user._id, password_otp_hash: user.password_otp_hash }, { $set: {
+            password_otp_hash: null, password_otp_expires_at: null, password_otp_sent_at: null,
+            password_otp_attempts: 0
+        } });
+        throw new ApiError(400, 'Password verification code is invalid or expired');
+    }
+
+    const expected = Buffer.from(user.password_otp_hash, 'hex');
+    const candidate = Buffer.from(hashOtp(req.body.otp), 'hex');
+    if (expected.length !== candidate.length || !timingSafeEqual(expected, candidate)) {
+        const attempt = await User.updateOne({
+            _id: user._id,
+            password_otp_hash: user.password_otp_hash,
+            password_otp_attempts: { $lt: OTP_MAX_ATTEMPTS },
+            password_otp_expires_at: { $gt: new Date() }
+        }, { $inc: { password_otp_attempts: 1 } });
+        if (attempt.modifiedCount !== 1) throw new ApiError(429, 'Too many incorrect verification codes; request a new code');
+        throw new ApiError(400, 'Password verification code is invalid or expired');
+    }
+
+    const passwordHash = await bcrypt.hash(req.body.new_password, 12);
+    const changed = await User.findOneAndUpdate({
+        _id: user._id,
+        password_otp_hash: user.password_otp_hash,
+        password_otp_expires_at: { $gt: new Date() },
+        password_otp_attempts: { $lt: OTP_MAX_ATTEMPTS }
+    }, { $set: {
+        password_hash: passwordHash,
+        refresh_token_hash: null,
+        password_otp_hash: null,
+        password_otp_expires_at: null,
+        password_otp_sent_at: null,
+        password_otp_attempts: 0
+    } }, { new: true, runValidators: true });
+    if (!changed) throw new ApiError(400, 'Password verification code is invalid or expired');
+    return res.json({ status: 'success', message: 'Password updated; sign in again.' });
+});
 
 // Hàm adminLogin: Kiểm tra thông tin đăng nhập, xác minh quyền hạn (Admin) trước khi cấp phiên.
 export const adminLogin = asyncHandler(async (req, res) => {

@@ -16,15 +16,10 @@ export function BookReaderPage() {
   const [loadingBook, setLoadingBook] = useState(true);
   const [error, setError] = useState('');
   const [darkWorkspace, setDarkWorkspace] = useState(false);
-  const [showAdNotice, setShowAdNotice] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (loadingAuth) return;
-    if (!user || !['USER', 'ADMIN'].includes(user.role)) {
-      navigate('/login', { replace: true, state: { from: `/books/${encodeURIComponent(bookId)}/read` } });
-      return;
-    }
 
     let active = true;
     setLoadingBook(true);
@@ -34,12 +29,23 @@ export function BookReaderPage() {
         const bookResult = await fetchPublicBook(bookId);
         if (!active) return;
         setBook(bookResult);
-        const { blob: pdf, showAd } = await streamPublicBook(bookId);
+        if (bookResult._id !== bookId) {
+          navigate(`/books/${encodeURIComponent(bookResult._id)}/pdf`, { replace: true });
+        }
+        if (bookResult.reader_mode === 'chapters') {
+          navigate(`/books/${encodeURIComponent(bookResult._id)}/read`, { replace: true });
+          return;
+        }
+        if (bookResult.reader_mode !== 'pdf') {
+          throw new Error(bookResult.reader_mode === 'unsupported'
+            ? `Định dạng ${bookResult.file_format || 'này'} chưa có trình đọc trong ứng dụng.`
+            : 'Sách chưa có chương đọc được hoặc tệp PDF gốc hợp lệ.');
+        }
+        const pdf = await streamPublicBook(bookResult._id);
         if (!active) return;
         if (pdf.type !== 'application/pdf' || pdf.size === 0) {
           throw new Error('Tệp sách không phải PDF hợp lệ hoặc đang rỗng.');
         }
-        setShowAdNotice(showAd);
         setReaderUrl(URL.createObjectURL(pdf));
       } catch (loadError: unknown) {
         if (!active) return;
@@ -83,7 +89,7 @@ export function BookReaderPage() {
 
   return (
     <main className={`reader-pdf-workspace ${darkWorkspace ? 'reader-pdf-dark' : 'reader-pdf-light'} flex h-screen min-h-[420px] flex-col overflow-hidden ${darkWorkspace ? 'bg-[#20252b]' : 'bg-[#edf2f7]'}`}>
-      <header className={`z-10 grid min-h-[58px] shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b px-3 sm:px-5 ${
+      <header className={`z-10 grid min-h-[58px] shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center border-b px-3 sm:px-5 ${
         darkWorkspace ? 'border-slate-700 bg-[#171b20] text-slate-100' : 'border-slate-200 bg-white text-[#26332e]'
       }`}>
         <div className="flex min-w-0 items-center gap-2">
@@ -100,11 +106,6 @@ export function BookReaderPage() {
           </div>
         </div>
 
-        <Link className="flex items-center gap-2 text-xs font-extrabold tracking-[0.1em] text-[#31564a] sm:text-sm" to="/">
-          <BookOpen size={19} />
-          <span className="hidden sm:inline">OPENBOOK</span>
-        </Link>
-
         <nav aria-label="Điều khiển trình đọc" className="flex items-center justify-end gap-1">
           <button
             aria-label="In sách"
@@ -115,7 +116,7 @@ export function BookReaderPage() {
           >
             <Printer size={16} />
           </button>
-          {user?.role === 'ADMIN' || user?.is_vip ? (
+          {user?.role === 'ADMIN' || user?.is_premium ? (
             <button
               aria-label="Tải sách ngoại tuyến"
               className={`grid h-9 w-9 place-items-center rounded-md ${darkWorkspace ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
@@ -128,9 +129,9 @@ export function BookReaderPage() {
             </button>
           ) : (
             <Link
-              aria-label="Đăng ký VIP để tải sách"
+              aria-label="Đăng ký Premium để tải sách"
               className={`grid h-9 w-9 place-items-center rounded-md ${darkWorkspace ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
-              title="Đăng ký VIP để tải sách ngoại tuyến"
+              title="Đăng ký Premium để tải sách ngoại tuyến"
               to="/account"
             >
               <Download size={16} />
@@ -158,11 +159,6 @@ export function BookReaderPage() {
               <p className={`mt-2 text-sm ${darkWorkspace ? 'text-slate-300' : 'text-slate-600'}`} role="alert">{error}</p>
               <button className="button-primary mt-5" onClick={() => window.location.reload()} type="button">Thử lại</button>
             </div>
-          </div>
-        ) : showAdNotice ? (
-          <div className="relative h-full">
-            <div className="border-b border-[#e7ddc5] bg-[#fff8e8] px-4 py-2 text-center text-xs text-[#805e1e]" role="status">Nội dung có vị trí quảng cáo theo lượt đọc miễn phí.</div>
-            {readerUrl && book && <iframe className="h-[calc(100%-34px)] w-full border-0" ref={iframeRef} src={readerUrl} title={`Đọc sách ${book.title}`} />}
           </div>
         ) : readerUrl && book ? (
           <iframe

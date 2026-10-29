@@ -93,7 +93,8 @@ Các service nghiệp vụ hiện có: `book`, `chapter`, `user`, `subscription`
 
 - **Free / USER:** đọc nội dung Free; có thể nhận quảng cáo theo chu kỳ lượt đọc.
 - **Premium còn hạn:** đọc nội dung Premium và VIP, không nhận quảng cáo.
-- **VIP còn hạn:** có quyền Premium và tải file sách offline.
+- **VIP còn hạn:** quyền VIP và đọc không quảng cáo; không tự động được tải file Premium.
+- **Premium còn hạn:** quyền Premium, bao gồm quyền VIP và tải file theo chính sách Premium.
 - **ADMIN:** được cấp quyền đọc và tải theo logic của model entitlement, đồng thời có quyền quản trị API.
 
 ## 6. Danh sách API hiện tại
@@ -140,7 +141,7 @@ Danh mục sách: `ebook`, `audiobook`, `comic`, `webnovel`. Sách/chương có 
 |---|---|---|---|
 | `POST` | `/subscriptions` | Đăng nhập | Tạo yêu cầu gói VIP/Premium tháng |
 | `GET` | `/subscriptions/me` | Đăng nhập | Xem trạng thái yêu cầu gần nhất của tài khoản |
-| `GET` | `/downloads/:bookId` | VIP còn hạn hoặc ADMIN | Tải file từ kho riêng |
+| `GET` | `/downloads/:bookId` | Premium còn hạn hoặc ADMIN | Tải file từ kho riêng |
 | `POST` | `/admin/books/:bookId/file` | ADMIN | Upload file sách; multipart field `file`, tối đa 100 MiB |
 | `GET` | `/admin/subscriptions` | ADMIN | Liệt kê yêu cầu thuê bao |
 | `GET` | `/admin/subscriptions/pending` | ADMIN | Liệt kê yêu cầu chờ xét duyệt |

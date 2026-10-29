@@ -3,6 +3,7 @@ import Book from '../models/book.model.js';
 import ApiError from '../utils/api-error.js';
 import { asyncHandler } from '../utils/async-handler.js';
 import { resolvePrivateBookFile } from '../utils/private-book-storage.js';
+import { recordReadingOpen } from '../services/reading-progress.service.js';
 
 // [PHÁT TỆP BẢO MẬT] Không lộ đường dẫn lưu trữ; buộc tải file và cấm cache/sniff nội dung.
 export const downloadBook = asyncHandler(async (req, res, next) => {
@@ -30,14 +31,15 @@ export const downloadBook = asyncHandler(async (req, res, next) => {
 export const streamBook = asyncHandler(async (req, res, next) => {
     const book = req.book;
     if (!book?.file_key) throw new ApiError(404, 'Book content file not found');
+    await recordReadingOpen(req.authUser?._id, book._id, null, 'file_open').catch((error) => {
+        console.error('HarveyBook could not save PDF-open progress:', error?.message || error);
+    });
     const filePath = await resolvePrivateBookFile(book.file_key);
     const headers = {
         'Cache-Control': 'private, no-store, no-cache, must-revalidate',
         Pragma: 'no-cache',
         'X-Content-Type-Options': 'nosniff',
-        'Content-Disposition': 'inline',
-        'X-OpenBook-Show-Ad': String(req.adDecision?.showAd === true),
-        'X-OpenBook-Ad-Reason': req.adDecision?.reason || 'unavailable'
+        'Content-Disposition': 'inline'
     };
     return res.sendFile(filePath, { headers }, (error) => {
         if (error) {

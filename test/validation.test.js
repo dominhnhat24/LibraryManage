@@ -11,36 +11,6 @@ test('user validation normalizes registration names and rejects client-selected 
         email: 'reader@example.com',
         password: 'secure-pass-123'
     });
-
-    // Kiểm thử OTP: Chỉ chấp nhận email hợp lệ cùng mã xác minh đúng sáu chữ số.
-    test('email verification validation accepts six-digit OTPs and rejects malformed requests', () => {
-        assert.equal(authValidation.verifyEmail.validate({
-            email: 'reader@example.com',
-            otp: '004219'
-        }).error, undefined);
-        assert.ok(authValidation.verifyEmail.validate({
-            email: 'reader@example.com',
-            otp: '4219'
-        }).error);
-        assert.ok(authValidation.resendVerification.validate({ email: 'not-an-email' }).error);
-    });
-
-    // Kiểm thử auth DTO đầu vào: Refresh token đúng cấu trúc JWT và đăng ký chỉ chọn một tên.
-    test('auth validation requires one registration name and a valid refresh JWT shape', () => {
-        const baseRegistration = {
-            email: 'reader@example.com',
-            password: 'secure-pass-123'
-        };
-        assert.equal(authValidation.register.validate({ ...baseRegistration, name: 'Reader' }).error, undefined);
-        assert.equal(authValidation.register.validate({
-            ...baseRegistration, name: 'Reader', full_name: 'Reader'
-        }).error.details[0].type, 'object.xor');
-        assert.ok(authValidation.refresh.validate({ refresh_token: 'invalid-token' }).error);
-        assert.equal(authValidation.refresh.validate({
-            refresh_token: 'header.payload.signature',
-            injected: true
-        }, { stripUnknown: true }).value.injected, undefined);
-    });
     assert.equal(registration.error, undefined);
     assert.equal(registration.value.name, 'A Reader');
     assert.ok(modelValidation.user.create.validate({
@@ -49,6 +19,44 @@ test('user validation normalizes registration names and rejects client-selected 
         password: 'secure-pass-123',
         role: 'ADMIN'
     }).error);
+});
+
+// Kiểm thử OTP: Chỉ chấp nhận email hợp lệ cùng mã xác minh đúng sáu chữ số.
+test('email verification validation accepts six-digit OTPs and rejects malformed requests', () => {
+    assert.equal(authValidation.verifyEmail.validate({
+        email: 'reader@example.com',
+        otp: '004219'
+    }).error, undefined);
+    assert.ok(authValidation.verifyEmail.validate({
+        email: 'reader@example.com',
+        otp: '4219'
+    }).error);
+    assert.ok(authValidation.resendVerification.validate({ email: 'not-an-email' }).error);
+});
+
+test('profile and password change validators reject privilege fields and require a valid OTP', () => {
+    assert.equal(authValidation.updateProfile.validate({ name: ' Reader ' }).value.name, 'Reader');
+    assert.ok(authValidation.updateProfile.validate({ role: 'ADMIN' }).error);
+    assert.ok(authValidation.changePassword.validate({ otp: '123', new_password: 'secure-password' }).error);
+    assert.ok(authValidation.changePassword.validate({ otp: '123456', new_password: 'short' }).error);
+    assert.equal(authValidation.changePassword.validate({ otp: '123456', new_password: 'secure-password' }).error, undefined);
+});
+
+// Kiểm thử auth DTO đầu vào: Refresh token đúng cấu trúc JWT và đăng ký chỉ chọn một tên.
+test('auth validation requires one registration name and a valid refresh JWT shape', () => {
+    const baseRegistration = {
+        email: 'reader@example.com',
+        password: 'secure-pass-123'
+    };
+    assert.equal(authValidation.register.validate({ ...baseRegistration, name: 'Reader' }).error, undefined);
+    assert.equal(authValidation.register.validate({
+        ...baseRegistration, name: 'Reader', full_name: 'Reader'
+    }).error.details[0].type, 'object.xor');
+    assert.ok(authValidation.refresh.validate({ refresh_token: 'invalid-token' }).error);
+    assert.equal(authValidation.refresh.validate({
+        refresh_token: 'header.payload.signature',
+        injected: true
+    }, { stripUnknown: true }).value.injected, undefined);
 });
 
 // Kiểm thử Joi: Email báo cáo bắt buộc với khách vãng lai nhưng lấy từ tài khoản khi đã đăng nhập.
@@ -114,6 +122,8 @@ test('content validation rejects values outside model constraints', () => {
     assert.ok(modelValidation.comment.create.validate({ body: 'Comment', rating: 6 }).error);
     assert.ok(modelValidation.report.update.validate({ status: 'deleted' }).error);
     assert.ok(modelValidation.readingProgress.update.validate({ chapters_since_ad: 3 }).error);
+    assert.equal(modelValidation.readingProgress.list.validate({ page: '1', limit: '100' }).error, undefined);
+    assert.ok(modelValidation.readingProgress.list.validate({ page: '1', limit: '101' }).error);
 });
 
 // Kiểm thử slug: Chuẩn hóa tiêu đề tiếng Việt thành slug URL không dấu, chữ thường và có dấu gạch nối.

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
-  AlertCircle, Check, LoaderCircle, Pencil, Plus, Search, ShieldCheck, Trash2, UserRound, X,
+  AlertCircle, Check, Gem, LoaderCircle, Pencil, Plus, Search, ShieldCheck, Trash2, UserRound, X,
 } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { Pagination } from '../components/Pagination';
 import {
-  createUser, deleteUser, errorMessage, fetchUser, fetchUsers, grantVip, updateUser,
+  createUser, deleteUser, errorMessage, fetchUser, fetchUsers, grantPremium, grantVip, updateUser,
   type UserFormPayload, type UserUpdatePayload,
 } from '../api/client';
 import type { PaginationData, User } from '../types';
@@ -45,7 +45,7 @@ export function UserManagement() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'vip' | null>(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'vip' | 'premium' | null>(null);
   const [pendingDelete, setPendingDelete] = useState<User | null>(null);
   const [searchParams] = useSearchParams();
   const urlSearch = searchParams.get('search') ?? '';
@@ -132,6 +132,25 @@ export function UserManagement() {
     }
   }
 
+  async function savePremium(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedUser) return;
+    const expiresAt = String(new FormData(event.currentTarget).get('premium_expires_at') || '');
+    setSaving(true);
+    setError('');
+    try {
+      await grantPremium(userId(selectedUser), new Date(expiresAt).toISOString());
+      setNotice(`Đã cấp quyền Premium cho ${selectedUser.name}.`);
+      setModalMode(null);
+      setSelectedUser(null);
+      await loadUsers();
+    } catch (grantError) {
+      setError(errorMessage(grantError));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   // Hàm editUser: Tải hồ sơ đầy đủ theo ID trước khi mở biểu mẫu chỉnh sửa ADMIN.
   async function editUser(user: User) {
     setLoadingUserDetail(true);
@@ -177,7 +196,8 @@ export function UserManagement() {
         <div>
           <p className="eyebrow">Quản trị hệ thống · Tài khoản</p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#202b28] sm:text-[2.15rem]">Người dùng</h1>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">Quản lý hồ sơ, role hệ thống và quyền đọc VIP của thành viên.</p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">Quản lý hồ sơ, role hệ thống và quyền đọc Free, VIP, Premium của thành viên.</p>
+          <p className="mt-1 text-xs font-medium text-[#76642D]">Cấp Premium bằng nút màu vàng ở cột “Thao tác” trên dòng tài khoản USER.</p>
         </div>
         <div className="flex items-center gap-2 self-start md:self-auto">
           <button 
@@ -192,10 +212,9 @@ export function UserManagement() {
         </div>
       </section>
 
-      <section aria-label="Thống kê người dùng" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+      <section aria-label="Thống kê người dùng" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-2">
         <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng tài khoản</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p></div>
         <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p></div>
-        <div className="bg-[#FFFFFF] px-5 py-4"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p><p className="mt-2 text-2xl font-bold text-[#153D31]">{pagination.limit}</p></div>
       </section>
 
       <section className="border border-[#DDE9E6] bg-[#FFFFFF]">
@@ -221,14 +240,15 @@ export function UserManagement() {
               <thead><tr className="border-y border-[#e9e8e2] bg-[#F8FBF9] text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500"><th className="px-5 py-3.5">Tài khoản</th><th className="px-4 py-3.5">Role</th><th className="px-4 py-3.5">Quyền đọc</th><th className="px-4 py-3.5">Ngày tham gia</th><th className="px-5 py-3.5 text-right">Thao tác</th></tr></thead>
               <tbody className="divide-y divide-[#EEF3F0]">{users.map((item) => {
                 const isCurrentUser = item.id === currentUser?.id || userId(item) === currentUser?.id;
+                const premiumActive = Boolean(item.is_premium && item.premium_expires_at && new Date(item.premium_expires_at) > new Date());
                 const vipActive = Boolean(item.is_vip && item.vip_expires_at && new Date(item.vip_expires_at) > new Date());
                 return <tr className="hover:bg-[#FFFFFF]" key={userId(item)}>
                   <td className="px-5 py-3.5"><div className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center border border-[#DDE9E6] bg-[#f1f0ea] text-[#496a55]"><UserRound size={16} /></span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#202b28]">{item.name}{isCurrentUser && <span className="ml-2 text-[10px] font-medium text-slate-400">(Bạn)</span>}</p><p className="truncate text-xs text-slate-500">{item.email}</p><p className="mt-0.5 text-[11px] text-slate-400">{item.phone_number || 'Chưa có số điện thoại'}</p></div></div></td>
                   <td className="px-4 py-3.5"><span className={`inline-flex border px-2.5 py-1 text-[10px] font-bold ${item.role === 'ADMIN' ? 'border-[#cbd9d0] bg-[#E3F4EB] text-[#24795C]' : 'border-[#DDE9E6] bg-white text-slate-600'}`}>{item.role === 'ADMIN' ? 'ADMIN · Quản trị' : 'USER · Độc giả'}</span></td>
-                  <td className="px-4 py-3.5"><div className="space-y-1"><span className={`block text-xs font-semibold ${vipActive ? 'text-[#B8860B]' : 'text-slate-500'}`}>{vipActive ? 'VIP đang hoạt động' : item.is_premium ? 'Premium đang hoạt động' : 'Free'}</span>{vipActive && <span className="block text-[10px] text-slate-400">Hạn {formatDate(item.vip_expires_at)}</span>}</div></td>
+                  <td className="px-4 py-3.5"><div className="space-y-1"><span className={`block text-xs font-semibold ${item.role === 'ADMIN' || premiumActive ? 'text-[#B8860B]' : vipActive ? 'text-[#24795C]' : 'text-slate-500'}`}>{item.role === 'ADMIN' ? 'Đầy đủ quyền (ADMIN)' : premiumActive ? 'Premium đang hoạt động' : vipActive ? 'VIP đang hoạt động' : 'Free'}</span>{premiumActive && <span className="block text-[10px] text-slate-400">Premium hết hạn {formatDate(item.premium_expires_at)}</span>}{!premiumActive && vipActive && <span className="block text-[10px] text-slate-400">VIP hết hạn {formatDate(item.vip_expires_at)}</span>}</div></td>
                   <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(item.createdAt)}</td>
                   <td className="px-5 py-3.5"><div className="flex justify-end gap-2">
-                    {item.role !== 'ADMIN' && <button aria-label={`Cấp VIP cho ${item.name}`} className="icon-button" onClick={() => { setSelectedUser(item); setModalMode('vip'); }} title="Cấp VIP" type="button"><ShieldCheck size={15} /></button>}
+                    {item.role !== 'ADMIN' ? <><button aria-label={`Cấp Premium cho ${item.name}`} className="inline-flex min-h-8 items-center gap-1.5 border border-[#D9C58A] bg-[#FBF7E8] px-2.5 text-[11px] font-semibold text-[#76642D] hover:bg-[#F4EDCF]" onClick={() => { setSelectedUser(item); setModalMode('premium'); }} title="Cấp Premium: gồm quyền VIP và tải sách PDF" type="button"><Gem size={14} />Cấp Premium</button><button aria-label={`Cấp VIP cho ${item.name}`} className="inline-flex min-h-8 items-center gap-1.5 border border-[#C9DED3] bg-[#F2F8F4] px-2.5 text-[11px] font-semibold text-[#24795C] hover:bg-[#E3F4EB]" onClick={() => { setSelectedUser(item); setModalMode('vip'); }} title="Cấp VIP: tắt quảng cáo khi đọc" type="button"><ShieldCheck size={14} />Cấp VIP</button></> : <span className="self-center text-[10px] font-medium text-slate-500" title="ADMIN đã có đầy đủ quyền">Toàn quyền ADMIN</span>}
                     <button aria-label={`Sửa ${item.name}`} className="icon-button" disabled={loadingUserDetail} onClick={() => void editUser(item)} type="button"><Pencil size={15} /></button>
                     {!isCurrentUser && <button aria-label={`Xóa ${item.name}`} className="icon-button icon-button-danger" onClick={() => setPendingDelete(item)} type="button"><Trash2 size={15} /></button>}
                   </div></td>
@@ -238,8 +258,9 @@ export function UserManagement() {
         {!loading && pagination.totalPages > 0 && <Pagination itemLabel="tài khoản" onPageChange={setPage} pagination={pagination} />}
       </section>
 
-      {modalMode && modalMode !== 'vip' && <UserModal mode={modalMode} user={selectedUser} canChangeRole={!selectedUser || userId(selectedUser) !== currentUser?.id} saving={saving} onClose={() => { setModalMode(null); setSelectedUser(null); }} onSave={saveUser} />}
+      {(modalMode === 'create' || modalMode === 'edit') && <UserModal mode={modalMode} user={selectedUser} canChangeRole={!selectedUser || userId(selectedUser) !== currentUser?.id} saving={saving} onClose={() => { setModalMode(null); setSelectedUser(null); }} onSave={saveUser} />}
       {modalMode === 'vip' && selectedUser && <VipModal error={error} user={selectedUser} saving={saving} onClose={() => { setModalMode(null); setSelectedUser(null); }} onSubmit={saveVip} />}
+      {modalMode === 'premium' && selectedUser && <PremiumModal error={error} user={selectedUser} saving={saving} onClose={() => { setModalMode(null); setSelectedUser(null); }} onSubmit={savePremium} />}
       {pendingDelete && <div className="modal-backdrop" role="presentation"><section aria-labelledby="delete-user-title" aria-modal="true" className="confirm-panel" role="alertdialog"><div className="flex items-start gap-4"><span className="grid h-11 w-11 shrink-0 place-items-center bg-rose-50 text-rose-700"><Trash2 size={19} /></span><div><p className="eyebrow">Xác nhận thao tác</p><h2 className="mt-1 text-lg font-bold" id="delete-user-title">Xóa tài khoản?</h2><p className="mt-2 text-sm leading-6 text-slate-600">Tài khoản <strong>{pendingDelete.email}</strong> cùng dữ liệu cá nhân, nội dung sở hữu và tệp sách liên quan sẽ bị xóa vĩnh viễn.</p></div></div><div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button className="button-secondary" disabled={saving} onClick={() => setPendingDelete(null)} type="button">Giữ lại</button><button className="button-danger" disabled={saving} onClick={() => void confirmDelete()} type="button">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <Trash2 size={16} />}Xóa tài khoản</button></div></section></div>}
     </AdminLayout>
   );
@@ -313,4 +334,17 @@ function VipModal({ user, saving, error, onClose, onSubmit }: {
   defaultExpiry.setMonth(defaultExpiry.getMonth() + 1);
   const localValue = new Date(defaultExpiry.getTime() - defaultExpiry.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
   return <div className="modal-backdrop" role="presentation"><section aria-labelledby="vip-modal-title" aria-modal="true" className="confirm-panel" role="dialog"><header className="flex items-start justify-between"><div><p className="eyebrow">Quyền đọc</p><h2 className="mt-1 text-lg font-bold" id="vip-modal-title">Cấp quyền VIP</h2></div><button aria-label="Đóng cửa sổ" className="icon-button" disabled={saving} onClick={onClose} type="button"><X size={17} /></button></header><p className="mt-3 text-sm text-slate-600">Tài khoản <strong>{user.name}</strong> sẽ được cấp quyền VIP tới thời điểm đã chọn.</p><form className="mt-5" onSubmit={onSubmit}><label className="field-label">VIP hết hạn lúc<input className="form-input mt-2" min={new Date().toISOString().slice(0, 16)} name="vip_expires_at" required type="datetime-local" defaultValue={localValue} /></label>{error && <p className="mt-3 border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{error}</p>}<div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button><button className="button-primary" disabled={saving} type="submit">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <ShieldCheck size={16} />}Cấp VIP</button></div></form></section></div>;
+}
+
+function PremiumModal({ user, saving, error, onClose, onSubmit }: {
+  user: User;
+  saving: boolean;
+  error: string;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const defaultExpiry = new Date();
+  defaultExpiry.setMonth(defaultExpiry.getMonth() + 1);
+  const localValue = new Date(defaultExpiry.getTime() - defaultExpiry.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  return <div className="modal-backdrop" role="presentation"><section aria-labelledby="premium-modal-title" aria-modal="true" className="confirm-panel" role="dialog"><header className="flex items-start justify-between"><div><p className="eyebrow">Quyền đọc</p><h2 className="mt-1 text-lg font-bold" id="premium-modal-title">Cấp quyền Premium</h2></div><button aria-label="Đóng cửa sổ" className="icon-button" disabled={saving} onClick={onClose} type="button"><X size={17} /></button></header><p className="mt-3 text-sm text-slate-600">Tài khoản <strong>{user.name}</strong> sẽ được cấp Premium, bao gồm quyền VIP và tải sách PDF, tới thời điểm đã chọn.</p><form className="mt-5" onSubmit={onSubmit}><label className="field-label">Premium hết hạn lúc<input className="form-input mt-2" min={new Date().toISOString().slice(0, 16)} name="premium_expires_at" required type="datetime-local" defaultValue={localValue} /></label>{error && <p className="mt-3 border-l-2 border-rose-500 bg-rose-50 px-3 py-2 text-sm text-rose-800" role="alert">{error}</p>}<div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button className="button-secondary" disabled={saving} onClick={onClose} type="button">Hủy</button><button className="button-primary" disabled={saving} type="submit">{saving ? <LoaderCircle className="animate-spin" size={16} /> : <ShieldCheck size={16} />}Cấp Premium</button></div></form></section></div>;
 }

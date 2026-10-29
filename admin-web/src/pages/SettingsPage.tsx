@@ -1,267 +1,115 @@
-import { useState, type FormEvent } from 'react';
-import {
-  UserRound, Shield, Palette, Bell, Laptop, Lock,
-  Calendar, CheckCircle2, AlertCircle
-} from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { AlertCircle, Check, ChevronRight, LockKeyhole, LogOut, Sun, UserRound } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReaderLayout } from '../components/ReaderLayout';
 import { useAuth } from '../auth/AuthContext';
-import { api, errorMessage } from '../api/client';
+import { errorMessage } from '../api/client';
+
+type ThemePreference = 'auto' | 'light' | 'dark';
+type ReadingSize = 'small' | 'medium' | 'large';
 
 export function SettingsPage() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'appearance' | 'notifications' | 'sessions'>('profile');
-
-  // Form thông tin cá nhân
-  const [name, setName] = useState(user?.name || 'Đỗ Minh Nhật');
-  const [email] = useState(user?.email || 'minhnhat@example.com');
-  const [dob, setDob] = useState('02/04/2005');
+  const { user, updateProfile, changePassword, logout } = useAuth();
+  const navigate = useNavigate();
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [name, setName] = useState(user?.name ?? '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone_number ?? '');
   const [savingProfile, setSavingProfile] = useState(false);
-  const [profileNotice, setProfileNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  // Form đổi mật khẩu
+  const [profileNotice, setProfileNotice] = useState('');
+  const [theme, setTheme] = useState<ThemePreference>(() => (localStorage.getItem('openbook.theme') as ThemePreference) || 'auto');
+  const [readingSize, setReadingSize] = useState<ReadingSize>(() => (localStorage.getItem('openbook.reading-size') as ReadingSize) || 'medium');
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordNotice, setPasswordNotice] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
   const [savingPassword, setSavingPassword] = useState(false);
-  const [passwordNotice, setPasswordNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleUpdateProfile = async (e: FormEvent) => {
-    e.preventDefault();
-    setSavingProfile(true);
-    setProfileNotice(null);
+  useEffect(() => {
+    document.documentElement.dataset.bookTheme = theme === 'auto' ? '' : theme;
+    localStorage.setItem('openbook.theme', theme);
+  }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.dataset.readerSize = readingSize;
+    localStorage.setItem('openbook.reading-size', readingSize);
+  }, [readingSize]);
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setSavingProfile(true); setProfileNotice('');
     try {
-      await api.patch('/users/me', { name }).catch(() => api.patch('/auth/me', { name }));
-      setProfileNotice({ type: 'success', message: 'Cập nhật thông tin cá nhân thành công!' });
-    } catch {
-      setProfileNotice({ type: 'success', message: 'Đã lưu thay đổi thông tin thành công!' });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
+      const updated = await updateProfile({ name: name.trim(), phone_number: phoneNumber.trim() || null });
+      setName(updated.name); setPhoneNumber(updated.phone_number ?? ''); setEditingProfile(false); setProfileNotice('Thông tin tài khoản đã được cập nhật.');
+    } catch (error) { setProfileNotice(errorMessage(error)); }
+    finally { setSavingProfile(false); }
+  }
 
-  const handleChangePassword = async (e: FormEvent) => {
-    e.preventDefault();
-    setPasswordNotice(null);
-
-    if (newPassword.length < 8) {
-      setPasswordNotice({ type: 'error', message: 'Mật khẩu mới phải có ít nhất 8 ký tự.' });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordNotice({ type: 'error', message: 'Mật khẩu xác nhận không khớp.' });
-      return;
-    }
-
+  async function savePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setPasswordNotice(null);
+    if (!currentPassword) { setPasswordNotice({ kind: 'error', text: 'Vui lòng nhập mật khẩu hiện tại.' }); return; }
+    if (newPassword.length < 8 || newPassword.length > 128) { setPasswordNotice({ kind: 'error', text: 'Mật khẩu mới cần từ 8 đến 128 ký tự.' }); return; }
+    if (newPassword !== confirmPassword) { setPasswordNotice({ kind: 'error', text: 'Mật khẩu xác nhận chưa khớp.' }); return; }
     setSavingPassword(true);
     try {
-      await api.post('/auth/change-password', {
-        current_password: currentPassword,
-        new_password: newPassword,
-      });
-      setPasswordNotice({ type: 'success', message: 'Đổi mật khẩu thành công!' });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      setPasswordNotice({
-        type: 'error',
-        message: errorMessage(err) || 'Không thể đổi mật khẩu lúc này. Vui lòng thử lại sau.',
-      });
-    } finally {
-      setSavingPassword(false);
-    }
-  };
+      await changePassword(currentPassword, newPassword);
+      setPasswordNotice({ kind: 'success', text: 'Mật khẩu đã được cập nhật. Hãy đăng nhập lại.' });
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      navigate('/login', { replace: true });
+    } catch (error) { setPasswordNotice({ kind: 'error', text: errorMessage(error) }); }
+    finally { setSavingPassword(false); }
+  }
 
-  return (
-    <ReaderLayout>
-      <div className="bn-page-header">
-        <h1 className="bn-page-title-main">Cài đặt tài khoản</h1>
-        <p className="bn-page-subtitle-main">Quản lý thông tin cá nhân và tùy chỉnh trải nghiệm của bạn</p>
-      </div>
-
-      <div className="bn-settings-layout">
-        {/* Menu con bên trái */}
-        <div className="bn-settings-menu">
-          <button
-            className={`bn-settings-menu-item ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <UserRound size={17} />
-            <span>Thông tin cá nhân</span>
-          </button>
-          <button
-            className={`bn-settings-menu-item ${activeTab === 'security' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security')}
-          >
-            <Shield size={17} />
-            <span>Bảo mật</span>
-          </button>
-          <button
-            className={`bn-settings-menu-item ${activeTab === 'appearance' ? 'active' : ''}`}
-            onClick={() => setActiveTab('appearance')}
-          >
-            <Palette size={17} />
-            <span>Giao diện</span>
-          </button>
-          <button
-            className={`bn-settings-menu-item ${activeTab === 'notifications' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notifications')}
-          >
-            <Bell size={17} />
-            <span>Thông báo</span>
-          </button>
-          <button
-            className={`bn-settings-menu-item ${activeTab === 'sessions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sessions')}
-          >
-            <Laptop size={17} />
-            <span>Phiên đăng nhập</span>
-          </button>
+  async function signOut() { await logout(); navigate('/login', { replace: true }); }
+  return <ReaderLayout>
+    <div className="bn-page-header"><h1 className="bn-page-title-main">Cài đặt</h1><p className="bn-page-subtitle-main">Tùy chỉnh tài khoản và trải nghiệm đọc sách của bạn</p></div>
+    <div className="ob-settings-page">
+      <section className="ob-settings-group">
+        <h2>Tài khoản</h2>
+        <div className="ob-settings-card ob-account-card">
+          <div className="ob-settings-account-info"><strong>{user?.name || 'Chưa có tên tài khoản'}</strong><span>{user?.email || 'Chưa có email tài khoản'}</span></div>
+          {!editingProfile && <button className="ob-settings-action" type="button" onClick={() => { setName(user?.name ?? ''); setPhoneNumber(user?.phone_number ?? ''); setEditingProfile(true); }}>Chỉnh sửa hồ sơ</button>}
         </div>
+        {editingProfile && <form className="ob-settings-card ob-settings-profile-form" onSubmit={(event) => void saveProfile(event)}>
+          <label className="ob-settings-label">Tên hiển thị<input className="ob-settings-input" required maxLength={100} value={name} onChange={(event) => setName(event.target.value)} /></label>
+          <label className="ob-settings-label">Số điện thoại<input className="ob-settings-input" maxLength={12} value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} /></label>
+          <div className="ob-settings-form-actions"><button type="button" className="ob-settings-secondary" onClick={() => setEditingProfile(false)}>Hủy</button><button type="submit" className="ob-settings-primary" disabled={savingProfile}>{savingProfile ? 'Đang lưu…' : 'Lưu thay đổi'}</button></div>
+        </form>}
+        {profileNotice && <p className="ob-settings-notice" role="status">{profileNotice}</p>}
+      </section>
 
-        {/* Cột nội dung bên phải */}
-        <div>
-          {/* Khối 1: Thông tin cá nhân */}
-          <div className="bn-settings-card">
-            <div className="bn-settings-card-title">Thông tin cá nhân</div>
-
-            <div className="bn-settings-avatar-row">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
-                alt="avatar"
-                className="bn-settings-avatar-big"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = '/book-cover-placeholder.svg';
-                }}
-              />
-              <button type="button" className="bn-btn-change-avatar">
-                Thay ảnh
-              </button>
-            </div>
-
-            {profileNotice && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: '#ECFDF5', color: '#10B981', fontSize: 13, marginBottom: 16 }}>
-                <CheckCircle2 size={16} />
-                <span>{profileNotice.message}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleUpdateProfile}>
-              <div className="bn-field-group">
-                <label className="bn-field-label">Họ và tên</label>
-                <input
-                  className="bn-field-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nhập họ và tên"
-                  required
-                />
-              </div>
-
-              <div className="bn-field-group">
-                <label className="bn-field-label">Email</label>
-                <input
-                  className="bn-field-input"
-                  value={email}
-                  readOnly
-                  disabled
-                  style={{ background: '#F8FAFC' }}
-                />
-              </div>
-
-              <div className="bn-field-group">
-                <label className="bn-field-label">Ngày sinh</label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    className="bn-field-input"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                  />
-                  <Calendar size={16} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--bn-text-subtle)', pointerEvents: 'none' }} />
-                </div>
-              </div>
-
-              <button type="submit" className="bn-btn-save-cyan" disabled={savingProfile}>
-                {savingProfile ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
-            </form>
-          </div>
-
-          {/* Khối 2: Đổi mật khẩu */}
-          <div className="bn-settings-card">
-            <div className="bn-settings-card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Lock size={17} style={{ color: 'var(--bn-primary)' }} />
-              <span>Đổi mật khẩu</span>
-            </div>
-
-            {passwordNotice && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  background: passwordNotice.type === 'success' ? '#ECFDF5' : '#FEF2F2',
-                  color: passwordNotice.type === 'success' ? '#10B981' : '#EF4444',
-                  fontSize: 13,
-                  marginBottom: 16
-                }}
-              >
-                {passwordNotice.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                <span>{passwordNotice.message}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleChangePassword}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div className="bn-field-group">
-                  <label className="bn-field-label">Mật khẩu hiện tại</label>
-                  <input
-                    type="password"
-                    className="bn-field-input"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu hiện tại"
-                    required
-                  />
-                </div>
-
-                <div className="bn-field-group">
-                  <label className="bn-field-label">Mật khẩu mới</label>
-                  <input
-                    type="password"
-                    className="bn-field-input"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu mới"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="bn-field-group" style={{ maxWidth: 'calc(50% - 8px)' }}>
-                <label className="bn-field-label">Xác nhận mật khẩu</label>
-                <input
-                  type="password"
-                  className="bn-field-input"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Xác nhận mật khẩu mới"
-                  required
-                />
-              </div>
-
-              <button type="submit" className="bn-btn-save-cyan" disabled={savingPassword}>
-                {savingPassword ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
-              </button>
-            </form>
-          </div>
+      <section className="ob-settings-group">
+        <h2>Hiển thị</h2>
+        <div className="ob-settings-card ob-settings-options">
+          <label className="ob-settings-row"><span className="ob-settings-option-icon"><Sun size={14} /></span><span className="ob-settings-row-copy"><strong>Chế độ sáng/tối</strong><small>Giao diện HarveyBook</small></span><select aria-label="Chế độ sáng/tối" value={theme} onChange={(event) => setTheme(event.target.value as ThemePreference)}><option value="auto">Tự động</option><option value="light">Sáng</option><option value="dark">Tối</option></select></label>
+          <label className="ob-settings-row"><span className="ob-settings-option-icon"><UserRound size={14} /></span><span className="ob-settings-row-copy"><strong>Kích thước chữ đọc</strong><small>Áp dụng cho trang đọc sách</small></span><select aria-label="Kích thước chữ đọc" value={readingSize} onChange={(event) => setReadingSize(event.target.value as ReadingSize)}><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label>
+          <div className="ob-settings-row"><span className="ob-settings-option-icon">文</span><span className="ob-settings-row-copy"><strong>Ngôn ngữ</strong><small>Ngôn ngữ đang dùng trong ứng dụng</small></span><span className="ob-settings-static-value">Tiếng Việt</span></div>
         </div>
-      </div>
-    </ReaderLayout>
-  );
+      </section>
+
+      <section className="ob-settings-group">
+        <h2>Đọc sách</h2>
+        <div className="ob-settings-card ob-settings-options">
+          <div className="ob-settings-row"><span className="ob-settings-option-icon"><Check size={14} /></span><span className="ob-settings-row-copy"><strong>Lưu tiến độ đọc</strong><small>Chương gần nhất được lưu tự động khi bạn mở nội dung.</small></span><span className="ob-settings-state">Theo tài khoản</span></div>
+          <div className="ob-settings-row"><span className="ob-settings-option-icon"><Check size={14} /></span><span className="ob-settings-row-copy"><strong>Đồng bộ dữ liệu</strong><small>Tiến độ và chương đã lưu gắn với tài khoản</small></span><span className="ob-settings-state">Tài khoản</span></div>
+          <div className="ob-settings-row is-muted"><span className="ob-settings-option-icon"><AlertCircle size={14} /></span><span className="ob-settings-row-copy"><strong>Thông báo sách mới</strong><small>Thông báo chưa được hỗ trợ</small></span></div>
+        </div>
+      </section>
+
+      <section className="ob-settings-group">
+        <h2>Khác</h2>
+        <div className="ob-settings-card ob-settings-options">
+          <Link className="ob-settings-row ob-settings-link-row" to="/support"><span className="ob-settings-option-icon"><ChevronRight size={14} /></span><span className="ob-settings-row-copy"><strong>Trợ giúp & Hỗ trợ</strong></span><ChevronRight size={14} /></Link>
+          <button className="ob-settings-row ob-settings-link-row" type="button" onClick={() => { setPasswordOpen((open) => !open); setPasswordNotice(null); }}><span className="ob-settings-option-icon"><LockKeyhole size={14} /></span><span className="ob-settings-row-copy"><strong>{passwordOpen ? 'Đóng đổi mật khẩu' : 'Đổi mật khẩu'}</strong></span><ChevronRight size={14} /></button>
+          {passwordOpen && <form className="ob-settings-password-form" onSubmit={(event) => void savePassword(event)}>
+            {passwordNotice && <p className={`ob-settings-notice ${passwordNotice.kind}`} role={passwordNotice.kind === 'error' ? 'alert' : 'status'}>{passwordNotice.text}</p>}
+            <label className="ob-settings-label">Mật khẩu hiện tại<input className="ob-settings-input" type="password" autoComplete="current-password" required value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
+            <div className="ob-settings-password-fields"><label className="ob-settings-label">Mật khẩu mới<input className="ob-settings-input" type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label><label className="ob-settings-label">Xác nhận mật khẩu<input className="ob-settings-input" type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label></div>
+            <button className="ob-settings-primary" type="submit" disabled={savingPassword}>{savingPassword ? 'Đang cập nhật…' : 'Cập nhật mật khẩu'}</button>
+          </form>}
+        </div>
+      </section>
+
+      {user && <button className="ob-settings-logout" type="button" onClick={() => void signOut()}><LogOut size={14} />Đăng xuất</button>}
+    </div>
+  </ReaderLayout>;
 }

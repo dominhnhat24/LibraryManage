@@ -3,12 +3,12 @@ import { asyncHandler } from '../utils/async-handler.js';
 import * as subscriptionService from '../services/subscription.service.js';
 import { mapDtoList, toSubscriptionDto } from '../utils/api-dto.js';
 
-// [YÊU CẦU PREMIUM] Ghi nhận khoản chuyển khoản 20.000 VND; không bật Premium trước khi duyệt.
+// [YÊU CẦU THÀNH VIÊN] Ghi nhận yêu cầu gói VIP/Premium; chỉ bật quyền sau khi ADMIN duyệt.
 export const createSubscription = asyncHandler(async (req, res) => {
     const subscription = await subscriptionService.createSubscription(req.authUser._id, { ...req.body });
     return res.status(201).json({
         status: 'success',
-        message: 'Payment request submitted for manual review',
+        message: 'Payment request submitted; waiting for payment confirmation',
         data: {
             ...toSubscriptionDto(subscription),
             payment_instructions: {

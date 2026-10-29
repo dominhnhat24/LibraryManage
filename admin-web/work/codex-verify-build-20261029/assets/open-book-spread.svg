@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" width="100%" height="100%">
+  <defs>
+    <!-- Page curl drop shadow -->
+    <filter id="pageShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#3B2A1A" flood-opacity="0.22"/>
+    </filter>
+    <linearGradient id="leftPageGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F7F3EA"/>
+      <stop offset="85%" stop-color="#FCFAF5"/>
+      <stop offset="97%" stop-color="#E5DEC9"/>
+      <stop offset="100%" stop-color="#B8AB91"/>
+    </linearGradient>
+    <linearGradient id="rightPageGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#B8AB91"/>
+      <stop offset="3%" stop-color="#E5DEC9"/>
+      <stop offset="15%" stop-color="#FCFAF5"/>
+      <stop offset="100%" stop-color="#F7F3EA"/>
+    </linearGradient>
+    <linearGradient id="edgePages" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DFD6C2"/>
+      <stop offset="50%" stop-color="#ECE5D4"/>
+      <stop offset="100%" stop-color="#D5CAAE"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#pageShadow)">
+    <!-- Book stack thickness at bottom -->
+    <path d="M 28 245 Q 140 252 260 252 Q 380 252 492 245 L 498 252 Q 380 260 260 260 Q 140 260 22 252 Z" fill="url(#edgePages)"/>
+
+    <!-- Left Open Page -->
+    <path d="M 25 240 Q 140 248 260 248 L 260 22 Q 140 18 25 15 Z" fill="url(#leftPageGrad)"/>
+    
+    <!-- Right Open Page -->
+    <path d="M 260 248 Q 380 248 495 240 L 495 15 Q 380 18 260 22 Z" fill="url(#rightPageGrad)"/>
+  </g>
+
+  <!-- Left Page Content: Scientific Chart & Text -->
+  <g fill="#2C2B29" opacity="0.85">
+    <!-- Chart axes -->
+    <line x1="55" y1="95" x2="195" y2="95" stroke="#4A4947" stroke-width="0.8"/>
+    <line x1="75" y1="50" x2="75" y2="105" stroke="#4A4947" stroke-width="0.8"/>
+    <!-- Exponential curve -->
+    <path d="M 75 92 Q 130 90 190 52" stroke="#2B2927" stroke-width="1.2" fill="none"/>
+    <path d="M 75 93 Q 130 94 190 102" stroke="#8A8680" stroke-width="0.9" stroke-dasharray="2,2" fill="none"/>
+    <!-- Tiny chart labels -->
+    <text x="80" y="48" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" fill="#75726D">1% better every day</text>
+    <text x="145" y="108" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" fill="#75726D">1 year = 37.78x</text>
+
+    <!-- Paragraph lines (Left Page) -->
+    <rect x="52" y="118" width="180" height="2.5" rx="1" fill="#4A4742" opacity="0.65"/>
+    <rect x="52" y="125" width="175" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="131" width="182" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="137" width="168" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+
+    <rect x="52" y="148" width="180" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="154" width="176" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="160" width="179" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="166" width="160" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+
+    <rect x="52" y="177" width="182" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="183" width="175" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="52" y="189" width="150" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+  </g>
+
+  <!-- Right Page Content: Text Paragraphs & Chapter Heading -->
+  <g fill="#2C2B29" opacity="0.85">
+    <!-- Chapter small header -->
+    <text x="375" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="6" font-weight="700" letter-spacing="1" fill="#6B6760" text-anchor="middle">WHAT PROGRESS IS REALLY LIKE</text>
+
+    <!-- Paragraph text lines (Right Page) -->
+    <rect x="290" y="50" width="178" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="56" width="172" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="62" width="175" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="68" width="160" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+
+    <rect x="290" y="80" width="180" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="86" width="176" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="92" width="179" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="98" width="170" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="104" width="155" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+
+    <rect x="290" y="116" width="178" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="122" width="174" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="128" width="176" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="134" width="168" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+
+    <rect x="290" y="146" width="180" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="152" width="175" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="158" width="172" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+    <rect x="290" y="164" width="145" height="2" rx="1" fill="#736F68" opacity="0.5"/>
+  </g>
+
+  <!-- Center spine seam / shadow line -->
+  <line x1="260" y1="20" x2="260" y2="248" stroke="#8C816B" stroke-width="1.4" opacity="0.7"/>
+</svg>

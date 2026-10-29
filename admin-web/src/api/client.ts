@@ -8,6 +8,12 @@ const ACCESS_TOKEN_KEY = 'openbook.access_token';
 const REFRESH_TOKEN_KEY = 'openbook.refresh_token';
 const USER_KEY = 'openbook.user';
 
+export function apiAssetUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const apiOrigin = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+  return new URL(path, `${apiOrigin}/`).toString();
+}
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 20_000,
@@ -98,9 +104,10 @@ export async function fetchPublicBooks(
   category?: Book['category'],
   page = 1,
   limit = 30,
+  genre?: Book['genre'],
 ): Promise<PublicBookListResponse> {
   const { data } = await api.get<ApiEnvelope<Book[]>>('/books', {
-    params: { page, limit, ...(search ? { search } : {}), ...(category ? { category } : {}) },
+    params: { page, limit, ...(search ? { search } : {}), ...(category ? { category } : {}), ...(genre ? { genre } : {}) },
   });
   return {
     books: data.data,
@@ -129,11 +136,35 @@ export async function fetchReadableChapters(bookId: string, page = 1, limit = 50
   };
 }
 
+// Lấy metadata trực tiếp của một chương đã lưu mà không cần tải toàn bộ catalog.
+export async function fetchReadableChapterMetadata(bookId: string, chapterId: string): Promise<Chapter> {
+  const { data } = await api.get<ApiEnvelope<Chapter>>(
+    `/books/${encodeURIComponent(bookId)}/chapters/${encodeURIComponent(chapterId)}`,
+  );
+  return data.data;
+}
+
 // Hàm readBookChapter: Xin backend kiểm tra entitlement, ghi lượt đọc và trả nội dung chương.
 export async function readBookChapter(bookId: string, chapterId: string): Promise<ReadChapterResult> {
   const { data } = await api.post<ApiEnvelope<ReadChapterResult>>(
     `/books/${encodeURIComponent(bookId)}/chapters/${encodeURIComponent(chapterId)}/read`,
   );
+  return data.data;
+}
+
+// Explicit completion is separate from opening content and safe to retry.
+export async function completeBookChapter(bookId: string, chapterId: string): Promise<{
+  newly_completed: boolean;
+  completed_chapter_count: number;
+  completed_chapters_since_ad: number;
+  ad_eligibility_due: boolean;
+}> {
+  const { data } = await api.post<ApiEnvelope<{
+    newly_completed: boolean;
+    completed_chapter_count: number;
+    completed_chapters_since_ad: number;
+    ad_eligibility_due: boolean;
+  }>>(`/books/${encodeURIComponent(bookId)}/chapters/${encodeURIComponent(chapterId)}/complete`);
   return data.data;
 }
 
@@ -204,22 +235,29 @@ export async function saveReaderBookmark(bookId: string, chapterId: string, book
 }
 
 // Hàm fetchReadingProgress: Tải thống kê số lượt đọc theo sách của tài khoản hiện tại.
-export async function fetchReadingProgress(page = 1, limit = 50): Promise<{
+export async function fetchReadingProgress(page = 1, limit = 50, search = '', bookId?: string): Promise<{
   progress: ReadingProgress[];
   pagination: PaginationData;
 }> {
+  const safeLimit = Math.min(50, Math.max(1, Math.trunc(limit)));
   const { data } = await api.get<ApiEnvelope<ReadingProgress[]>>('/reading-progress', {
-    params: { page, limit },
+    params: { page, limit: safeLimit, ...(search ? { search } : {}), ...(bookId ? { book: bookId } : {}) },
   });
   return {
     progress: data.data,
-    pagination: data.pagination ?? { total: data.data.length, page, limit, totalPages: 1 },
+    pagination: data.pagination ?? { total: data.data.length, page, limit: safeLimit, totalPages: 1 },
   };
 }
 
 // Hàm deleteReadingProgress: Xóa một bộ đếm tiến độ đọc của tài khoản hiện tại.
 export async function deleteReadingProgress(progressId: string): Promise<void> {
   await api.delete(`/reading-progress/${encodeURIComponent(progressId)}`);
+}
+
+// Hàm clearReadingHistory: Xóa toàn bộ tiến độ đọc thuộc tài khoản đang đăng nhập.
+export async function clearReadingHistory(): Promise<number> {
+  const { data } = await api.delete<ApiEnvelope<{ deleted_count: number }>>('/reading-progress');
+  return data.data.deleted_count;
 }
 
 // Hàm updateReadingProgress: Cập nhật bộ đếm đọc của tài khoản theo giới hạn trường do backend đặt.
@@ -240,8 +278,8 @@ export async function submitReaderReport(payload: {
   message: string;
   type: 'contact' | 'bug';
   email?: string;
-}): Promise<Partial<Report>> {
-  const { data } = await api.post<ApiEnvelope<Partial<Report>>>('/reports', payload);
+}): Promise<Partial<Report> & { confirmation_email_sent?: boolean }> {
+  const { data } = await api.post<ApiEnvelope<Partial<Report> & { confirmation_email_sent?: boolean }>>('/reports', payload);
   return data.data;
 }
 
@@ -260,16 +298,13 @@ export async function createReaderSubscription(
 }
 
 // Hàm streamPublicBook: Lấy nội dung file qua API bảo vệ JWT/quyền đọc, không gọi URL kho lưu trữ trực tiếp.
-export async function streamPublicBook(bookId: string): Promise<{ blob: Blob; showAd: boolean }> {
+export async function streamPublicBook(bookId: string): Promise<Blob> {
   try {
     const response = await api.get<Blob>(`/books/${encodeURIComponent(bookId)}/stream`, {
       responseType: 'blob',
       headers: { Accept: 'application/pdf,application/epub+zip,*/*' },
     });
-    return {
-      blob: response.data,
-      showAd: response.headers['x-openbook-show-ad'] === 'true',
-    };
+    return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
       const responseText = await error.response.data.text();
@@ -356,27 +391,49 @@ export async function uploadExcelApi(formData: FormData) {
 
 // Hàm refreshAccessToken: Xoay refresh token một lần và dùng chung promise cho các request đồng thời.
 let refreshRequest: Promise<string> | null = null;
-async function refreshAccessToken(): Promise<string> {
-  if (!refreshRequest) {
-    refreshRequest = axios.post<ApiEnvelope<AuthPayload>>(
+async function performRefresh(failedAccessToken?: string): Promise<string> {
+  const currentAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+  // Another tab may already have refreshed while this request waited for the lock.
+  if (failedAccessToken && currentAccessToken && currentAccessToken !== failedAccessToken) return currentAccessToken;
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refreshToken) throw new Error('Refresh token is missing');
+
+  try {
+    const { data } = await axios.post<ApiEnvelope<AuthPayload>>(
       `${API_BASE_URL}/auth/refresh`,
-      { refresh_token: localStorage.getItem(REFRESH_TOKEN_KEY) },
+      { refresh_token: refreshToken },
       { timeout: 20_000, headers: { Accept: 'application/json' } },
-    )
-      .then(({ data }) => {
-        storeSession(data.data);
-        return data.data.access_token;
-      })
-      .catch((error: unknown) => {
-        clearSession();
-        window.dispatchEvent(new CustomEvent('openbook:session-expired'));
-        throw error;
-      })
+    );
+    storeSession(data.data);
+    return data.data.access_token;
+  } catch (error: unknown) {
+    // A different tab can rotate the token while this request is in flight. Never
+    // erase that newer session because this tab's copy of the old token was rejected.
+    const latestRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const latestAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (latestRefreshToken && latestRefreshToken !== refreshToken && latestAccessToken) return latestAccessToken;
+    clearSession();
+    window.dispatchEvent(new CustomEvent('openbook:session-expired'));
+    throw error;
+  }
+}
+
+async function refreshAccessToken(failedAccessToken?: string): Promise<string> {
+  if (!refreshRequest) {
+    const refresh = () => performRefresh(failedAccessToken);
+    const task: Promise<string> = typeof navigator !== 'undefined' && 'locks' in navigator
+      ? (navigator.locks.request as unknown as (name: string, callback: () => Promise<string>) => Promise<string>)(
+        'openbook-auth-refresh', refresh,
+      )
+      : refresh();
+    const pending = task
       .finally(() => {
         refreshRequest = null;
       });
+    refreshRequest = pending;
+    return pending;
   }
-  return refreshRequest;
+  return refreshRequest!;
 }
 
 api.interceptors.request.use((config) => {
@@ -409,7 +466,9 @@ api.interceptors.response.use(
       && localStorage.getItem(REFRESH_TOKEN_KEY)) {
       config._retry = true;
       try {
-        const token = await refreshAccessToken();
+        const authorization = String(config.headers.get('Authorization') || '');
+        const failedAccessToken = /^Bearer\s+(.+)$/i.exec(authorization)?.[1];
+        const token = await refreshAccessToken(failedAccessToken);
         config.headers.Authorization = `Bearer ${token}`;
         return api.request(config);
       } catch (refreshError) {
@@ -490,8 +549,18 @@ export async function updateMyProfile(payload: { name: string; phone_number?: st
   return data.data;
 }
 
+export async function uploadMyAvatar(file: File): Promise<User> {
+  const form = new FormData();
+  form.append('avatar', file);
+  const { data } = await api.post<ApiEnvelope<User>>('/auth/me/avatar', form);
+  storeUser(data.data);
+  return data.data;
+}
+
 export async function changeMyPassword(current_password: string, new_password: string): Promise<void> {
   await api.post('/auth/change-password', { current_password, new_password });
+  clearSession();
+  window.dispatchEvent(new CustomEvent('openbook:session-expired'));
 }
 
 // Hàm signOut: Thu hồi refresh token phía server trước khi dọn phiên trên trình duyệt.
@@ -514,6 +583,61 @@ export async function fetchBooks(params: {
   const { data } = await api.get<ApiEnvelope<Book[]>>('/admin/books', { params });
   if (!data.pagination) throw new Error('API danh sách sách không trả dữ liệu phân trang.');
   return { books: data.data, pagination: data.pagination };
+}
+
+export interface BookImportCandidate {
+  id: string;
+  title: string;
+  author: string;
+  summary: string;
+  source: string;
+  sourceUrl: string;
+  language: 'vi';
+  format: 'PDF';
+  license: string;
+  licenseUrl: string;
+  coverUrl: string;
+  coverVerified: boolean;
+  coverLicense: string;
+  coverLicenseUrl: string;
+  coverSourceUrl: string;
+  coverAttribution: string;
+  coverWidth: number | null;
+  coverHeight: number | null;
+  contentCharacters: number;
+  publicationYear: number | null;
+  eligible: boolean;
+  reasons: string[];
+  exportAvailable: boolean;
+}
+
+export interface BookImportSearchResult {
+  query: string;
+  found: number;
+  checked: number;
+  eligible: number;
+  excluded: number;
+  exclusions: Array<{ reason: string; count: number }>;
+  excludedCandidates: Array<{ id: string; title: string; reasons: string[] }>;
+  candidates: BookImportCandidate[];
+}
+
+export async function searchBookImportCandidates(query: string): Promise<BookImportSearchResult> {
+  const { data } = await api.get<ApiEnvelope<BookImportSearchResult>>('/admin/book-import/search', {
+    params: { q: query },
+    timeout: 90000,
+  });
+  return data.data;
+}
+
+export async function importBookCandidate(pageTitle: string, confirmLicense: boolean, confirmCover: boolean): Promise<{
+  status: 'imported' | 'already_imported' | 'duplicate';
+  book: Book;
+}> {
+  const { data } = await api.post<ApiEnvelope<{ status: 'imported' | 'already_imported' | 'duplicate'; book: Book }>>(
+    '/admin/book-import/import', { pageTitle, confirmLicense, confirmCover }, { timeout: 180000 },
+  );
+  return data.data;
 }
 
 // Hàm createBook: Gửi dữ liệu form sách mới đến endpoint quản trị.
@@ -654,6 +778,15 @@ export async function grantVip(userId: string, vipExpiresAt: string): Promise<Us
   return data.data;
 }
 
+// Hàm grantPremium: Cấp quyền Premium đến thời điểm hết hạn do ADMIN chọn.
+export async function grantPremium(userId: string, premiumExpiresAt: string): Promise<User> {
+  const { data } = await api.patch<ApiEnvelope<User>>(
+    `/admin/users/${encodeURIComponent(userId)}/premium`,
+    { premium_expires_at: premiumExpiresAt },
+  );
+  return data.data;
+}
+
 // Hàm fetchSubscriptions: Tải yêu cầu thuê bao theo trạng thái, gói và phân trang.
 export async function fetchSubscriptions(params: {
   page: number;
@@ -742,6 +875,7 @@ export interface BookFormPayload {
   title: string;
   author_name: string;
   category: Book['category'];
+  genre: NonNullable<Book['genre']>;
   publication_year: number | null;
   description: string;
   cover_url: string;

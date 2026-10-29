@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-    createReadingProgress, deleteReadingProgress, getAllReadingProgress,
+    clearAllReadingProgress, createReadingProgress, deleteReadingProgress, getAllReadingProgress,
     getReadingProgress, updateReadingProgress
 } from '../controllers/reading-progress.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
@@ -11,6 +11,7 @@ const router = Router();
 router.use(verifyToken);
 router.get('/', validateQuery(modelValidation.readingProgress.list), getAllReadingProgress);
 router.post('/', validateBody(modelValidation.readingProgress.create), createReadingProgress);
+router.delete('/', clearAllReadingProgress);
 router.get('/:progressId', validateParams(modelValidation.params.progress), getReadingProgress);
 router.patch('/:progressId', validateParams(modelValidation.params.progress),
     validateBody(modelValidation.readingProgress.update), updateReadingProgress);

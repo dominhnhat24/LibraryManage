@@ -7,6 +7,7 @@ const initialForm: BookFormPayload = {
   title: '',
   author_name: '',
   category: 'ebook',
+  genre: 'van_hoc_viet_nam',
   publication_year: null,
   description: '',
   cover_url: '',
@@ -32,6 +33,7 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
       title: book.title,
       author_name: book.author_name,
       category: book.category,
+      genre: book.genre || 'van_hoc_viet_nam',
       publication_year: book.publication_year,
       description: book.description || '',
       cover_url: book.cover_url || '',
@@ -94,7 +96,7 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
               <input className="form-input mt-2" maxLength={120} onChange={(event) => updateField('author_name', event.target.value)} placeholder="Tên tác giả" required value={form.author_name} />
             </label>
             <label className="field-label">
-              Thể loại <span className="text-rose-600">*</span>
+              Hình thức nội dung <span className="text-rose-600">*</span>
               <select className="form-input mt-2" onChange={(event) => {
                 const nextCategory = event.target.value as BookFormPayload['category'];
                 updateField('category', nextCategory);
@@ -104,6 +106,21 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
                 <option value="audiobook">Sách nói</option>
                 <option value="comic">Truyện tranh</option>
                 <option value="webnovel">Web novel</option>
+              </select>
+            </label>
+            <label className="field-label">
+              Danh mục sách
+              <select className="form-input mt-2" onChange={(event) => updateField('genre', event.target.value as BookFormPayload['genre'])} value={form.genre}>
+                <option value="van_hoc_viet_nam">Văn học Việt Nam</option>
+                <option value="truyen_ngan_viet_nam">Truyện ngắn Việt Nam</option>
+                <option value="tho_viet_nam">Thơ Việt Nam</option>
+                <option value="van_hoc_dan_gian">Văn học dân gian</option>
+                <option value="van_hoc_the_gioi">Văn học thế giới</option>
+                <option value="kinh_doanh">Kinh doanh</option>
+                <option value="phat_trien_ban_than">Phát triển bản thân</option>
+                <option value="tam_ly_hoc">Tâm lý học</option>
+                <option value="lich_su">Lịch sử</option>
+                <option value="khoa_hoc">Khoa học</option>
               </select>
             </label>
             <label className="field-label">

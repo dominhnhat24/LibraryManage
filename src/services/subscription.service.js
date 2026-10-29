@@ -5,7 +5,7 @@ import User from '../models/user.model.js';
 import ApiError from '../utils/api-error.js';
 import { PAGINATION } from '../constants/pagination.constant.js';
 
-// Tạo yêu cầu gói tháng (Chờ thanh toán / Chờ duyệt)
+// Tạo yêu cầu gói tháng và mã chuyển khoản riêng để webhook đối chiếu giao dịch.
 export const createSubscription = async (userId, data = {}) => {
     if (!userId) throw new ApiError(401, 'Authentication is required');
 
@@ -27,48 +27,49 @@ export const createSubscription = async (userId, data = {}) => {
         payment_reference: data.payment_reference,
         user: userId,
         plan,
-        transfer_note: `OPENBOOK-${randomBytes(6).toString('hex').toUpperCase()}`,
-        gateway: 'momo' // Hoặc nhận từ client/cấu hình
+        amount_vnd: plan === 'vip_monthly' ? 10000 : 20000,
+        transfer_note: `HB${randomBytes(5).toString('hex').toUpperCase()}`,
+        gateway: 'manual'
     };
     return Subscription.create(payload);
 };
 
 // [SERVICE TỰ ĐỘNG QUA WEBHOOK] Xử lý khi cổng thanh toán gọi về
-export const processPaymentWebhook = async ({ content, transferAmount, transactionId, gateway = 'momo' }) => {
-    if (!content) {
-        throw new Error('Thiếu nội dung chuyển khoản từ webhook');
+export const processPaymentWebhook = async ({ id, transferType, transferAmount, content, code }) => {
+    const transactionId = String(id ?? '').trim();
+    const amount = Number(transferAmount);
+    if (!transactionId || !Number.isFinite(amount) || amount <= 0) {
+        throw new ApiError(400, 'Webhook transaction ID and positive transfer amount are required');
+    }
+    if (String(transferType || '').toLowerCase() !== 'in') {
+        return { matched: false, reason: 'not_incoming' };
     }
 
-    // Tìm bản ghi đang pending có chứa mã chuyển khoản trong transfer_note
-    const subscription = await Subscription.findOne({
-        status: 'pending',
-        transfer_note: { $regex: new RegExp(content.trim(), 'i') }
-    });
+    const duplicate = await Subscription.findOne({ gateway: 'sepay', transaction_id: transactionId });
+    if (duplicate) return { matched: true, duplicate: true, subscription: duplicate };
 
-    if (!subscription) {
-        // Không tìm thấy bản ghi khớp -> Trả về null để ghi log hoặc để admin duyệt tay sau
-        return null; 
+    const notePattern = /(?:HB[A-Z0-9]{10}|OPENBOOK-[A-F0-9]{12})/i;
+    const paymentCode = String(code || '').trim();
+    const referenceText = `${paymentCode} ${String(content || '')}`;
+    const match = referenceText.match(notePattern);
+    if (!match) return { matched: false, reason: 'payment_note_not_found' };
+    const transferNote = match[0].toUpperCase();
+    const pending = await Subscription.findOne({ transfer_note: transferNote, status: 'pending' });
+    if (!pending) return { matched: false, reason: 'pending_subscription_not_found' };
+    if (pending.amount_vnd !== amount) return { matched: false, reason: 'amount_mismatch' };
+
+    try {
+        const subscription = await approveSubscription(pending._id, null, {
+            gateway: 'sepay', transactionId
+        });
+        return { matched: true, duplicate: false, subscription };
+    } catch (error) {
+        if (error?.code === 11000) {
+            const processed = await Subscription.findOne({ gateway: 'sepay', transaction_id: transactionId });
+            if (processed) return { matched: true, duplicate: true, subscription: processed };
+        }
+        throw error;
     }
-
-    // Kiểm tra số tiền
-    if (transferAmount < subscription.amount_vnd) {
-        throw new Error(`Số tiền chuyển khoản (${transferAmount} VND) không đủ so với giá gói (${subscription.amount_vnd} VND)`);
-    }
-
-    // Kích hoạt tự động
-    const now = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setMonth(expiresAt.getMonth() + 1);
-
-    subscription.status = 'active';
-    subscription.starts_at = now;
-    subscription.expires_at = expiresAt;
-    subscription.gateway = gateway;
-    subscription.transaction_id = transactionId || null;
-    subscription.auto_approved = true;
-
-    await subscription.save();
-    return subscription;
 };
 
 // [CƠ CHẾ DỰ PHÒNG] Admin duyệt thủ công khi webhook gặp lỗi hoặc giao dịch treo
@@ -181,7 +182,7 @@ export const deleteSubscription = async (subscriptionId) => {
 };
 
 // Hàm approveSubscription: Duyệt yêu cầu pending trong transaction và cập nhật quyền VIP/Premium cùng hạn sử dụng nguyên tử.
-export const approveSubscription = async (subscriptionId, reviewerId) => {
+export const approveSubscription = async (subscriptionId, reviewerId, payment = null) => {
     const session = await mongoose.startSession();
     let approved;
     try {
@@ -217,6 +218,11 @@ export const approveSubscription = async (subscriptionId, reviewerId) => {
             subscription.starts_at = startsAt;
             subscription.expires_at = expiresAt;
             subscription.reviewed_by = reviewerId;
+            if (payment) {
+                subscription.gateway = payment.gateway;
+                subscription.transaction_id = payment.transactionId;
+                subscription.auto_approved = true;
+            }
             await subscription.save({ session });
             approved = subscription.toObject();
         });

@@ -243,7 +243,7 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
           <p className="eyebrow">Kho nội dung số · Danh mục</p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#202b28] sm:text-[2.15rem]">Quản lý sách</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-            Quản lý danh mục, quyền truy cập và trạng thái xuất bản trong thư viện OpenBook.
+            Quản lý danh mục, quyền truy cập và trạng thái xuất bản trong thư viện HarveyBook.
           </p>
         </div>
         <div className="flex items-center gap-2 self-start md:self-auto">
@@ -270,7 +270,7 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
         </div>
       </section>
 
-      <section aria-label="Thống kê sách" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-3">
+      <section aria-label="Thống kê sách" className="mb-5 grid gap-px border border-[#DDE9E6] bg-[#DDE9E6] sm:grid-cols-2">
         <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Tổng đầu sách</p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.total.toLocaleString('vi-VN')}</p>
@@ -278,10 +278,6 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
         <div className="bg-[#FFFFFF] px-5 py-4">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Trang hiện tại</p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.totalPages ? `${pagination.page} / ${pagination.totalPages}` : '—'}</p>
-        </div>
-        <div className="bg-[#FFFFFF] px-5 py-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Bản ghi mỗi trang</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#153D31]">{pagination.limit}</p>
         </div>
       </section>
 

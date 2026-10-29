@@ -138,7 +138,7 @@ export function ChapterManagement() {
           <p className="eyebrow">Kho nội dung số · Chi tiết</p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#202b28] sm:text-[2.15rem]">Quản lý chương</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-            Tổ chức nội dung, thứ tự và cấp quyền đọc cho từng chương trong thư viện OpenBook.
+            Tổ chức nội dung, thứ tự và cấp quyền đọc cho từng chương trong thư viện HarveyBook.
           </p>
         </div>
         <div className="flex items-center gap-2">

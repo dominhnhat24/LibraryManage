@@ -1,108 +1,55 @@
 import { useState, type ReactNode, type FormEvent } from 'react';
-import { BookOpen, Heart, LibraryBig, LogOut, Menu, Search, Settings, LifeBuoy } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Crown, LogOut, Search, Settings, LifeBuoy } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import '../reader-ui.css';
+import { ReaderSidebar } from './ReaderSidebar';
+import { ReaderNotifications } from './ReaderNotifications';
 
-const navItems = [
-  { to: '/', label: 'Trang chủ', icon: BookOpen },
-  { to: '/library', label: 'Tủ sách của tôi', icon: LibraryBig },
-  { to: '/favorites', label: 'Yêu thích', icon: Heart },
-  { to: '/account', label: 'Cài đặt', icon: Settings },
-];
-
-export function ReaderShell({ children, title, subtitle, searchValue = '', onSearchChange }: {
+export function ReaderShell({ children, title, subtitle, searchValue = '', onSearchChange, onSearchSubmit, hideSearch = false }: {
   children: ReactNode;
   title?: string;
   subtitle?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  onSearchSubmit?: (value: string) => void;
+  hideSearch?: boolean;
 }) {
   const { user, logout } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem('reader-sidebar-collapsed') === 'true');
   const [localSearch, setLocalSearch] = useState(searchValue);
-
-  function isActive(to: string) {
-    if (to === '/') return location.pathname === '/' || location.pathname === '/catalog';
-    return location.pathname === to || location.pathname.startsWith(`${to}/`);
-  }
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const q = (onSearchChange ? searchValue : localSearch).trim();
-    navigate(q ? `/?search=${encodeURIComponent(q)}` : '/');
-    setMobileOpen(false);
+    if (onSearchSubmit) onSearchSubmit(q);
+    else navigate(q ? `/library?search=${encodeURIComponent(q)}` : '/library');
   }
-
-  async function handleLogout() {
-    await logout();
-    navigate('/', { replace: true });
-  }
-
+  async function handleLogout() { await logout(); navigate('/', { replace: true }); }
   const currentSearch = onSearchChange ? searchValue : localSearch;
+  const initials = user?.name?.trim().slice(0, 1).toUpperCase() || 'A';
 
-  return <div className="ob2-app">
-      <aside className={`ob2-sidebar ${mobileOpen ? 'is-open' : ''}`}>
-        <div className="ob2-brand-wrap">
-          <Link to="/" className="ob2-brand" onClick={() => setMobileOpen(false)}>
-            <span className="ob2-brand-icon"><BookOpen size={22} /></span>
-            <span><strong>OpenBook</strong><small>Đọc sách · Mở trí thức</small></span>
-          </Link>
-        </div>
-        <nav className="ob2-side-nav" aria-label="Điều hướng độc giả">
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} onClick={() => setMobileOpen(false)} className={`ob2-side-link ${isActive(to) ? 'is-active' : ''}`}>
-              <Icon size={17} /><span>{label}</span>
-            </Link>
-          ))}
-          <Link to="/support" onClick={() => setMobileOpen(false)} className={`ob2-side-link ${isActive('/support') ? 'is-active' : ''}`}>
-            <LifeBuoy size={17} /><span>Hỗ trợ</span>
-          </Link>
-        </nav>
-        <div className="ob2-side-tip">
-          <strong>Đọc sách là cách bạn trò chuyện với thế giới.</strong>
-          <span>Mở một cuốn sách mới hôm nay.</span>
-        </div>
-        <div className="ob2-side-bottom">
-          {user ? (
-            <button className="ob2-logout-link" onClick={() => void handleLogout()} type="button"><LogOut size={16} /> Đăng xuất</button>
-          ) : (
-            <Link className="ob2-login-link" to="/login">Đăng nhập</Link>
-          )}
-        </div>
-      </aside>
-      {mobileOpen && <button className="ob2-overlay" aria-label="Đóng menu" onClick={() => setMobileOpen(false)} type="button" />}
-
-      <section className="ob2-frame">
-        <header className="ob2-topbar">
-          <button className="ob2-mobile-button" aria-label="Mở menu" onClick={() => setMobileOpen(true)} type="button">
-            <Menu size={19} />
-          </button>
-          <form className="ob2-search" onSubmit={submitSearch} role="search">
-            <Search size={16} />
-            <input value={currentSearch} onChange={(event) => { const value = event.target.value; setLocalSearch(value); onSearchChange?.(value); }} placeholder="Tìm kiếm sách, tác giả, thể loại..." aria-label="Tìm kiếm sách, tác giả, thể loại" />
-          </form>
-          <div className="ob2-top-actions">
-            <span className="ob2-topbell" aria-hidden="true">♧</span>
-            {user ? (
-              <Link className="ob2-user-chip" to="/account">
-                <span className="ob2-avatar">{user.name.trim().slice(0, 1).toUpperCase()}</span>
-                <span><strong>{user.name}</strong><small>{user.is_vip ? 'VIP' : user.is_premium ? 'Premium' : 'Thành viên'}</small></span>
-              </Link>
-            ) : <Link className="ob2-user-chip" to="/login"><span className="ob2-avatar">?</span><span><strong>Khách</strong><small>Đăng nhập</small></span></Link>}
+  return <div className="booknest-home reader-shared-home">
+    <section className="booknest-book">
+      <ReaderSidebar collapsed={isSidebarCollapsed} onToggle={() => setIsSidebarCollapsed((prev) => {
+        const next = !prev;
+        localStorage.setItem('reader-sidebar-collapsed', String(next));
+        return next;
+      })} />
+      <div className="reader-main">
+        <header className="reader-topbar">
+          {!hideSearch && <form className="reader-search" onSubmit={submitSearch} role="search"><Search size={17} /><input value={currentSearch} onChange={(event) => { const value = event.target.value; setLocalSearch(value); onSearchChange?.(value); }} placeholder="Tìm kiếm sách, tác giả, thể loại..." aria-label="Tìm kiếm sách, tác giả, thể loại" /></form>}
+          <div className="harvey-header-actions"><Link aria-label="Gói thành viên" className="harvey-membership-link" title="Gói thành viên" to="/membership"><Crown size={20} /></Link><ReaderNotifications /><button className="harvey-header-avatar" onClick={() => setMenuOpen((open) => !open)} type="button" aria-label="Tài khoản">{initials}</button>
+            {menuOpen && <div className="harvey-account-popover"><Link to="/support"><LifeBuoy size={15} /> Hỗ trợ</Link>{user ? <><Link to="/account"><Settings size={15} /> Tài khoản</Link><button onClick={() => void handleLogout()} type="button"><LogOut size={15} /> Đăng xuất</button></> : <Link to="/login">Đăng nhập</Link>}{user?.role === 'ADMIN' && <Link to="/admin/dashboard">Quản trị</Link>}</div>}
           </div>
         </header>
-
-        <main className="ob2-content">
-          {(title || subtitle) && (
-            <div className="ob2-page-heading">
-              <div><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
-            </div>
-          )}
+        <main className="reader-content">
+          {(title || subtitle) && <div className="reader-content-heading"><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>}
           {children}
         </main>
-      </section>
-    </div>
+      </div>
+    </section>
+  </div>;
 }

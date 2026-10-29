@@ -31,7 +31,10 @@ export const errorHandler = (error, req, res, next) => {
                 : castError ? 'Invalid resource identifier'
                     : duplicateKeyError ? 'A record with that value already exists'
                         : multerError ? (error.code === 'LIMIT_FILE_SIZE'
-                            ? 'Uploaded file exceeds the 100 MiB limit' : 'Invalid file upload')
+                            ? req.path === '/me/avatar'
+                                ? 'Avatar image exceeds the 5 MB limit'
+                                : 'Uploaded file exceeds the 100 MiB limit'
+                            : 'Invalid file upload')
                             : invalidJson ? 'Request body contains invalid JSON'
                                 : oversizedBody ? 'Request body exceeds the size limit'
                                     : statusCode >= 500 ? 'Internal server error' : error.message;

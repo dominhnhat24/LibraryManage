@@ -3,6 +3,7 @@ import './src/config/load-env.js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { connectDB } from './src/config/database.config.js';
@@ -24,10 +25,8 @@ import {
 } from './src/middlewares/security.middleware.js';
 import ApiError from './src/utils/api-error.js';
 import commentRoutes from './src/routes/comment.routes.js';
+import webhookRoutes from './src/routes/webhook.routes.js';
 import multer from 'multer';
-
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // [CẤU HÌNH ỨNG DỤNG] Thiết lập middleware chung, CORS theo danh sách cấu hình và giới hạn payload JSON.
 export const app = express();
@@ -49,7 +48,7 @@ app.use(cors({
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Disposition', 'X-OpenBook-Show-Ad', 'X-OpenBook-Ad-Reason']
+    exposedHeaders: ['Content-Disposition']
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
@@ -63,8 +62,8 @@ app.use((req, res, next) => {
     return next();
 });
 
-// [KIỂM TRA SỨC KHỎE] Trả trạng thái API mà không làm lộ thông tin cấu hình hoặc dữ liệu hệ thống.
-app.get('/', (req, res) => res.json({ status: 'success', message: 'OpenBook API is running' }));
+// [KIỂM TRA SỨC KHỎE] Endpoint riêng cho Render kiểm tra tiến trình API.
+app.get('/health', (req, res) => res.json({ status: 'success', message: 'HarveyBook is running' }));
 
 // [ĐĂNG KÝ TUYẾN] Gom API theo chức năng và dùng chung tiền tố phiên bản.
 app.use('/api/v1', apiRateLimiter);
@@ -74,6 +73,7 @@ app.use('/api/v1/auth/admin-login', loginRateLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/books', bookRoutes);
 app.use('/api/v1/subscriptions', subscriptionRoutes);
+app.use('/api/v1/webhooks', webhookRoutes);
 app.use('/api/v1/downloads', downloadRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1', interactionRoutes);
@@ -82,6 +82,18 @@ app.use('/api/v1/admin/chapters', chapterRoutes);
 app.use('/api/v1/bookmarks', bookmarkRoutes);
 app.use('/api/v1/reading-progress', readingProgressRoutes); 
 app.use('/api', commentRoutes);
+
+// [GIAO DIỆN WEB] Docker production phục vụ SPA cùng origin với API để dùng chung HTTPS/domain.
+const webDistPath = resolve('admin-web/dist');
+if (existsSync(resolve(webDistPath, 'index.html'))) {
+    app.use(express.static(webDistPath, { index: false, maxAge: '1h' }));
+    app.get(/^(?!\/api(?:\/|$)).*/, (req, res, next) => {
+        if (!req.accepts('html')) return next();
+        return res.sendFile(resolve(webDistPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => res.json({ status: 'success', message: 'HarveyBook API is running' }));
+}
 
 // [XỬ LÝ LỖI] Chuẩn hóa tuyến không tồn tại và lỗi phát sinh trong middleware/controller.
 app.use(notFoundHandler);
@@ -95,7 +107,7 @@ export const startServer = async () => {
     await connectRateLimitStore();
     await connectDB();
     const port = Number(process.env.PORT || 5000);
-    return app.listen(port, () => console.log(`OpenBook API is running on port ${port}`));
+    return app.listen(port, () => console.log(`HarveyBook API is running on port ${port}`));
 };
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -104,7 +116,7 @@ const router = express.Router();
 // [CHẠY TRỰC TIẾP] Không tự khởi động khi server.js được import bởi kiểm thử.
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
     startServer().catch((error) => {
-        console.error('OpenBook server failed to start:', error);
+        console.error('HarveyBook server failed to start:', error);
         closeRateLimitStore().catch((closeError) => {
             console.error('Failed to close rate-limit Redis connection:', closeError);
         });

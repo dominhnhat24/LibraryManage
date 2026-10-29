@@ -6,7 +6,6 @@ import { ReaderShell } from '../components/ReaderShell';
 import {
   createReaderSubscription, deleteReaderBookmark, deleteReadingProgress, errorMessage,
   fetchMySubscription, fetchReaderBookmarks, fetchReadingProgress, submitReaderReport,
-  updateReadingProgress,
 } from '../api/client';
 import type { Bookmark as BookmarkType, ReadingProgress, Subscription } from '../types';
 
@@ -76,21 +75,6 @@ export function ReaderAccountPage() {
     }
   }
 
-  // Hàm resetProgress: Đặt lại hai bộ đếm hợp lệ của tiến độ sách mà không xóa bản ghi.
-  async function resetProgress(item: ReadingProgress) {
-    setSaving(true);
-    setError('');
-    try {
-      const updated = await updateReadingProgress(item._id, { chapters_since_ad: 0, total_chapter_reads: 0 });
-      setProgress((current) => current.map((progressItem) => progressItem._id === item._id ? updated : progressItem));
-      setNotice('Đã đặt lại thống kê lượt đọc.');
-    } catch (resetError: unknown) {
-      setError(errorMessage(resetError));
-    } finally {
-      setSaving(false);
-    }
-  }
-
   // Hàm requestSubscription: Gửi yêu cầu thuê bao và hiển thị chỉ dẫn thanh toán từ backend.
   async function requestSubscription(plan: 'premium_monthly' | 'vip_monthly') {
     setSaving(true);
@@ -121,7 +105,9 @@ export function ReaderAccountPage() {
         message: String(form.get('message') ?? '').trim(),
         type: String(form.get('type')) === 'bug' ? 'bug' : 'contact',
       });
-      setNotice(`Đã gửi phản hồi${result.id ? ` (mã ${result.id})` : ''}.`);
+      setNotice(result.confirmation_email_sent === false
+        ? `Đã tiếp nhận yêu cầu${result.id ? ` (mã ${result.id})` : ''}, nhưng chưa gửi được email xác nhận.`
+        : `Đã tiếp nhận yêu cầu và gửi email xác nhận${result.id ? ` (mã ${result.id})` : ''}.`);
       formElement.reset();
     } catch (reportError: unknown) {
       setError(errorMessage(reportError));
@@ -188,8 +174,7 @@ export function ReaderAccountPage() {
                     const bookId = referenceId(item.book);
                     return <li className="flex items-center justify-between gap-3 py-3" key={item._id}>
                       <Link className="min-w-0 truncate text-sm font-semibold hover:text-[#31564a]" to={bookId ? `/books/${encodeURIComponent(bookId)}` : '/'}>{book?.title ?? 'Sách'}</Link>
-                      <span className="shrink-0 text-xs text-slate-500">{item.total_chapter_reads} lượt</span>
-                      <button aria-label="Đặt lại thống kê" className="icon-button" disabled={saving || item.total_chapter_reads === 0} onClick={() => void resetProgress(item)} type="button">↻</button>
+                      <span className="shrink-0 text-xs text-slate-500">{item.completed_chapter_count ?? 0} chương hoàn thành</span>
                       <button aria-label="Xóa thống kê" className="icon-button icon-button-danger" disabled={saving} onClick={() => void removeProgress(item)} type="button"><Trash2 size={15} /></button>
                     </li>;
                   })}

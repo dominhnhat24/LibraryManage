@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, Bookmark, BookOpen, LoaderCircle, Star, Trash2 } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Bookmark, BookOpen, LoaderCircle, Star, Trash2 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { ReaderShell } from '../components/ReaderShell';
 import {
-  createBookComment, deleteBookComment, errorMessage, fetchBookComments, fetchPublicBook,
+  createBookComment, deleteBookComment, errorMessage, fetchBookComments, fetchPublicBook, streamPublicBook,
   fetchReadableChapters, fetchReaderBookmarks, readBookChapter, saveReaderBookmark, updateBookComment,
 } from '../api/client';
 import type { Bookmark as BookmarkType, Book, Chapter, Comment, PaginationData, ReadChapterResult } from '../types';
+import { cleanBookDescription } from '../utils/book-description';
 
 // Hàm ReaderBookPage: Hiển thị thông tin sách và đọc PDF qua endpoint riêng tư có kiểm tra entitlement.
 export function ReaderBookPage() {
@@ -38,6 +40,8 @@ export function ReaderBookPage() {
   const [readingChapter, setReadingChapter] = useState(false);
   const [savedBookmarks, setSavedBookmarks] = useState<BookmarkType[]>([]);
   const [savingBookmark, setSavingBookmark] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     if (previousBookIdRef.current === bookId) return;
@@ -60,7 +64,10 @@ export function ReaderBookPage() {
     setChapterError('');
     setActiveChapter(null);
     setSavedBookmarks([]);
+    setPdfUrl('');
   }, [bookId]);
+
+  useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
 
   useEffect(() => {
     let active = true;
@@ -74,11 +81,11 @@ export function ReaderBookPage() {
   }, [bookId]);
 
   useEffect(() => {
-    if (loadingAuth || !user) return;
+    if (loadingAuth) return;
     let active = true;
     setChapterLoading(true);
     setChapterError('');
-    Promise.allSettled([fetchReadableChapters(bookId, chapterPage), fetchReaderBookmarks()])
+    Promise.allSettled([fetchReadableChapters(bookId, chapterPage), user ? fetchReaderBookmarks() : Promise.resolve(null)])
       .then(([catalogResult, bookmarkResult]) => {
         if (!active || previousBookIdRef.current !== bookId) return;
         const messages: string[] = [];
@@ -89,9 +96,9 @@ export function ReaderBookPage() {
         } else {
           messages.push(`Không thể tải danh sách chương: ${errorMessage(catalogResult.reason)}`);
         }
-        if (bookmarkResult.status === 'fulfilled') {
+        if (bookmarkResult.status === 'fulfilled' && bookmarkResult.value) {
           setSavedBookmarks(bookmarkResult.value.bookmarks);
-        } else {
+        } else if (bookmarkResult.status === 'rejected') {
           messages.push(`Không thể tải chương đã lưu: ${errorMessage(bookmarkResult.reason)}`);
         }
         if (messages.length) setChapterError(messages.join(' '));
@@ -115,6 +122,7 @@ export function ReaderBookPage() {
     return () => { active = false; };
   }, [bookId, commentPage, commentRetryKey]);
 
+  const bookDescription = cleanBookDescription(book?.description);
   const currentUserId = user?._id ?? user?.id;
   const myComment = comments.find((comment) => referenceId(comment.user) === currentUserId);
   const activeChapterId = activeChapter?.chapter.id;
@@ -143,6 +151,10 @@ function extractId(item: any): string {
 
   // Hàm openChapter: Đọc chương qua endpoint được bảo vệ để backend kiểm tra quyền và ghi nhận lượt đọc.
   async function openChapter(chapter: Chapter) {
+    if (!user) {
+      navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}/read` } });
+      return;
+    }
     setReadingChapter(true);
     setChapterError('');
     try {
@@ -223,51 +235,65 @@ function extractId(item: any): string {
   }
 
   // Hàm openReader: Mở trang đọc riêng cho tài khoản đã đăng nhập, kể cả ADMIN có quyền đọc nội dung.
-  function openReader() {
+  async function openReader() {
     if (loadingAuth) return;
-    if (!user || !['USER', 'ADMIN'].includes(user.role)) {
-      navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}/read` } });
+    if (book?.reader_mode === 'pdf') {
+      setPdfLoading(true);
+      setChapterError('');
+      try {
+        const blob = await streamPublicBook(book._id);
+        setPdfUrl(URL.createObjectURL(blob));
+      } catch (streamError: unknown) {
+        setChapterError(errorMessage(streamError));
+      } finally { setPdfLoading(false); }
       return;
     }
-    navigate(`/books/${encodeURIComponent(bookId)}/read`);
+    if (book?.reader_mode === 'chapters') {
+      navigate(`/books/${encodeURIComponent(book._id)}/read`);
+      return;
+    }
+    setChapterError(book?.reader_mode === 'unsupported'
+      ? `Định dạng ${book.file_format || 'này'} chưa có trình đọc trong ứng dụng.`
+      : 'Sách chưa có chương đọc được hoặc tệp gốc hợp lệ.');
   }
 
   return (
-    <div className="reader-book-detail min-h-screen bg-[#f4f3ef] text-[#202b28]">
-      <header className="border-b border-[#deddd6] bg-[#fbfaf7]">
-        <div className="mx-auto flex min-h-[68px] max-w-[1100px] items-center justify-between px-4 sm:px-8">
-          <Link className="inline-flex items-center gap-2 text-sm font-semibold text-[#31564a]" to="/"><ArrowLeft size={16} /> Về thư viện</Link>
-          <Link className="flex items-center gap-2 text-xs font-extrabold tracking-[0.12em] text-[#203a34]" to="/"><BookOpen size={17} /> OPENBOOK</Link>
-        </div>
-      </header>
-      <main className="mx-auto max-w-[1100px] px-4 py-7 sm:px-8">
+    <ReaderShell>
+      <div className="harvey-detail">
+      <div className="harvey-detail-content">
         {loadingBook ? <p className="py-16 text-center text-sm text-slate-500">Đang tải sách…</p> : book ? (
           <>
-            <section className="flex flex-col gap-5 border border-[#dfded7] bg-[#fbfaf7] p-5 sm:flex-row sm:p-7">
+            <section className="harvey-detail-hero">
               <img
                 alt={`Bìa sách ${book.title}`}
-                className="h-48 w-36 self-center border border-[#e4e1d8] bg-[#f1eee6] object-cover sm:self-start"
+                className="harvey-detail-cover"
                 onError={(event) => { event.currentTarget.src = '/book-cover-placeholder.svg'; }}
                 src={book.cover_url || '/book-cover-placeholder.svg'}
               />
-              <div className="flex min-w-0 flex-col">
-                <p className="eyebrow">{book.category} · {book.access_level}</p>
-                <h1 className="mt-2 text-3xl font-bold tracking-tight">{book.title}</h1>
-                <p className="mt-2 text-sm text-slate-500">Tác giả: {book.author_name}</p>
-                <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-slate-600">{book.description || 'Chưa có mô tả cho đầu sách này.'}</p>
-                <button className="button-primary mt-6 self-start" disabled={loadingAuth} onClick={openReader} type="button">
-                  {loadingAuth ? 'Đang kiểm tra phiên…' : 'Đọc sách'}
-                </button>
+              <div className="harvey-detail-copy">
+                <p className="harvey-eyebrow">{book.category === 'ebook' ? 'EBOOK' : book.category.toUpperCase()} · {book.access_level === 'free' ? 'FREE' : book.access_level.toUpperCase()}</p>
+                <h1>{book.title}</h1>
+                <p className="harvey-detail-author">Tác giả: {book.author_name}</p>
+                <p className="harvey-detail-description">{bookDescription || 'Chưa có mô tả cho đầu sách này.'}</p>
+                <div className="harvey-detail-tags"><span><BookOpen size={15} /> {genreLabel(book.genre)}</span><span>♙ {book.author_name}</span>{book.publication_year && <span>▦ {book.publication_year}</span>}</div>
+                <div className="harvey-detail-actions"><button className="harvey-primary-button" disabled={loadingAuth || pdfLoading} onClick={() => void openReader()} type="button">
+                  {loadingAuth ? 'Đang kiểm tra phiên…' : pdfLoading ? 'Đang tải PDF…' : 'Đọc sách'}
+                </button><button className="harvey-round-button" disabled={!chapters[0]} onClick={() => user && chapters[0] ? void saveChapterBookmark(chapters[0]._id) : navigate('/login')} type="button" title="Lưu chương đầu"><Bookmark size={17} /></button><button className="harvey-round-button" onClick={() => navigator.clipboard?.writeText(window.location.href)} type="button" title="Chia sẻ"><span aria-hidden="true">↗</span></button></div>
               </div>
+              <aside className="harvey-detail-quote"><BookOpen size={38} strokeWidth={1} /><span></span><blockquote>{bookDescription.split(/[.!?]/)[0] || `Khám phá ${book.title}, tác phẩm của ${book.author_name}.`}</blockquote><small>— {book.author_name}</small></aside>
             </section>
+            <nav className="harvey-detail-tabs"><a href="#book-overview">Tổng quan</a><a href="#book-chapters">Mục lục</a><a href="#book-reviews">Đánh giá</a></nav>
             {error ? <p className="mt-4 border-l-2 border-rose-500 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{error}</p> : null}
-            {user && <section className="mt-7 border border-[#dfded7] bg-[#fbfaf7] p-5 sm:p-7" aria-labelledby="book-chapters">
+            <div className="harvey-detail-lower"><div className="harvey-detail-main-column">
+            <section className="harvey-detail-overview" id="book-overview"><h2>Giới thiệu</h2><p>{bookDescription || 'Chưa có mô tả cho đầu sách này.'}</p></section>
+            <section className="harvey-detail-section" aria-labelledby="book-chapters" id="book-chapters">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div><p className="eyebrow">Đọc theo chương</p><h2 className="mt-1 text-xl font-bold text-[#203a34]" id="book-chapters">Nội dung sách</h2></div>
                 <span className="text-xs text-slate-500">{chapterPagination?.total ?? chapters.length} chương có thể đọc</span>
               </div>
               {chapterError && <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-rose-700" role="alert"><span>{chapterError}</span><button className="button-secondary !min-h-8 !px-3 !py-1" onClick={() => setChapterRetryKey((key) => key + 1)} type="button">Thử lại</button></div>}
-              {chapterLoading && chapters.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">Đang tải danh sách chương…</p>
+              {pdfUrl ? <iframe title={`Đọc ${book.title}`} src={pdfUrl} className="mt-4 h-[80vh] min-h-[640px] w-full border border-[#e5e4de] bg-white" />
+                : chapterLoading && chapters.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">Đang tải danh sách chương…</p>
                 : chapters.length ? <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(230px,0.7fr)_minmax(0,1.3fr)]">
                   <ol className="max-h-[560px] divide-y divide-[#e9e8e2] overflow-y-auto border border-[#e5e4de] bg-white">
                     {chapters.map((chapter) => (
@@ -299,15 +325,14 @@ function extractId(item: any): string {
                             <Bookmark size={14} /> {referenceId(extractId(savedBookmark?.chapter)) === extractId(activeChapter?.chapter) ? 'Đã lưu' : savingBookmark ? 'Đang lưu…' : 'Lưu chương'}
                           </button>
                         </div>
-                        {activeChapter.ad?.showAd && <div className="my-4 border border-[#e7ddc5] bg-[#fff8e8] px-4 py-3 text-xs text-[#805e1e]" role="status">Nội dung có vị trí quảng cáo theo lượt đọc miễn phí.</div>}
                         <div className="whitespace-pre-wrap py-5 text-[15px] leading-8 text-[#26332e]">{activeChapter.chapter.content}</div>
                       </> : <p className="grid min-h-56 place-items-center text-center text-sm text-slate-500">Chọn một chương để bắt đầu đọc.</p>}
                   </article>
                 </div>
                 : !chapterLoading ? <p className="py-8 text-center text-sm text-slate-500">Chưa có chương phù hợp với quyền đọc tài khoản này.</p> : null}
               {chapterPagination && chapterPage < chapterPagination.totalPages && <button className="button-secondary mt-4 w-full" disabled={chapterLoading} onClick={() => setChapterPage((page) => page + 1)} type="button">Tải thêm chương</button>}
-            </section>}
-            <section className="mt-7 border border-[#dfded7] bg-[#fbfaf7] p-5 sm:p-7" aria-labelledby="book-reviews">
+            </section>
+            <section className="harvey-detail-section" aria-labelledby="book-reviews" id="book-reviews">
               <div className="flex flex-wrap items-end justify-between gap-2">
                 <div>
                   <p className="eyebrow">Cộng đồng độc giả</p>
@@ -344,7 +369,7 @@ function extractId(item: any): string {
                 {commentError && <p className="mt-3 text-sm text-rose-700" role="alert">{commentError}</p>}
                 {commentNotice && <p className="mt-3 text-sm text-emerald-700" role="status">{commentNotice}</p>}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="button-primary" disabled={savingComment} type="submit">
+                  <button className="button-primary harvey-review-submit" disabled={savingComment} type="submit">
                     {savingComment ? 'Đang lưu…' : editingComment || myComment ? 'Cập nhật đánh giá' : 'Gửi đánh giá'}
                   </button>
                   {editingComment && <button className="button-secondary" onClick={() => { setEditingComment(null); setCommentBody(''); }} type="button">Hủy sửa</button>}
@@ -391,12 +416,29 @@ function extractId(item: any): string {
                 </button>
               )}
               {commentError && <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-rose-700" role="alert"><span>{commentError}</span><button className="button-secondary !min-h-8 !px-3 !py-1" onClick={() => setCommentRetryKey((key) => key + 1)} type="button">Tải lại đánh giá</button></div>}
-            </section>
+            </section></div><aside className="harvey-book-facts"><h2>Thông tin sách</h2><dl><div><dt>Tác giả</dt><dd>{book.author_name}</dd></div><div><dt>Thể loại</dt><dd>{genreLabel(book.genre)}</dd></div><div><dt>Nhà xuất bản</dt><dd>Tự do (bản điện tử)</dd></div><div><dt>Năm xuất bản</dt><dd>{book.publication_year || 'Chưa rõ'}</dd></div><div><dt>Số chương</dt><dd>{chapterPagination?.total ?? (chapters.length || '—')}</dd></div></dl><hr /><h3>Chia sẻ</h3><div className="harvey-share-buttons"><button onClick={() => navigator.clipboard?.writeText(window.location.href)} title="Sao chép liên kết" type="button">⛓</button><button onClick={() => navigator.clipboard?.writeText(window.location.href)} title="Chia sẻ" type="button">↗</button></div></aside></div>
           </>
         ) : <div className="py-16 text-center"><p className="text-sm text-slate-500">{error || 'Không tìm thấy sách.'}</p>{error && <button className="button-secondary mt-4" onClick={() => window.location.reload()} type="button">Thử tải lại</button>}</div>}
-      </main>
-    </div>
+      </div>
+      </div>
+    </ReaderShell>
   );
+}
+
+function genreLabel(genre?: Book['genre']) {
+  const labels: Record<NonNullable<Book['genre']>, string> = {
+    van_hoc_viet_nam: 'Văn học Việt Nam',
+    truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
+    tho_viet_nam: 'Thơ Việt Nam',
+    van_hoc_dan_gian: 'Văn học dân gian',
+    van_hoc_the_gioi: 'Văn học thế giới',
+    kinh_doanh: 'Kinh doanh',
+    phat_trien_ban_than: 'Phát triển bản thân',
+    tam_ly_hoc: 'Tâm lý học',
+    lich_su: 'Lịch sử',
+    khoa_hoc: 'Khoa học',
+  };
+  return genre ? labels[genre] : labels.van_hoc_viet_nam;
 }
 
 /* Hàm referenceId: Chuẩn hóa ID người dùng từ tham chiếu dạng chuỗi hoặc object populate.

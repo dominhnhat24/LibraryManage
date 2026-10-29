@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import axios from 'axios';
 import {
-  changeMyPassword, clearSession, fetchCurrentUser, signIn, signInAdmin, signOut, updateMyProfile, verifyRegistrationEmail,
+  changeMyPassword, clearSession, fetchCurrentUser, signIn, signInAdmin, signOut,
+  updateMyProfile, uploadMyAvatar, verifyRegistrationEmail,
 } from '../api/client.ts';
 import type { User } from '../types';
 
@@ -13,6 +15,7 @@ interface AuthContextValue {
   verifyEmail: (email: string, otp: string) => Promise<User>;
   logout: () => Promise<void>;
   updateProfile: (payload: { name: string; phone_number?: string | null }) => Promise<User>;
+  uploadAvatar: (file: File) => Promise<User>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
@@ -48,9 +51,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     fetchCurrentUser()
       .then((currentUser) => { if (active) setUser(currentUser); })
-      .catch(() => {
-        clearSession();
-        if (active) setUser(null);
+      .catch((error: unknown) => {
+        // Clear credentials only when the server explicitly rejects the session.
+        // A temporary network/server failure must not sign the reader out or hide
+        // their database-backed favorites.
+        const unauthorized = axios.isAxiosError(error) && error.response?.status === 401;
+        if (unauthorized) {
+          clearSession();
+          if (active) setUser(null);
+          return;
+        }
+
+        if (active) {
+          try {
+            const cachedUser = localStorage.getItem('openbook.user');
+            setUser(cachedUser ? JSON.parse(cachedUser) as User : null);
+          } catch {
+            setUser(null);
+          }
+        }
       })
       .finally(() => { if (active) setLoading(false); });
 
@@ -83,8 +102,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(updated);
       return updated;
     },
+    async uploadAvatar(file) {
+      const updated = await uploadMyAvatar(file);
+      setUser(updated);
+      return updated;
+    },
     async changePassword(currentPassword, newPassword) {
       await changeMyPassword(currentPassword, newPassword);
+      setUser(null);
     },
     async logout() {
       try {

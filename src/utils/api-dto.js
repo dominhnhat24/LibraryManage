@@ -30,17 +30,17 @@ export const toUserDto = (value) => {
     if (!user) return null;
     if (typeof user.toPublicJSON === 'function') return user.toPublicJSON();
 
-    const activeVip = user.role === 'ADMIN' || (user.is_vip
-        && user.vip_expires_at && new Date(user.vip_expires_at) > new Date());
-    const activePremium = user.role === 'ADMIN' || activeVip || (user.is_premium
+    const activePremium = user.role === 'ADMIN' || (user.is_premium
         && user.premium_expires_at && new Date(user.premium_expires_at) > new Date());
+    const activeVip = user.role === 'ADMIN' || activePremium || (user.is_vip
+        && user.vip_expires_at && new Date(user.vip_expires_at) > new Date());
     return {
-        ...pick(user, [...identityFields, 'name', 'email', 'phone_number', 'role']),
+        ...pick(user, [...identityFields, 'name', 'email', 'phone_number', 'avatar_url', 'role']),
         is_vip: Boolean(activeVip),
-        vip_expires_at: activeVip && user.role !== 'ADMIN' ? user.vip_expires_at : null,
+        vip_expires_at: activeVip && user.role !== 'ADMIN' ? (activePremium ? user.premium_expires_at : user.vip_expires_at) : null,
         is_premium: Boolean(activePremium),
         premium_expires_at: activePremium && user.role !== 'ADMIN'
-            ? (activeVip ? user.vip_expires_at : user.premium_expires_at) : null
+            ? user.premium_expires_at : null
     };
 };
 
@@ -49,8 +49,11 @@ export const toBookDto = (value, { publicView = false, canReadPaid = false } = {
     const book = toPlainObject(value);
     if (!book) return null;
     const dto = pick(book, [
-        ...identityFields, 'title', 'slug', 'author_name', 'category', 'publication_year',
-        'description', 'cover_url', 'access_level', 'owner', 'status'
+        ...identityFields, 'title', 'slug', 'author_name', 'category', 'genre', 'publication_year',
+        'description', 'cover_url', 'access_level', 'owner', 'status', 'import_source',
+        'source_id', 'source_url', 'license_name', 'license_url', 'cover_source_url',
+        'cover_license_name', 'cover_license_url', 'cover_attribution', 'language', 'file_format',
+        'file_size', 'verified_at'
     ]);
     if (dto.owner !== undefined) dto.owner = reference(dto.owner, userReferenceFields);
     if (publicView) {
@@ -117,7 +120,7 @@ export const toBookmarkDto = (value) => {
     if (!bookmark) return null;
     const dto = pick(bookmark, [...identityFields, 'book', 'chapter']);
     if (dto.book !== undefined) {
-        dto.book = reference(dto.book, [...identityFields, 'title', 'slug', 'cover_url']);
+        dto.book = reference(dto.book, [...identityFields, 'title', 'author_name', 'slug', 'cover_url']);
     }
     if (dto.chapter !== undefined) {
         dto.chapter = reference(dto.chapter, [...identityFields, 'title', 'slug', 'chapter_number']);
@@ -130,10 +133,15 @@ export const toReadingProgressDto = (value) => {
     const progress = toPlainObject(value);
     if (!progress) return null;
     const dto = pick(progress, [
-        ...identityFields, 'book', 'chapters_since_ad', 'total_chapter_reads'
+        ...identityFields, 'book', 'chapters_since_ad', 'total_chapter_reads',
+        'completed_chapter_count', 'completed_chapters_since_ad', 'last_read_chapter'
     ]);
     if (dto.book !== undefined) {
-        dto.book = reference(dto.book, [...identityFields, 'title', 'slug', 'cover_url']);
+        dto.book = reference(dto.book, [...identityFields, 'title', 'author_name', 'slug', 'cover_url']);
+    }
+    if (dto.last_read_chapter !== undefined) {
+        dto.last_read_chapter = reference(dto.last_read_chapter,
+            [...identityFields, 'title', 'slug', 'chapter_number', 'access_level']);
     }
     return dto;
 };

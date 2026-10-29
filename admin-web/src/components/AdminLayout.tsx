@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { BookOpen, LayoutDashboard, LogOut, UserRound, Users, CreditCard, AlertCircle, MessageSquareText, Search, Bell, ChevronDown, BookText } from 'lucide-react';
+import { BookOpen, LayoutDashboard, LogOut, UserRound, Users, CreditCard, AlertCircle, MessageSquareText, Search, Bell, ChevronDown, BookText, BookDown } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { errorMessage, fetchBooks, fetchUsers } from '../api/client';
 import type { Book, User } from '../types';
@@ -96,6 +96,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const mainNav = [
     { to: '/admin/dashboard', label: 'Tổng quan', Icon: LayoutDashboard },
     { to: '/admin/books', label: 'Sách', Icon: BookOpen },
+    { to: '/admin/books/import', label: 'Import ebook', Icon: BookDown },
     { to: '/admin/chapters', label: 'Chương', Icon: BookText },
     { to: '/admin/users', label: 'Người dùng', Icon: Users },
     { to: '/admin/subscriptions', label: 'Thuê bao', Icon: CreditCard },
@@ -120,15 +121,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         className="fixed inset-x-0 top-0 z-30 flex h-[76px] items-center border-b border-[#DDE9E6] bg-white px-3 sm:px-6"
       >
         {/* Brand – left 256 px */}
-        <div className="flex w-[154px] shrink-0 items-center gap-2 pr-2 sm:w-[220px] sm:gap-3 sm:pr-6 lg:w-[256px]">
-          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-lg bg-[#24795C] text-white">
-            <BookOpen size={22} />
-          </div>
-          <div>
-            <p className="text-[17px] font-bold leading-tight text-[#24795C] sm:text-[20px]">OpenBook</p>
-            <p className="hidden text-[11px] font-medium text-[#526B86] sm:block">Read More · Grow More</p>
-          </div>
-        </div>
+        <div aria-hidden="true" className="w-[154px] shrink-0 pr-2 sm:w-[220px] sm:pr-6 lg:w-[256px]" />
 
         {/* Separator */}
         <div className="mr-3 hidden h-10 w-px bg-[#DDE9E6] lg:mr-6 lg:block" />
@@ -203,7 +196,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       >
         <nav className="flex flex-1 flex-col gap-1 px-4 pt-5">
           {mainNav.map(({ to, label, Icon }) => (
-            <NavLink key={to} to={to} className={linkClass}>
+            <NavLink key={to} to={to} end={to === '/admin/books'} className={linkClass}>
               <Icon size={20} />
               {label}
             </NavLink>
@@ -230,21 +223,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
         {/* Bottom illustration area */}
         <div className="mt-auto px-5 pb-6">
-          {/* Decorative book illustration (SVG) */}
-          <div className="mb-3 flex justify-center">
-            <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Stack of books */}
-              <rect x="20" y="55" width="100" height="14" rx="3" fill="#B8E0CC" />
-              <rect x="25" y="42" width="90" height="14" rx="3" fill="#8FD1AF" />
-              <rect x="30" y="29" width="80" height="14" rx="3" fill="#5BBF8A" />
-              {/* Leaf */}
-              <path d="M85 10 C95 5, 110 15, 100 30 C90 20, 85 15, 85 10Z" fill="#24795C" opacity="0.7" />
-              <path d="M85 10 C85 20, 90 25, 100 30" stroke="#24795C" strokeWidth="1" fill="none" opacity="0.5" />
-              {/* Small leaf */}
-              <path d="M75 18 C80 12, 90 18, 82 28 C78 22, 75 20, 75 18Z" fill="#57A982" opacity="0.5" />
-            </svg>
-          </div>
-          <p className="text-center text-[16px] font-bold text-[#24795C]">OpenBook</p>
+          <div className="mb-3 flex justify-center"><img src="/HarveyBook-gold.png" alt="HarveyBook" className="harveybook-logo h-[90px] w-[140px] object-contain" /></div>
           <p className="mt-1 text-center text-[12px] leading-relaxed text-[#526B86]">
             Knowledge is the key<br />to a brighter future
           </p>
@@ -256,7 +235,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <div className="px-3 py-4 sm:p-6">
           <nav aria-label="Điều hướng quản trị trên thiết bị nhỏ" className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">
             {mainNav.map(({ to, label, Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${isActive ? 'border-[#C3E5D0] bg-[#E3F4EB] text-[#24795C]' : 'border-[#DDE9E6] bg-white text-[#526B86]'}`}>
+              <NavLink key={to} to={to} end={to === '/admin/books'} className={({ isActive }) => `inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${isActive ? 'border-[#C3E5D0] bg-[#E3F4EB] text-[#24795C]' : 'border-[#DDE9E6] bg-white text-[#526B86]'}`}>
                 <Icon size={15} />{label}
               </NavLink>
             ))}

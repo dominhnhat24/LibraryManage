@@ -18,6 +18,16 @@ export const getAllReadingProgress = asyncHandler(async (req, res) => {
     });
 });
 
+// Hàm clearAllReadingProgress: Xóa toàn bộ tiến độ đọc thuộc tài khoản hiện tại.
+export const clearAllReadingProgress = asyncHandler(async (req, res) => {
+    const deletedCount = await readingProgressService.deleteAllReadingProgress(req.authUser._id);
+    return res.json({
+        status: 'success',
+        message: 'Reading history cleared successfully',
+        data: { deleted_count: deletedCount }
+    });
+});
+
 // Hàm getReadingProgress: Đọc một tiến độ chỉ khi tài khoản hiện tại sở hữu bản ghi đó.
 export const getReadingProgress = asyncHandler(async (req, res) => {
     const progress = await readingProgressService.getReadingProgressById(
