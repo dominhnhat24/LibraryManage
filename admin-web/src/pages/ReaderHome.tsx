@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Bookmark,
+  BookOpen,
+  Crown,
   ChevronLeft,
   ChevronRight,
-  Crown,
-  BookOpen,
+  Brain,
+  Compass,
+  Landmark,
   Search,
+  ShieldCheck,
+  TrendingUp,
   UserRound,
 } from 'lucide-react';
 
@@ -142,33 +148,64 @@ export function ReaderHome() {
   };
 
   if (!authLoading && !user) {
-    return <div className="booknest-home"><div className="booknest-book">
-      <ReaderSidebar collapsed={isSidebarCollapsed} onToggle={() => setIsSidebarCollapsed((previous) => {
+    const guestCategories = [
+      { title: 'Văn học', description: 'Tiểu thuyết, truyện ngắn, truyện cổ điển', icon: Landmark },
+      { title: 'Kinh tế', description: 'Quản trị, đầu tư, kinh doanh', icon: TrendingUp },
+      { title: 'Khoa học', description: 'Công nghệ, tự nhiên, khám phá', icon: Brain },
+      { title: 'Lịch sử', description: 'Sự kiện, danh nhân, dòng chảy thời gian', icon: Compass },
+      { title: 'Tâm lý', description: 'Phát triển bản thân, kỹ năng sống', icon: Bookmark },
+    ];
+
+    return <div className="booknest-home booknest-guest-home"><div className="booknest-book booknest-book-guest">
+      <ReaderSidebar showLabels collapsed={isSidebarCollapsed} onToggle={() => setIsSidebarCollapsed((previous) => {
         const next = !previous;
         localStorage.setItem('reader-sidebar-collapsed', String(next));
         return next;
       })} />
-      <main className="booknest-pages booknest-guest-pages">
-        <section className="booknest-guest-copy">
-          <p className="booknest-guest-eyebrow"><span /> THƯ VIỆN SỐ HARVEYBOOK</p>
-          <h1>Chạm vào thế giới<br /><em>qua từng trang sách.</em></h1>
-          <p className="booknest-guest-description">Khám phá những câu chuyện đáng nhớ, lưu lại cuốn sách bạn yêu thích và tiếp tục đọc theo nhịp riêng của mình.</p>
-          <div className="booknest-guest-actions">
-            <Link className="booknest-guest-primary" to="/login">Đăng nhập <ChevronRight size={18} /></Link>
-            <Link className="booknest-guest-secondary" to="/register">Tạo tài khoản</Link>
+      <main className="booknest-guest-main">
+        <header className="booknest-guest-header">
+          <form className="booknest-guest-search" role="search" onSubmit={(event) => { event.preventDefault(); navigate(search.trim() ? `/catalog?search=${encodeURIComponent(search.trim())}` : '/catalog'); }}>
+            <Search size={19} aria-hidden="true" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm kiếm sách, tác giả, chủ đề..." aria-label="Tìm kiếm sách, tác giả, chủ đề" />
+          </form>
+          <nav className="booknest-guest-topnav" aria-label="Điều hướng chính">
+            <a href="#features">Giới thiệu</a>
+            <Link to="/membership">Gói thành viên</Link>
+            <a href="#categories">Blog</a>
+            <Link to="/support">Liên hệ</Link>
+            <Link className="booknest-guest-login" to="/login">Đăng nhập</Link>
+          </nav>
+        </header>
+
+        <section className="booknest-guest-hero" aria-labelledby="guest-home-title">
+          <div className="booknest-guest-copy">
+            <p className="booknest-guest-eyebrow"><span /> THƯ VIỆN SỐ HARVEYBOOK</p>
+            <h1 id="guest-home-title">Chạm vào thế giới<br /><em>qua từng trang sách.</em></h1>
+            <p className="booknest-guest-description">Khám phá những câu chuyện đáng nhớ, lưu lại cuốn sách bạn yêu thích và tiếp tục đọc theo nhịp riêng của mình.</p>
+            <div className="booknest-guest-actions">
+              <Link className="booknest-guest-primary" to="/login">Bắt đầu ngay <ChevronRight size={18} /></Link>
+              <Link className="booknest-guest-secondary" to="/catalog">Khám phá thư viện</Link>
+            </div>
           </div>
-          <p className="booknest-guest-note">Một không gian yên tĩnh dành cho người yêu sách.</p>
+          <div className="booknest-guest-photo"><img src="/harveybook-library-hero.jpg" alt="Một cuốn sách đang mở trên bàn trong không gian thư viện ấm áp" /></div>
         </section>
-        <aside className="booknest-guest-art" aria-label="Minh họa những cuốn sách HarveyBook">
-          <div className="booknest-guest-art-glow" />
-          <div className="booknest-guest-art-caption"><BookOpen size={18} strokeWidth={1.4} /><span>MỞ RA MỘT THẾ GIỚI</span></div>
-          <div className="booknest-guest-books" aria-hidden="true">
-            <div className="booknest-guest-book book-one"><span>HARVEYBOOK</span><strong>Những<br />trang đầu</strong><i>VĂN HỌC · 01</i></div>
-            <div className="booknest-guest-book book-two"><span>THƯ VIỆN</span><strong>Miền<br />ký ức</strong><i>TẢN VĂN · 02</i></div>
-            <div className="booknest-guest-book book-three"><span>ĐỌC CHẬM</span><strong>Ngày<br />nắng nhẹ</strong><i>TRUYỆN · 03</i></div>
+
+        <section className="booknest-guest-benefits" id="features" aria-label="Lợi ích của HarveyBook">
+          <article><span className="booknest-guest-benefit-icon"><BookOpen size={26} /></span><div><strong>Đọc mọi lúc, mọi nơi</strong><p>Đồng bộ giữa các thiết bị để bạn không bỏ lỡ trang sách nào.</p></div></article>
+          <article><span className="booknest-guest-benefit-icon"><ShieldCheck size={26} /></span><div><strong>An toàn &amp; bảo mật</strong><p>Bảo vệ dữ liệu và quyền riêng tư của bạn một cách tối ưu.</p></div></article>
+          <article><span className="booknest-guest-benefit-icon"><Bookmark size={26} /></span><div><strong>Cá nhân hóa trải nghiệm</strong><p>Gợi ý sách phù hợp với sở thích và thói quen đọc của bạn.</p></div></article>
+        </section>
+
+        <section className="booknest-guest-categories" id="categories">
+          <p className="booknest-guest-eyebrow">KHÁM PHÁ DANH MỤC</p>
+          <h2>Kho tàng tri thức</h2>
+          <p className="booknest-guest-category-intro">Đa dạng thể loại sách cho mọi sở thích và nhu cầu.</p>
+          <div className="booknest-guest-category-grid">
+            {guestCategories.map(({ title, description, icon: Icon }) => <Link to="/catalog" className="booknest-guest-category" key={title}>
+              <span><Icon size={25} strokeWidth={1.5} /></span><div><strong>{title}</strong><small>{description}</small></div>
+            </Link>)}
           </div>
-          <div className="booknest-guest-art-footer"><span>01 — 03</span><span>ĐỌC · LƯU · TRỞ LẠI</span></div>
-        </aside>
+        </section>
       </main>
     </div></div>;
   }

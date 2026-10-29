@@ -1497,3 +1497,100 @@ body { margin: 0; overflow-x: hidden; }
   .booknest-guest-art-caption { top: 8%; left: 8%; }
   .booknest-guest-art-footer { right: 8%; bottom: 6%; left: 8%; }
 }
+
+/* Public landing page, aligned with the supplied HarveyBook reference. */
+.booknest-guest-home { min-height: 100dvh; padding: 0; overflow: auto; background: #fcfaf5; }
+.booknest-book-guest { width: 100%; height: auto; min-height: 100dvh; grid-template-columns: 136px minmax(0,1fr); overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
+.booknest-sidebar.is-labeled { position: sticky; top: 0; height: 100dvh; min-height: 660px; padding: 0 14px; border-right: 1px solid #eee9df; }
+.booknest-sidebar.is-labeled::after { display: none; }
+.booknest-sidebar.is-labeled .harveybook-sidebar-brand { width: 104px; height: 112px; border-bottom: 1px solid #eee9df; }
+.booknest-sidebar.is-labeled .booknest-side-nav { width: 100%; flex: 1; justify-content: flex-start; gap: 12px; padding-top: 34px; }
+.booknest-sidebar.is-labeled .booknest-side-icon { width: 100%; height: 76px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; gap: 7px; border-radius: 14px; color: #45443b; font-size: 13px; font-weight: 400; }
+.booknest-sidebar.is-labeled .booknest-side-icon:hover { background: #f4f0e4; }
+.booknest-sidebar.is-labeled .booknest-side-icon.is-active { background: transparent; color: #5d542c; }
+.booknest-sidebar.is-labeled .booknest-side-icon.is-active svg { box-sizing: content-box; padding: 11px; border-radius: 50%; background: #77703c; color: #fff; }
+.booknest-sidebar.is-labeled .booknest-side-icon span { display: block; line-height: 1.2; }
+.booknest-sidebar.is-labeled .booknest-menu-button { display: none; }
+.booknest-guest-main { min-width: 0; padding: 0 clamp(24px,4.4vw,70px) 42px; background: #fcfaf5; color: #27271f; }
+.booknest-guest-header { min-height: 92px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+.booknest-guest-search { position: static; width: min(390px,34%); height: 48px; flex: 0 1 390px; padding: 0 16px; border: 1px solid #e7e0d3; border-radius: 999px; background: transparent; color: #5c563b; }
+.booknest-guest-search input { font-size: 14px; }
+.booknest-guest-search input::placeholder { color: #898477; }
+.booknest-guest-topnav { display: flex; align-items: center; justify-content: flex-end; gap: clamp(18px,3.2vw,48px); }
+.booknest-guest-topnav a { color: #292820; font-size: 14px; white-space: nowrap; }
+.booknest-guest-topnav a:hover { color: #8b7a3d; }
+.booknest-guest-topnav .booknest-guest-login { min-width: 138px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: #625c2d; color: #fff; font-weight: 600; }
+.booknest-guest-topnav .booknest-guest-login:hover { background: #504b24; color: #fff; }
+.booknest-guest-hero { display: grid; grid-template-columns: minmax(0,.92fr) minmax(420px,1.18fr); align-items: center; gap: clamp(28px,4vw,64px); padding: 14px 0 28px; }
+.booknest-guest-copy { max-width: 670px; padding: 20px 0; }
+.booknest-guest-eyebrow { margin-bottom: 24px; color: #665f30; font-size: 12px; letter-spacing: .13em; }
+.booknest-guest-copy h1 { font-size: clamp(44px,4.1vw,66px); line-height: 1.08; letter-spacing: -.04em; }
+.booknest-guest-copy h1 em { color: #91885d; font-style: italic; white-space: nowrap; }
+.booknest-guest-description { max-width: 540px; margin-top: 26px; color: #45443e; font-size: 16px; line-height: 1.85; }
+.booknest-guest-actions { gap: 16px; margin-top: 32px; }
+.booknest-guest-primary,.booknest-guest-secondary { min-height: 50px; padding: 0 24px; font-size: 14px; }
+.booknest-guest-primary { background: #625c2d; }
+.booknest-guest-primary:hover { background: #504b24; }
+.booknest-guest-secondary { border-color: #bdb28b; background: transparent; color: #49452c !important; }
+.booknest-guest-photo { width: 100%; height: clamp(300px,30vw,450px); overflow: hidden; border-radius: 22px; background: #ddd5c3; box-shadow: 0 12px 26px rgba(55,45,27,.12); }
+.booknest-guest-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 57%; }
+.booknest-guest-benefits { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: center; margin: 0 0 40px; padding: 20px 16px; border: 1px solid #eee8dc; border-radius: 14px; box-shadow: 0 4px 12px rgba(60,50,30,.025); }
+.booknest-guest-benefits article { min-width: 0; display: flex; align-items: center; gap: 16px; padding: 6px clamp(12px,2.4vw,36px); }
+.booknest-guest-benefits article + article { border-left: 1px solid #eee8dc; }
+.booknest-guest-benefit-icon { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; border-radius: 50%; background: #f3eedf; color: #675d32; }
+.booknest-guest-benefits strong { font-size: 15px; font-weight: 650; }
+.booknest-guest-benefits p { margin: 6px 0 0; color: #68665f; font-size: 12px; line-height: 1.65; }
+.booknest-guest-categories { position: relative; padding: 2px 0 12px; }
+.booknest-guest-categories > .booknest-guest-eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 700; }
+.booknest-guest-categories h2 { margin: 0; color: #292820; font: 500 31px/1.2 'Playfair Display',Georgia,serif; }
+.booknest-guest-category-intro { margin: 7px 0 20px; color: #68665f; font-size: 13px; }
+.booknest-guest-category-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 14px; }
+.booknest-guest-category { min-width: 0; min-height: 104px; display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #eee8dc; border-radius: 13px; background: rgba(255,255,255,.36); transition: transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
+.booknest-guest-category:hover { transform: translateY(-2px); border-color: #d8cfb2; box-shadow: 0 7px 18px rgba(55,45,27,.06); }
+.booknest-guest-category > span { width: 48px; height: 48px; flex: 0 0 48px; display: grid; place-items: center; border-radius: 50%; background: #eeebdf; color: #68623b; }
+.booknest-guest-category:nth-child(3n + 1) > span { background: #e9eadc; }
+.booknest-guest-category strong { display: block; color: #2d2b24; font-size: 13px; }
+.booknest-guest-category small { display: block; margin-top: 4px; color: #68665f; font-size: 10px; line-height: 1.5; }
+@media (max-width: 1160px) {
+  .booknest-book-guest { grid-template-columns: 92px minmax(0,1fr); }
+  .booknest-sidebar.is-labeled .harveybook-sidebar-brand { width: 76px; }
+  .booknest-sidebar.is-labeled .booknest-side-icon { font-size: 11px; }
+  .booknest-guest-main { padding-right: 28px; padding-left: 28px; }
+  .booknest-guest-header { gap: 18px; }
+  .booknest-guest-topnav { gap: 18px; }
+  .booknest-guest-hero { grid-template-columns: minmax(0,1fr) minmax(330px,1fr); gap: 28px; }
+  .booknest-guest-copy h1 { font-size: clamp(40px,4.6vw,56px); }
+  .booknest-guest-category-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 760px) {
+  .booknest-guest-home { padding: 0; }
+  .booknest-book-guest { min-height: 100dvh; grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) 72px; overflow: visible; }
+  .booknest-sidebar.is-labeled { grid-row: 2; width: 100%; height: 72px; min-height: 0; flex-direction: row; justify-content: center; padding: 0 8px; border-top: 1px solid #eee9df; border-right: 0; }
+  .booknest-sidebar.is-labeled .harveybook-sidebar-brand { display: none; }
+  .booknest-sidebar.is-labeled .booknest-side-nav { flex-direction: row; justify-content: space-around; gap: 2px; padding: 0; }
+  .booknest-sidebar.is-labeled .booknest-side-icon { width: 60px; height: 60px; gap: 3px; font-size: 9px; }
+  .booknest-sidebar.is-labeled .booknest-side-icon svg { width: 20px; height: 20px; }
+  .booknest-sidebar.is-labeled .booknest-side-icon.is-active svg { padding: 5px; }
+  .booknest-guest-main { grid-row: 1; padding: 0 18px 30px; }
+  .booknest-guest-header { min-height: 0; flex-direction: column; align-items: stretch; gap: 14px; padding: 16px 0; }
+  .booknest-guest-search { width: 100%; flex-basis: 44px; height: 44px; }
+  .booknest-guest-topnav { justify-content: space-between; gap: 8px; }
+  .booknest-guest-topnav a { font-size: 11px; }
+  .booknest-guest-topnav .booknest-guest-login { min-width: 82px; height: 36px; }
+  .booknest-guest-hero { grid-template-columns: minmax(0,1fr); gap: 18px; padding-top: 10px; }
+  .booknest-guest-copy { padding: 16px 0 8px; }
+  .booknest-guest-eyebrow { margin-bottom: 14px; font-size: 9px; }
+  .booknest-guest-copy h1 { font-size: clamp(38px,10vw,54px); }
+  .booknest-guest-copy h1 em { white-space: normal; }
+  .booknest-guest-description { margin-top: 16px; font-size: 14px; }
+  .booknest-guest-actions { margin-top: 20px; }
+  .booknest-guest-photo { height: min(62vw,300px); border-radius: 15px; }
+  .booknest-guest-benefits { grid-template-columns: minmax(0,1fr); gap: 2px; margin: 18px 0 30px; padding: 8px; }
+  .booknest-guest-benefits article { padding: 10px; }
+  .booknest-guest-benefits article + article { border-top: 1px solid #eee8dc; border-left: 0; }
+  .booknest-guest-benefit-icon { width: 46px; height: 46px; flex-basis: 46px; }
+  .booknest-guest-category-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  .booknest-guest-category { min-height: 86px; gap: 8px; padding: 10px; }
+  .booknest-guest-category > span { width: 38px; height: 38px; flex-basis: 38px; }
+  .booknest-guest-category > span svg { width: 20px; height: 20px; }
+}
