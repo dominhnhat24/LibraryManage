@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Crown,
+  BookOpen,
   Search,
   UserRound,
 } from 'lucide-react';
@@ -147,16 +148,27 @@ export function ReaderHome() {
         localStorage.setItem('reader-sidebar-collapsed', String(next));
         return next;
       })} />
-      <main className="booknest-pages grid place-items-center p-8 text-center">
-        <section className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-[.2em] text-[#81744f]">THƯ VIỆN SỐ HARVEYBOOK</p>
-          <h1 className="mt-4 text-4xl font-semibold text-[#29261f]">Chào mừng bạn đến với HarveyBook</h1>
-          <p className="mt-4 text-sm leading-7 text-[#777164]">Đăng nhập hoặc tạo tài khoản để khám phá sách, lưu yêu thích và tiếp tục hành trình đọc của bạn.</p>
-          <div className="mt-7 flex justify-center gap-3">
-            <Link className="rounded-full bg-[#29261f] px-6 py-3 text-sm font-semibold text-white" to="/login">Đăng nhập</Link>
-            <Link className="rounded-full border border-[#b9ad8d] px-6 py-3 text-sm font-semibold text-[#5f512b]" to="/register">Đăng ký</Link>
+      <main className="booknest-pages booknest-guest-pages">
+        <section className="booknest-guest-copy">
+          <p className="booknest-guest-eyebrow"><span /> THƯ VIỆN SỐ HARVEYBOOK</p>
+          <h1>Chạm vào thế giới<br /><em>qua từng trang sách.</em></h1>
+          <p className="booknest-guest-description">Khám phá những câu chuyện đáng nhớ, lưu lại cuốn sách bạn yêu thích và tiếp tục đọc theo nhịp riêng của mình.</p>
+          <div className="booknest-guest-actions">
+            <Link className="booknest-guest-primary" to="/login">Đăng nhập <ChevronRight size={18} /></Link>
+            <Link className="booknest-guest-secondary" to="/register">Tạo tài khoản</Link>
           </div>
+          <p className="booknest-guest-note">Một không gian yên tĩnh dành cho người yêu sách.</p>
         </section>
+        <aside className="booknest-guest-art" aria-label="Minh họa những cuốn sách HarveyBook">
+          <div className="booknest-guest-art-glow" />
+          <div className="booknest-guest-art-caption"><BookOpen size={18} strokeWidth={1.4} /><span>MỞ RA MỘT THẾ GIỚI</span></div>
+          <div className="booknest-guest-books" aria-hidden="true">
+            <div className="booknest-guest-book book-one"><span>HARVEYBOOK</span><strong>Những<br />trang đầu</strong><i>VĂN HỌC · 01</i></div>
+            <div className="booknest-guest-book book-two"><span>THƯ VIỆN</span><strong>Miền<br />ký ức</strong><i>TẢN VĂN · 02</i></div>
+            <div className="booknest-guest-book book-three"><span>ĐỌC CHẬM</span><strong>Ngày<br />nắng nhẹ</strong><i>TRUYỆN · 03</i></div>
+          </div>
+          <div className="booknest-guest-art-footer"><span>01 — 03</span><span>ĐỌC · LƯU · TRỞ LẠI</span></div>
+        </aside>
       </main>
     </div></div>;
   }

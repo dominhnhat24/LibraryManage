@@ -1382,3 +1382,118 @@ body { margin: 0; overflow-x: hidden; }
 .booknest-chapters .booknest-section-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .booknest-chapters .booknest-section-head h2 { flex:1 1 auto; min-width:0; }
 .booknest-chapters .booknest-section-head > .booknest-see-all { display:inline-flex; width:auto; min-width:max-content; flex:0 0 auto; align-items:center; justify-content:center; gap:8px; white-space:nowrap; }
+
+/* Guest home: use the full spread instead of centering a small message on one page. */
+.booknest-guest-pages {
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr);
+  align-items: stretch;
+  background: var(--bn-page);
+}
+.booknest-guest-pages::after { display: none; }
+.booknest-guest-copy {
+  align-self: center;
+  max-width: 760px;
+  padding: clamp(36px, 7vw, 110px);
+  z-index: 3;
+}
+.booknest-guest-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 26px;
+  color: #8c7d43;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2em;
+}
+.booknest-guest-eyebrow span { width: 28px; height: 1px; background: #a39353; }
+.booknest-guest-copy h1 {
+  margin: 0;
+  color: #302d20;
+  font: 500 clamp(42px, 5.3vw, 76px)/1.06 'Playfair Display', Georgia, serif;
+  letter-spacing: -.045em;
+}
+.booknest-guest-copy h1 em { color: #998847; font-weight: 500; }
+.booknest-guest-description {
+  max-width: 520px;
+  margin: 25px 0 0;
+  color: #77766c;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.8;
+}
+.booknest-guest-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
+.booknest-guest-primary,
+.booknest-guest-secondary {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 25px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.booknest-guest-primary { color: #fff !important; background: #8f803d; box-shadow: 0 8px 20px rgba(99,84,38,.16); }
+.booknest-guest-primary:hover { transform: translateY(-2px); background: #786a31; box-shadow: 0 12px 24px rgba(99,84,38,.2); }
+.booknest-guest-secondary { border: 1px solid #d8d0b9; color: #625a3e !important; background: #fbf9f2; }
+.booknest-guest-secondary:hover { transform: translateY(-2px); background: #f1eddf; }
+.booknest-guest-note { margin: 24px 0 0; color: #969084; font-size: 12px; letter-spacing: .02em; }
+.booknest-guest-art {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, #f0eddf 0%, #e8e2ce 100%);
+}
+.booknest-guest-art::before,
+.booknest-guest-art::after { position: absolute; content: ''; border: 1px solid rgba(150,132,67,.18); border-radius: 50%; }
+.booknest-guest-art::before { width: min(76%, 500px); aspect-ratio: 1; }
+.booknest-guest-art::after { width: min(60%, 390px); aspect-ratio: 1; }
+.booknest-guest-art-glow { position: absolute; width: 54%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.42); filter: blur(30px); }
+.booknest-guest-art-caption,
+.booknest-guest-art-footer { position: absolute; z-index: 2; display: flex; align-items: center; color: #857747; letter-spacing: .17em; }
+.booknest-guest-art-caption { top: 9%; left: 9%; gap: 10px; font-size: 10px; }
+.booknest-guest-art-footer { right: 9%; bottom: 8%; left: 9%; justify-content: space-between; padding-top: 14px; border-top: 1px solid rgba(145,129,77,.24); font-size: 9px; }
+.booknest-guest-books { position: relative; z-index: 1; width: min(78%, 470px); height: 390px; display: flex; align-items: center; justify-content: center; perspective: 900px; }
+.booknest-guest-book {
+  position: absolute;
+  width: 190px;
+  height: 285px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 21px;
+  border: 1px solid rgba(255,255,255,.32);
+  box-shadow: 0 20px 35px rgba(58,49,29,.2), inset 7px 0 10px rgba(255,255,255,.08);
+  color: #f6f0de;
+  transform-style: preserve-3d;
+}
+.booknest-guest-book span,.booknest-guest-book i { font-size: 8px; font-style: normal; letter-spacing: .18em; }
+.booknest-guest-book strong { font: 500 29px/1.16 'Playfair Display', Georgia, serif; }
+.booknest-guest-book i { opacity: .78; }
+.book-one { z-index: 1; background: linear-gradient(145deg,#9a8a49,#70633a); transform: translateX(-100px) rotate(-12deg) translateZ(-35px); }
+.book-two { z-index: 3; background: linear-gradient(145deg,#58563c,#343326); transform: translateY(-4px) rotate(2deg) translateZ(20px); }
+.book-three { z-index: 2; background: linear-gradient(145deg,#c0ad75,#958355); transform: translateX(100px) rotate(13deg) translateZ(-20px); }
+@media (max-width: 1199px) and (min-width: 768px) {
+  .booknest-guest-pages { grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); }
+  .booknest-guest-copy { padding: 52px clamp(28px, 5vw, 64px); }
+  .booknest-guest-art { min-height: 560px; }
+  .booknest-guest-books { transform: scale(.82); }
+}
+@media (max-width: 767px) {
+  .booknest-guest-pages { grid-template-columns: minmax(0,1fr); grid-template-rows: auto minmax(300px, 42vh); }
+  .booknest-guest-copy { padding: 58px 26px 44px; }
+  .booknest-guest-eyebrow { margin-bottom: 18px; font-size: 9px; }
+  .booknest-guest-copy h1 { font-size: clamp(38px, 11vw, 54px); }
+  .booknest-guest-description { margin-top: 18px; font-size: 14px; }
+  .booknest-guest-actions { margin-top: 24px; }
+  .booknest-guest-primary,.booknest-guest-secondary { min-height: 46px; padding: 0 18px; font-size: 13px; }
+  .booknest-guest-note { margin-top: 16px; font-size: 11px; }
+  .booknest-guest-art { min-height: 300px; }
+  .booknest-guest-books { height: 300px; transform: scale(.72); }
+  .booknest-guest-art-caption { top: 8%; left: 8%; }
+  .booknest-guest-art-footer { right: 8%; bottom: 6%; left: 8%; }
+}
