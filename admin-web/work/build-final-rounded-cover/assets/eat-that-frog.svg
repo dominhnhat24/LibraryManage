@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="100%" height="100%">
+  <defs>
+    <!-- 3D drop shadow -->
+    <filter id="frogShadow" x="-20%" y="-10%" width="150%" height="130%">
+      <feDropShadow dx="8" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="frogSpineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="60%" stop-color="#2D3748"/>
+      <stop offset="100%" stop-color="#1A202C"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#frogShadow)">
+    <!-- 3D Spine (Left) -->
+    <polygon points="12,18 36,8 36,302 12,312" fill="url(#frogSpineGrad)"/>
+    <text x="-160" y="27" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" font-weight="700" fill="#E2E8F0" transform="rotate(-90)" letter-spacing="1">EAT THAT FROG! • BRIAN TRACY</text>
+
+    <!-- Front Cover (Angled 3D) -->
+    <polygon points="36,8 220,16 220,310 36,302" fill="#FFFFFF"/>
+    
+    <!-- Top banner -->
+    <polygon points="36,8 220,16 220,40 36,32" fill="#1A202C"/>
+    <text x="128" y="26" font-family="'Plus Jakarta Sans', sans-serif" font-size="6.5" font-weight="700" fill="#E2E8F0" text-anchor="middle" letter-spacing="0.5">INTERNATIONAL BESTSELLER</text>
+
+    <!-- Green Frog Header -->
+    <text x="128" y="85" font-family="'Impact', Arial Black, sans-serif" font-size="30" font-weight="900" fill="#2E7D32" text-anchor="middle" letter-spacing="1">EAT THAT</text>
+    <text x="128" y="118" font-family="'Impact', Arial Black, sans-serif" font-size="34" font-weight="900" fill="#2E7D32" text-anchor="middle" letter-spacing="1">FROG!</text>
+
+    <!-- Subtitle -->
+    <text x="128" y="136" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" font-weight="700" fill="#4B5563" text-anchor="middle">21 GREAT WAYS TO STOP PROCRASTINATING</text>
+    <text x="128" y="144" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" font-weight="700" fill="#4B5563" text-anchor="middle">&amp; GET MORE DONE IN LESS TIME</text>
+
+    <!-- Clock face & Frog Graphic -->
+    <g transform="translate(128, 205)">
+      <!-- Clock dial -->
+      <circle cx="0" cy="0" r="44" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+      <line x1="0" y1="0" x2="0" y2="-28" stroke="#1E293B" stroke-width="2"/>
+      <line x1="0" y1="0" x2="22" y2="12" stroke="#EF4444" stroke-width="1.5"/>
+      <!-- Green frog body -->
+      <ellipse cx="6" cy="6" rx="22" ry="16" fill="#388E3C"/>
+      <circle cx="-4" cy="-4" r="5" fill="#2E7D32"/>
+      <circle cx="-5" cy="-5" r="2" fill="#FFFFFF"/>
+      <circle cx="16" cy="-4" r="5" fill="#2E7D32"/>
+      <circle cx="15" cy="-5" r="2" fill="#FFFFFF"/>
+      <!-- Gold medallion badge -->
+      <circle cx="28" cy="22" r="14" fill="#F59E0B"/>
+      <text x="28" y="25" font-family="'Plus Jakarta Sans', sans-serif" font-size="4.5" font-weight="800" fill="#FFFFFF" text-anchor="middle">OVER 3M</text>
+    </g>
+
+    <!-- Author -->
+    <text x="128" y="285" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#1E293B" text-anchor="middle" letter-spacing="1">BRIAN TRACY</text>
+  </g>
+</svg>

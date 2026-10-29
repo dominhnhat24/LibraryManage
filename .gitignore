@@ -1,2 +1,7 @@
 .env
 node_modules/
+/private-books/
+/private-avatars/
+/admin-web/dist/
+/admin-web/.env.local
+/admin-web/*.tsbuildinfo

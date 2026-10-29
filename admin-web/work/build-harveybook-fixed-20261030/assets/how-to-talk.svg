@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="100%" height="100%">
+  <defs>
+    <filter id="talkShadow" x="-20%" y="-10%" width="150%" height="130%">
+      <feDropShadow dx="8" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+    <linearGradient id="talkSpineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#227D9A"/>
+      <stop offset="70%" stop-color="#38A3C4"/>
+      <stop offset="100%" stop-color="#288BAA"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#talkShadow)">
+    <!-- 3D Spine (Left) -->
+    <polygon points="12,18 36,8 36,302 12,312" fill="url(#talkSpineGrad)"/>
+    <text x="-180" y="27" font-family="'Plus Jakarta Sans', sans-serif" font-size="7.5" font-weight="700" fill="#FFFFFF" transform="rotate(-90)" letter-spacing="1">HOW TO TALK TO ANYONE • LEIL LOWNDES</text>
+
+    <!-- Front Cover (Cyan blue) -->
+    <polygon points="36,8 220,16 220,310 36,302" fill="#4FB8D7"/>
+
+    <!-- Top Subtitle -->
+    <text x="128" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="5.5" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">OVER 1 MILLION COPIES SOLD</text>
+
+    <!-- Main Title -->
+    <text x="128" y="78" font-family="'Impact', Arial Black, sans-serif" font-size="32" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">HOW</text>
+    <text x="128" y="100" font-family="'Playfair Display', Georgia, serif" font-size="16" font-style="italic" fill="#1E293B" text-anchor="middle">to</text>
+    <text x="128" y="136" font-family="'Impact', Arial Black, sans-serif" font-size="36" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">TALK</text>
+    <text x="128" y="156" font-family="'Playfair Display', Georgia, serif" font-size="16" font-style="italic" fill="#1E293B" text-anchor="middle">to</text>
+
+    <!-- Black Circle with ANYONE -->
+    <g transform="translate(128, 205)">
+      <circle cx="0" cy="0" r="42" fill="#1A202C"/>
+      <text x="0" y="6" font-family="'Impact', Arial Black, sans-serif" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.5">ANYONE</text>
+      <text x="0" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-size="4.5" font-weight="700" fill="#E2E8F0" text-anchor="middle">92 LITTLE TRICKS FOR BIG SUCCESS</text>
+    </g>
+
+    <!-- Author -->
+    <text x="128" y="280" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="800" letter-spacing="1.5" fill="#FFFFFF" text-anchor="middle">LEIL LOWNDES</text>
+  </g>
+</svg>

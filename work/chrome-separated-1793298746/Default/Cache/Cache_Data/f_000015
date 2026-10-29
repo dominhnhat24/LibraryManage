@@ -1,0 +1,741 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/SettingsPage.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fc6494bc"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=fc6494bc"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useRef = __vite__cjsImport3_react["useRef"]; const useState = __vite__cjsImport3_react["useState"];
+import { AlertCircle, Check, ChevronRight, LockKeyhole, LogOut, Sun, UserRound } from "/node_modules/.vite/deps/lucide-react.js?v=fc6494bc";
+import { Link, useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=fc6494bc";
+import { ReaderLayout } from "/src/components/ReaderLayout.tsx";
+import { useAuth } from "/src/auth/AuthContext.tsx";
+import { apiAssetUrl, errorMessage } from "/src/api/client.ts";
+export function SettingsPage() {
+  _s();
+  const { user, updateProfile, uploadAvatar, requestPasswordOtp, changePassword, logout } = useAuth();
+  const navigate = useNavigate();
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [name, setName] = useState(user?.name ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone_number ?? "");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileNotice, setProfileNotice] = useState("");
+  const [avatarNotice, setAvatarNotice] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInput = useRef(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem("openbook.theme") || "auto");
+  const [readingSize, setReadingSize] = useState(() => localStorage.getItem("openbook.reading-size") || "medium");
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordNotice, setPasswordNotice] = useState(null);
+  const [savingPassword, setSavingPassword] = useState(false);
+  useEffect(() => {
+    document.documentElement.dataset.bookTheme = theme === "auto" ? "" : theme;
+    localStorage.setItem("openbook.theme", theme);
+  }, [theme]);
+  useEffect(() => {
+    document.documentElement.dataset.readerSize = readingSize;
+    localStorage.setItem("openbook.reading-size", readingSize);
+  }, [readingSize]);
+  async function saveProfile(event) {
+    event.preventDefault();
+    setSavingProfile(true);
+    setProfileNotice("");
+    try {
+      const updated = await updateProfile({ name: name.trim(), phone_number: phoneNumber.trim() || null });
+      setName(updated.name);
+      setPhoneNumber(updated.phone_number ?? "");
+      setEditingProfile(false);
+      setProfileNotice("Thông tin tài khoản đã được cập nhật.");
+    } catch (error) {
+      setProfileNotice(errorMessage(error));
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+  async function saveAvatar(file) {
+    if (!file || uploadingAvatar) return;
+    setUploadingAvatar(true);
+    setAvatarNotice("");
+    try {
+      await uploadAvatar(file);
+      setAvatarNotice("Ảnh đại diện đã được cập nhật.");
+    } catch (error) {
+      setAvatarNotice(errorMessage(error));
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInput.current) avatarInput.current.value = "";
+    }
+  }
+  async function sendPasswordOtp() {
+    setSavingPassword(true);
+    setPasswordNotice(null);
+    setOtp("");
+    try {
+      await requestPasswordOtp();
+      setOtpRequested(true);
+      setPasswordNotice({ kind: "success", text: "Mã xác minh đã được gửi đến email tài khoản." });
+    } catch (error) {
+      setPasswordNotice({ kind: "error", text: errorMessage(error) });
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+  async function savePassword(event) {
+    event.preventDefault();
+    setPasswordNotice(null);
+    if (!/^\d{6}$/.test(otp)) {
+      setPasswordNotice({ kind: "error", text: "Mã xác minh phải gồm 6 chữ số." });
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordNotice({ kind: "error", text: "Mật khẩu mới cần có ít nhất 8 ký tự." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordNotice({ kind: "error", text: "Mật khẩu xác nhận chưa khớp." });
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      await changePassword(otp, newPassword);
+      setPasswordNotice({ kind: "success", text: "Mật khẩu đã được cập nhật. Hãy đăng nhập lại." });
+      setOtp("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setOtpRequested(false);
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setPasswordNotice({ kind: "error", text: errorMessage(error) });
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+  async function signOut() {
+    await logout();
+    navigate("/login", { replace: true });
+  }
+  const initials = user?.name?.trim().slice(0, 1).toUpperCase() || "?";
+  return /* @__PURE__ */ jsxDEV(ReaderLayout, { children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "bn-page-header", children: [
+      /* @__PURE__ */ jsxDEV("h1", { className: "bn-page-title-main", children: "Cài đặt" }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 107,
+        columnNumber: 37
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "bn-page-subtitle-main", children: "Tùy chỉnh tài khoản và trải nghiệm đọc sách của bạn" }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 107,
+        columnNumber: 84
+      }, this)
+    ] }, void 0, true, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+      lineNumber: 107,
+      columnNumber: 5
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-page", children: [
+      /* @__PURE__ */ jsxDEV("section", { className: "ob-settings-group", children: [
+        /* @__PURE__ */ jsxDEV("h2", { children: "Tài khoản" }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 110,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-card ob-account-card", children: [
+          user?.avatar_url ? /* @__PURE__ */ jsxDEV("img", { alt: "Ảnh đại diện", className: "ob-settings-avatar object-cover", src: apiAssetUrl(user.avatar_url) }, void 0, false, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 112,
+            columnNumber: 31
+          }, this) : /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-avatar", "aria-hidden": "true", children: initials }, void 0, false, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 112,
+            columnNumber: 139
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-account-info", children: [
+            /* @__PURE__ */ jsxDEV("strong", { children: user?.name || "Chưa có tên tài khoản" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 113,
+              columnNumber: 53
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { children: user?.email || "Chưa có email tài khoản" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 113,
+              columnNumber: 109
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 113,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-action", disabled: uploadingAvatar, onClick: () => avatarInput.current?.click(), type: "button", children: uploadingAvatar ? "Đang tải…" : "Đổi ảnh đại diện" }, void 0, false, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 114,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("input", { accept: "image/png,image/jpeg", className: "sr-only", onChange: (event) => void saveAvatar(event.target.files?.[0]), ref: avatarInput, type: "file" }, void 0, false, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 115,
+            columnNumber: 11
+          }, this),
+          !editingProfile && /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-action", type: "button", onClick: () => {
+            setName(user?.name ?? "");
+            setPhoneNumber(user?.phone_number ?? "");
+            setEditingProfile(true);
+          }, children: "Chỉnh sửa hồ sơ" }, void 0, false, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 116,
+            columnNumber: 31
+          }, this)
+        ] }, void 0, true, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 111,
+          columnNumber: 9
+        }, this),
+        avatarNotice && /* @__PURE__ */ jsxDEV("p", { className: "ob-settings-notice", role: "status", children: avatarNotice }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 118,
+          columnNumber: 26
+        }, this),
+        editingProfile && /* @__PURE__ */ jsxDEV("form", { className: "ob-settings-card ob-settings-profile-form", onSubmit: (event) => void saveProfile(event), children: [
+          /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-label", children: [
+            "Tên hiển thị",
+            /* @__PURE__ */ jsxDEV("input", { className: "ob-settings-input", required: true, maxLength: 100, value: name, onChange: (event) => setName(event.target.value) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 120,
+              columnNumber: 60
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 120,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-label", children: [
+            "Số điện thoại",
+            /* @__PURE__ */ jsxDEV("input", { className: "ob-settings-input", maxLength: 12, value: phoneNumber, onChange: (event) => setPhoneNumber(event.target.value) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 121,
+              columnNumber: 61
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 121,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-form-actions", children: [
+            /* @__PURE__ */ jsxDEV("button", { type: "button", className: "ob-settings-secondary", onClick: () => setEditingProfile(false), children: "Hủy" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 122,
+              columnNumber: 53
+            }, this),
+            /* @__PURE__ */ jsxDEV("button", { type: "submit", className: "ob-settings-primary", disabled: savingProfile, children: savingProfile ? "Đang lưu…" : "Lưu thay đổi" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 122,
+              columnNumber: 162
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 122,
+            columnNumber: 11
+          }, this)
+        ] }, void 0, true, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 119,
+          columnNumber: 28
+        }, this),
+        profileNotice && /* @__PURE__ */ jsxDEV("p", { className: "ob-settings-notice", role: "status", children: profileNotice }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 124,
+          columnNumber: 27
+        }, this)
+      ] }, void 0, true, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 109,
+        columnNumber: 7
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "ob-settings-group", children: [
+        /* @__PURE__ */ jsxDEV("h2", { children: "Hiển thị" }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 128,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-card ob-settings-options", children: [
+          /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-row", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(Sun, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 130,
+              columnNumber: 88
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 130,
+              columnNumber: 46
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Chế độ sáng/tối" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 130,
+                columnNumber: 151
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Giao diện OpenBook" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 130,
+                columnNumber: 183
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 130,
+              columnNumber: 112
+            }, this),
+            /* @__PURE__ */ jsxDEV("select", { "aria-label": "Chế độ sáng/tối", value: theme, onChange: (event) => setTheme(event.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "auto", children: "Tự động" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 130,
+                columnNumber: 344
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "light", children: "Sáng" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 130,
+                columnNumber: 381
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "dark", children: "Tối" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 130,
+                columnNumber: 416
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 130,
+              columnNumber: 223
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 130,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-row", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(UserRound, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 131,
+              columnNumber: 88
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 131,
+              columnNumber: 46
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Kích thước chữ đọc" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 131,
+                columnNumber: 157
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Áp dụng cho trang đọc sách" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 131,
+                columnNumber: 192
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 131,
+              columnNumber: 118
+            }, this),
+            /* @__PURE__ */ jsxDEV("select", { "aria-label": "Kích thước chữ đọc", value: readingSize, onChange: (event) => setReadingSize(event.target.value), children: [
+              /* @__PURE__ */ jsxDEV("option", { value: "small", children: "Nhỏ" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 131,
+                columnNumber: 372
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "medium", children: "Vừa" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 131,
+                columnNumber: 406
+              }, this),
+              /* @__PURE__ */ jsxDEV("option", { value: "large", children: "Lớn" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 131,
+                columnNumber: 441
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 131,
+              columnNumber: 240
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 131,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-row", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: "文" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 132,
+              columnNumber: 44
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Ngôn ngữ" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 132,
+                columnNumber: 133
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Ngôn ngữ đang dùng trong ứng dụng" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 132,
+                columnNumber: 158
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 132,
+              columnNumber: 94
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-static-value", children: "Tiếng Việt" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 132,
+              columnNumber: 213
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 132,
+            columnNumber: 11
+          }, this)
+        ] }, void 0, true, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 129,
+          columnNumber: 9
+        }, this)
+      ] }, void 0, true, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 127,
+        columnNumber: 7
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "ob-settings-group", children: [
+        /* @__PURE__ */ jsxDEV("h2", { children: "Đọc sách" }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 137,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-card ob-settings-options", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-row", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(Check, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 139,
+              columnNumber: 86
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 139,
+              columnNumber: 44
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Lưu tiến độ đọc" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 139,
+                columnNumber: 151
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Chương được ghi nhận khi bạn đánh dấu hoàn thành" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 139,
+                columnNumber: 183
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 139,
+              columnNumber: 112
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-state", children: "Theo tài khoản" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 139,
+              columnNumber: 253
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 139,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-row", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(Check, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 140,
+              columnNumber: 86
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 140,
+              columnNumber: 44
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Đồng bộ dữ liệu" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 140,
+                columnNumber: 151
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Tiến độ và chương đã lưu gắn với tài khoản" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 140,
+                columnNumber: 183
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 140,
+              columnNumber: 112
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-state", children: "Tài khoản" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 140,
+              columnNumber: 247
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 140,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-row is-muted", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(AlertCircle, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 141,
+              columnNumber: 95
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 141,
+              columnNumber: 53
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: [
+              /* @__PURE__ */ jsxDEV("strong", { children: "Thông báo sách mới" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 141,
+                columnNumber: 166
+              }, this),
+              /* @__PURE__ */ jsxDEV("small", { children: "Thông báo chưa được hỗ trợ" }, void 0, false, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 141,
+                columnNumber: 201
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 141,
+              columnNumber: 127
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 141,
+            columnNumber: 11
+          }, this)
+        ] }, void 0, true, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 138,
+          columnNumber: 9
+        }, this)
+      ] }, void 0, true, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 136,
+        columnNumber: 7
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "ob-settings-group", children: [
+        /* @__PURE__ */ jsxDEV("h2", { children: "Khác" }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 146,
+          columnNumber: 9
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-card ob-settings-options", children: [
+          /* @__PURE__ */ jsxDEV(Link, { className: "ob-settings-row ob-settings-link-row", to: "/support", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(ChevronRight, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 148,
+              columnNumber: 122
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 148,
+              columnNumber: 80
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: /* @__PURE__ */ jsxDEV("strong", { children: "Trợ giúp & Hỗ trợ" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 148,
+              columnNumber: 194
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 148,
+              columnNumber: 155
+            }, this),
+            /* @__PURE__ */ jsxDEV(ChevronRight, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 148,
+              columnNumber: 235
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 148,
+            columnNumber: 11
+          }, this),
+          /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-row ob-settings-link-row", type: "button", onClick: () => {
+            setPasswordOpen((open) => !open);
+            setPasswordNotice(null);
+          }, children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-option-icon", children: /* @__PURE__ */ jsxDEV(LockKeyhole, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 149,
+              columnNumber: 200
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 149,
+              columnNumber: 158
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "ob-settings-row-copy", children: /* @__PURE__ */ jsxDEV("strong", { children: passwordOpen ? "Đóng đổi mật khẩu" : "Đổi mật khẩu" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 149,
+              columnNumber: 271
+            }, this) }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 149,
+              columnNumber: 232
+            }, this),
+            /* @__PURE__ */ jsxDEV(ChevronRight, { size: 14 }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 149,
+              columnNumber: 348
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 149,
+            columnNumber: 11
+          }, this),
+          passwordOpen && /* @__PURE__ */ jsxDEV("form", { className: "ob-settings-password-form", onSubmit: (event) => void savePassword(event), children: [
+            passwordNotice && /* @__PURE__ */ jsxDEV("p", { className: `ob-settings-notice ${passwordNotice.kind}`, role: passwordNotice.kind === "error" ? "alert" : "status", children: passwordNotice.text }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 151,
+              columnNumber: 32
+            }, this),
+            !otpRequested ? /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-primary", disabled: savingPassword, onClick: () => void sendPasswordOtp(), type: "button", children: savingPassword ? "Đang gửi…" : "Gửi mã xác minh qua email" }, void 0, false, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 152,
+              columnNumber: 30
+            }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+              /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-label", children: [
+                "Mã xác minh",
+                /* @__PURE__ */ jsxDEV("input", { className: "ob-settings-input", autoComplete: "one-time-code", inputMode: "numeric", maxLength: 6, pattern: "[0-9]{6}", required: true, value: otp, onChange: (event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6)) }, void 0, false, {
+                  fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                  lineNumber: 152,
+                  columnNumber: 271
+                }, this)
+              ] }, void 0, true, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 152,
+                columnNumber: 223
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "ob-settings-password-fields", children: [
+                /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-label", children: [
+                  "Mật khẩu mới",
+                  /* @__PURE__ */ jsxDEV("input", { className: "ob-settings-input", type: "password", autoComplete: "new-password", minLength: 8, maxLength: 128, required: true, value: newPassword, onChange: (event) => setNewPassword(event.target.value) }, void 0, false, {
+                    fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                    lineNumber: 152,
+                    columnNumber: 595
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                  lineNumber: 152,
+                  columnNumber: 546
+                }, this),
+                /* @__PURE__ */ jsxDEV("label", { className: "ob-settings-label", children: [
+                  "Xác nhận mật khẩu",
+                  /* @__PURE__ */ jsxDEV("input", { className: "ob-settings-input", type: "password", autoComplete: "new-password", minLength: 8, maxLength: 128, required: true, value: confirmPassword, onChange: (event) => setConfirmPassword(event.target.value) }, void 0, false, {
+                    fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                    lineNumber: 152,
+                    columnNumber: 856
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                  lineNumber: 152,
+                  columnNumber: 802
+                }, this)
+              ] }, void 0, true, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 152,
+                columnNumber: 501
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "flex gap-2", children: [
+                /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-secondary", disabled: savingPassword, onClick: () => void sendPasswordOtp(), type: "button", children: "Gửi lại mã" }, void 0, false, {
+                  fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                  lineNumber: 152,
+                  columnNumber: 1105
+                }, this),
+                /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-primary", type: "submit", disabled: savingPassword, children: savingPassword ? "Đang cập nhật…" : "Cập nhật mật khẩu" }, void 0, false, {
+                  fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                  lineNumber: 152,
+                  columnNumber: 1245
+                }, this)
+              ] }, void 0, true, {
+                fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+                lineNumber: 152,
+                columnNumber: 1077
+              }, this)
+            ] }, void 0, true, {
+              fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+              lineNumber: 152,
+              columnNumber: 221
+            }, this)
+          ] }, void 0, true, {
+            fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+            lineNumber: 150,
+            columnNumber: 28
+          }, this)
+        ] }, void 0, true, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 147,
+          columnNumber: 9
+        }, this)
+      ] }, void 0, true, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 145,
+        columnNumber: 7
+      }, this),
+      /* @__PURE__ */ jsxDEV("button", { className: "ob-settings-logout", type: "button", onClick: () => void signOut(), children: [
+        /* @__PURE__ */ jsxDEV(LogOut, { size: 14 }, void 0, false, {
+          fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+          lineNumber: 157,
+          columnNumber: 91
+        }, this),
+        "Đăng xuất"
+      ] }, void 0, true, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+        lineNumber: 157,
+        columnNumber: 7
+      }, this)
+    ] }, void 0, true, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+      lineNumber: 108,
+      columnNumber: 5
+    }, this)
+  ] }, void 0, true, {
+    fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx",
+    lineNumber: 106,
+    columnNumber: 10
+  }, this);
+}
+_s(SettingsPage, "9tCcmYuNVaNJjiHyNrPTTCtJyo8=", false, function() {
+  return [useAuth, useNavigate];
+});
+_c = SettingsPage;
+var _c;
+$RefreshReg$(_c, "SettingsPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/pages/SettingsPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QSxhQUFpSDtBQUFBLFNBakRuSDtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBa0RBO0FBQUEsT0FwREs7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQXFEUDtBQUNGO0FBQUNuRSxHQWxJZUQsY0FBWTtBQUFBLFVBQ2dFSCxTQUN6RUYsV0FBVztBQUFBO0FBQUEsS0FGZEs7QUFBWSxJQUFBOEU7QUFBQSxhQUFBQSxJQUFBIiwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlUmVmIiwidXNlU3RhdGUiLCJBbGVydENpcmNsZSIsIkNoZWNrIiwiQ2hldnJvblJpZ2h0IiwiTG9ja0tleWhvbGUiLCJMb2dPdXQiLCJTdW4iLCJVc2VyUm91bmQiLCJMaW5rIiwidXNlTmF2aWdhdGUiLCJSZWFkZXJMYXlvdXQiLCJ1c2VBdXRoIiwiYXBpQXNzZXRVcmwiLCJlcnJvck1lc3NhZ2UiLCJTZXR0aW5nc1BhZ2UiLCJfcyIsInVzZXIiLCJ1cGRhdGVQcm9maWxlIiwidXBsb2FkQXZhdGFyIiwicmVxdWVzdFBhc3N3b3JkT3RwIiwiY2hhbmdlUGFzc3dvcmQiLCJsb2dvdXQiLCJuYXZpZ2F0ZSIsImVkaXRpbmdQcm9maWxlIiwic2V0RWRpdGluZ1Byb2ZpbGUiLCJuYW1lIiwic2V0TmFtZSIsInBob25lTnVtYmVyIiwic2V0UGhvbmVOdW1iZXIiLCJwaG9uZV9udW1iZXIiLCJzYXZpbmdQcm9maWxlIiwic2V0U2F2aW5nUHJvZmlsZSIsInByb2ZpbGVOb3RpY2UiLCJzZXRQcm9maWxlTm90aWNlIiwiYXZhdGFyTm90aWNlIiwic2V0QXZhdGFyTm90aWNlIiwidXBsb2FkaW5nQXZhdGFyIiwic2V0VXBsb2FkaW5nQXZhdGFyIiwiYXZhdGFySW5wdXQiLCJ0aGVtZSIsInNldFRoZW1lIiwibG9jYWxTdG9yYWdlIiwiZ2V0SXRlbSIsInJlYWRpbmdTaXplIiwic2V0UmVhZGluZ1NpemUiLCJwYXNzd29yZE9wZW4iLCJzZXRQYXNzd29yZE9wZW4iLCJvdHAiLCJzZXRPdHAiLCJvdHBSZXF1ZXN0ZWQiLCJzZXRPdHBSZXF1ZXN0ZWQiLCJuZXdQYXNzd29yZCIsInNldE5ld1Bhc3N3b3JkIiwiY29uZmlybVBhc3N3b3JkIiwic2V0Q29uZmlybVBhc3N3b3JkIiwicGFzc3dvcmROb3RpY2UiLCJzZXRQYXNzd29yZE5vdGljZSIsInNhdmluZ1Bhc3N3b3JkIiwic2V0U2F2aW5nUGFzc3dvcmQiLCJkb2N1bWVudCIsImRvY3VtZW50RWxlbWVudCIsImRhdGFzZXQiLCJib29rVGhlbWUiLCJzZXRJdGVtIiwicmVhZGVyU2l6ZSIsInNhdmVQcm9maWxlIiwiZXZlbnQiLCJwcmV2ZW50RGVmYXVsdCIsInVwZGF0ZWQiLCJ0cmltIiwiZXJyb3IiLCJzYXZlQXZhdGFyIiwiZmlsZSIsImN1cnJlbnQiLCJ2YWx1ZSIsInNlbmRQYXNzd29yZE90cCIsImtpbmQiLCJ0ZXh0Iiwic2F2ZVBhc3N3b3JkIiwidGVzdCIsImxlbmd0aCIsInJlcGxhY2UiLCJzaWduT3V0IiwiaW5pdGlhbHMiLCJzbGljZSIsInRvVXBwZXJDYXNlIiwiYXZhdGFyX3VybCIsImVtYWlsIiwiY2xpY2siLCJ0YXJnZXQiLCJmaWxlcyIsIm9wZW4iLCJfYyJdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJTZXR0aW5nc1BhZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZUVmZmVjdCwgdXNlUmVmLCB1c2VTdGF0ZSwgdHlwZSBGb3JtRXZlbnQgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBBbGVydENpcmNsZSwgQ2hlY2ssIENoZXZyb25SaWdodCwgTG9ja0tleWhvbGUsIExvZ091dCwgU3VuLCBVc2VyUm91bmQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgTGluaywgdXNlTmF2aWdhdGUgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IFJlYWRlckxheW91dCB9IGZyb20gJy4uL2NvbXBvbmVudHMvUmVhZGVyTGF5b3V0JztcbmltcG9ydCB7IHVzZUF1dGggfSBmcm9tICcuLi9hdXRoL0F1dGhDb250ZXh0JztcbmltcG9ydCB7IGFwaUFzc2V0VXJsLCBlcnJvck1lc3NhZ2UgfSBmcm9tICcuLi9hcGkvY2xpZW50JztcblxudHlwZSBUaGVtZVByZWZlcmVuY2UgPSAnYXV0bycgfCAnbGlnaHQnIHwgJ2RhcmsnO1xudHlwZSBSZWFkaW5nU2l6ZSA9ICdzbWFsbCcgfCAnbWVkaXVtJyB8ICdsYXJnZSc7XG5cbmV4cG9ydCBmdW5jdGlvbiBTZXR0aW5nc1BhZ2UoKSB7XG4gIGNvbnN0IHsgdXNlciwgdXBkYXRlUHJvZmlsZSwgdXBsb2FkQXZhdGFyLCByZXF1ZXN0UGFzc3dvcmRPdHAsIGNoYW5nZVBhc3N3b3JkLCBsb2dvdXQgfSA9IHVzZUF1dGgoKTtcbiAgY29uc3QgbmF2aWdhdGUgPSB1c2VOYXZpZ2F0ZSgpO1xuICBjb25zdCBbZWRpdGluZ1Byb2ZpbGUsIHNldEVkaXRpbmdQcm9maWxlXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW25hbWUsIHNldE5hbWVdID0gdXNlU3RhdGUodXNlcj8ubmFtZSA/PyAnJyk7XG4gIGNvbnN0IFtwaG9uZU51bWJlciwgc2V0UGhvbmVOdW1iZXJdID0gdXNlU3RhdGUodXNlcj8ucGhvbmVfbnVtYmVyID8/ICcnKTtcbiAgY29uc3QgW3NhdmluZ1Byb2ZpbGUsIHNldFNhdmluZ1Byb2ZpbGVdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbcHJvZmlsZU5vdGljZSwgc2V0UHJvZmlsZU5vdGljZV0gPSB1c2VTdGF0ZSgnJyk7XG4gIGNvbnN0IFthdmF0YXJOb3RpY2UsIHNldEF2YXRhck5vdGljZV0gPSB1c2VTdGF0ZSgnJyk7XG4gIGNvbnN0IFt1cGxvYWRpbmdBdmF0YXIsIHNldFVwbG9hZGluZ0F2YXRhcl0gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IGF2YXRhcklucHV0ID0gdXNlUmVmPEhUTUxJbnB1dEVsZW1lbnQ+KG51bGwpO1xuICBjb25zdCBbdGhlbWUsIHNldFRoZW1lXSA9IHVzZVN0YXRlPFRoZW1lUHJlZmVyZW5jZT4oKCkgPT4gKGxvY2FsU3RvcmFnZS5nZXRJdGVtKCdvcGVuYm9vay50aGVtZScpIGFzIFRoZW1lUHJlZmVyZW5jZSkgfHwgJ2F1dG8nKTtcbiAgY29uc3QgW3JlYWRpbmdTaXplLCBzZXRSZWFkaW5nU2l6ZV0gPSB1c2VTdGF0ZTxSZWFkaW5nU2l6ZT4oKCkgPT4gKGxvY2FsU3RvcmFnZS5nZXRJdGVtKCdvcGVuYm9vay5yZWFkaW5nLXNpemUnKSBhcyBSZWFkaW5nU2l6ZSkgfHwgJ21lZGl1bScpO1xuICBjb25zdCBbcGFzc3dvcmRPcGVuLCBzZXRQYXNzd29yZE9wZW5dID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbb3RwLCBzZXRPdHBdID0gdXNlU3RhdGUoJycpO1xuICBjb25zdCBbb3RwUmVxdWVzdGVkLCBzZXRPdHBSZXF1ZXN0ZWRdID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbbmV3UGFzc3dvcmQsIHNldE5ld1Bhc3N3b3JkXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW2NvbmZpcm1QYXNzd29yZCwgc2V0Q29uZmlybVBhc3N3b3JkXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW3Bhc3N3b3JkTm90aWNlLCBzZXRQYXNzd29yZE5vdGljZV0gPSB1c2VTdGF0ZTx7IGtpbmQ6ICdzdWNjZXNzJyB8ICdlcnJvcic7IHRleHQ6IHN0cmluZyB9IHwgbnVsbD4obnVsbCk7XG4gIGNvbnN0IFtzYXZpbmdQYXNzd29yZCwgc2V0U2F2aW5nUGFzc3dvcmRdID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmRhdGFzZXQuYm9va1RoZW1lID0gdGhlbWUgPT09ICdhdXRvJyA/ICcnIDogdGhlbWU7XG4gICAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ29wZW5ib29rLnRoZW1lJywgdGhlbWUpO1xuICB9LCBbdGhlbWVdKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5kYXRhc2V0LnJlYWRlclNpemUgPSByZWFkaW5nU2l6ZTtcbiAgICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgnb3BlbmJvb2sucmVhZGluZy1zaXplJywgcmVhZGluZ1NpemUpO1xuICB9LCBbcmVhZGluZ1NpemVdKTtcblxuICBhc3luYyBmdW5jdGlvbiBzYXZlUHJvZmlsZShldmVudDogRm9ybUV2ZW50PEhUTUxGb3JtRWxlbWVudD4pIHtcbiAgICBldmVudC5wcmV2ZW50RGVmYXVsdCgpOyBzZXRTYXZpbmdQcm9maWxlKHRydWUpOyBzZXRQcm9maWxlTm90aWNlKCcnKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgdXBkYXRlZCA9IGF3YWl0IHVwZGF0ZVByb2ZpbGUoeyBuYW1lOiBuYW1lLnRyaW0oKSwgcGhvbmVfbnVtYmVyOiBwaG9uZU51bWJlci50cmltKCkgfHwgbnVsbCB9KTtcbiAgICAgIHNldE5hbWUodXBkYXRlZC5uYW1lKTsgc2V0UGhvbmVOdW1iZXIodXBkYXRlZC5waG9uZV9udW1iZXIgPz8gJycpOyBzZXRFZGl0aW5nUHJvZmlsZShmYWxzZSk7IHNldFByb2ZpbGVOb3RpY2UoJ1Row7RuZyB0aW4gdMOgaSBraG/huqNuIMSRw6MgxJHGsOG7o2MgY+G6rXAgbmjhuq10LicpO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7IHNldFByb2ZpbGVOb3RpY2UoZXJyb3JNZXNzYWdlKGVycm9yKSk7IH1cbiAgICBmaW5hbGx5IHsgc2V0U2F2aW5nUHJvZmlsZShmYWxzZSk7IH1cbiAgfVxuXG4gIGFzeW5jIGZ1bmN0aW9uIHNhdmVBdmF0YXIoZmlsZT86IEZpbGUpIHtcbiAgICBpZiAoIWZpbGUgfHwgdXBsb2FkaW5nQXZhdGFyKSByZXR1cm47XG4gICAgc2V0VXBsb2FkaW5nQXZhdGFyKHRydWUpOyBzZXRBdmF0YXJOb3RpY2UoJycpO1xuICAgIHRyeSB7IGF3YWl0IHVwbG9hZEF2YXRhcihmaWxlKTsgc2V0QXZhdGFyTm90aWNlKCfhuqJuaCDEkeG6oWkgZGnhu4duIMSRw6MgxJHGsOG7o2MgY+G6rXAgbmjhuq10LicpOyB9XG4gICAgY2F0Y2ggKGVycm9yKSB7IHNldEF2YXRhck5vdGljZShlcnJvck1lc3NhZ2UoZXJyb3IpKTsgfVxuICAgIGZpbmFsbHkgeyBzZXRVcGxvYWRpbmdBdmF0YXIoZmFsc2UpOyBpZiAoYXZhdGFySW5wdXQuY3VycmVudCkgYXZhdGFySW5wdXQuY3VycmVudC52YWx1ZSA9ICcnOyB9XG4gIH1cblxuICBhc3luYyBmdW5jdGlvbiBzZW5kUGFzc3dvcmRPdHAoKSB7XG4gICAgc2V0U2F2aW5nUGFzc3dvcmQodHJ1ZSk7IHNldFBhc3N3b3JkTm90aWNlKG51bGwpO1xuICAgIHNldE90cCgnJyk7XG4gICAgdHJ5IHtcbiAgICAgIGF3YWl0IHJlcXVlc3RQYXNzd29yZE90cCgpO1xuICAgICAgc2V0T3RwUmVxdWVzdGVkKHRydWUpO1xuICAgICAgc2V0UGFzc3dvcmROb3RpY2UoeyBraW5kOiAnc3VjY2VzcycsIHRleHQ6ICdNw6MgeMOhYyBtaW5oIMSRw6MgxJHGsOG7o2MgZ+G7rWkgxJHhur9uIGVtYWlsIHTDoGkga2hv4bqjbi4nIH0pO1xuICAgIH0gY2F0Y2ggKGVycm9yKSB7IHNldFBhc3N3b3JkTm90aWNlKHsga2luZDogJ2Vycm9yJywgdGV4dDogZXJyb3JNZXNzYWdlKGVycm9yKSB9KTsgfVxuICAgIGZpbmFsbHkgeyBzZXRTYXZpbmdQYXNzd29yZChmYWxzZSk7IH1cbiAgfVxuXG4gIGFzeW5jIGZ1bmN0aW9uIHNhdmVQYXNzd29yZChldmVudDogRm9ybUV2ZW50PEhUTUxGb3JtRWxlbWVudD4pIHtcbiAgICBldmVudC5wcmV2ZW50RGVmYXVsdCgpOyBzZXRQYXNzd29yZE5vdGljZShudWxsKTtcbiAgICBpZiAoIS9eXFxkezZ9JC8udGVzdChvdHApKSB7IHNldFBhc3N3b3JkTm90aWNlKHsga2luZDogJ2Vycm9yJywgdGV4dDogJ03DoyB4w6FjIG1pbmggcGjhuqNpIGfhu5NtIDYgY2jhu68gc+G7kS4nIH0pOyByZXR1cm47IH1cbiAgICBpZiAobmV3UGFzc3dvcmQubGVuZ3RoIDwgOCkgeyBzZXRQYXNzd29yZE5vdGljZSh7IGtpbmQ6ICdlcnJvcicsIHRleHQ6ICdN4bqtdCBraOG6qXUgbeG7m2kgY+G6p24gY8OzIMOtdCBuaOG6pXQgOCBrw70gdOG7sS4nIH0pOyByZXR1cm47IH1cbiAgICBpZiAobmV3UGFzc3dvcmQgIT09IGNvbmZpcm1QYXNzd29yZCkgeyBzZXRQYXNzd29yZE5vdGljZSh7IGtpbmQ6ICdlcnJvcicsIHRleHQ6ICdN4bqtdCBraOG6qXUgeMOhYyBuaOG6rW4gY2jGsGEga2jhu5twLicgfSk7IHJldHVybjsgfVxuICAgIHNldFNhdmluZ1Bhc3N3b3JkKHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBhd2FpdCBjaGFuZ2VQYXNzd29yZChvdHAsIG5ld1Bhc3N3b3JkKTsgc2V0UGFzc3dvcmROb3RpY2UoeyBraW5kOiAnc3VjY2VzcycsIHRleHQ6ICdN4bqtdCBraOG6qXUgxJHDoyDEkcaw4bujYyBj4bqtcCBuaOG6rXQuIEjDo3kgxJHEg25nIG5o4bqtcCBs4bqhaS4nIH0pO1xuICAgICAgc2V0T3RwKCcnKTsgc2V0TmV3UGFzc3dvcmQoJycpOyBzZXRDb25maXJtUGFzc3dvcmQoJycpOyBzZXRPdHBSZXF1ZXN0ZWQoZmFsc2UpO1xuICAgICAgbmF2aWdhdGUoJy9sb2dpbicsIHsgcmVwbGFjZTogdHJ1ZSB9KTtcbiAgICB9IGNhdGNoIChlcnJvcikgeyBzZXRQYXNzd29yZE5vdGljZSh7IGtpbmQ6ICdlcnJvcicsIHRleHQ6IGVycm9yTWVzc2FnZShlcnJvcikgfSk7IH1cbiAgICBmaW5hbGx5IHsgc2V0U2F2aW5nUGFzc3dvcmQoZmFsc2UpOyB9XG4gIH1cblxuICBhc3luYyBmdW5jdGlvbiBzaWduT3V0KCkgeyBhd2FpdCBsb2dvdXQoKTsgbmF2aWdhdGUoJy9sb2dpbicsIHsgcmVwbGFjZTogdHJ1ZSB9KTsgfVxuICBjb25zdCBpbml0aWFscyA9IHVzZXI/Lm5hbWU/LnRyaW0oKS5zbGljZSgwLCAxKS50b1VwcGVyQ2FzZSgpIHx8ICc/JztcblxuICByZXR1cm4gPFJlYWRlckxheW91dD5cbiAgICA8ZGl2IGNsYXNzTmFtZT1cImJuLXBhZ2UtaGVhZGVyXCI+PGgxIGNsYXNzTmFtZT1cImJuLXBhZ2UtdGl0bGUtbWFpblwiPkPDoGkgxJHhurd0PC9oMT48cCBjbGFzc05hbWU9XCJibi1wYWdlLXN1YnRpdGxlLW1haW5cIj5Uw7l5IGNo4buJbmggdMOgaSBraG/huqNuIHbDoCB0cuG6o2kgbmdoaeG7h20gxJHhu41jIHPDoWNoIGPhu6dhIGLhuqFuPC9wPjwvZGl2PlxuICAgIDxkaXYgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtcGFnZVwiPlxuICAgICAgPHNlY3Rpb24gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtZ3JvdXBcIj5cbiAgICAgICAgPGgyPlTDoGkga2hv4bqjbjwvaDI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtY2FyZCBvYi1hY2NvdW50LWNhcmRcIj5cbiAgICAgICAgICB7dXNlcj8uYXZhdGFyX3VybCA/IDxpbWcgYWx0PVwi4bqibmggxJHhuqFpIGRp4buHblwiIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLWF2YXRhciBvYmplY3QtY292ZXJcIiBzcmM9e2FwaUFzc2V0VXJsKHVzZXIuYXZhdGFyX3VybCl9IC8+IDogPHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtYXZhdGFyXCIgYXJpYS1oaWRkZW49XCJ0cnVlXCI+e2luaXRpYWxzfTwvc3Bhbj59XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1hY2NvdW50LWluZm9cIj48c3Ryb25nPnt1c2VyPy5uYW1lIHx8ICdDaMawYSBjw7MgdMOqbiB0w6BpIGtob+G6o24nfTwvc3Ryb25nPjxzcGFuPnt1c2VyPy5lbWFpbCB8fCAnQ2jGsGEgY8OzIGVtYWlsIHTDoGkga2hv4bqjbid9PC9zcGFuPjwvZGl2PlxuICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtYWN0aW9uXCIgZGlzYWJsZWQ9e3VwbG9hZGluZ0F2YXRhcn0gb25DbGljaz17KCkgPT4gYXZhdGFySW5wdXQuY3VycmVudD8uY2xpY2soKX0gdHlwZT1cImJ1dHRvblwiPnt1cGxvYWRpbmdBdmF0YXIgPyAnxJBhbmcgdOG6o2nigKYnIDogJ8SQ4buVaSDhuqNuaCDEkeG6oWkgZGnhu4duJ308L2J1dHRvbj5cbiAgICAgICAgICA8aW5wdXQgYWNjZXB0PVwiaW1hZ2UvcG5nLGltYWdlL2pwZWdcIiBjbGFzc05hbWU9XCJzci1vbmx5XCIgb25DaGFuZ2U9eyhldmVudCkgPT4gdm9pZCBzYXZlQXZhdGFyKGV2ZW50LnRhcmdldC5maWxlcz8uWzBdKX0gcmVmPXthdmF0YXJJbnB1dH0gdHlwZT1cImZpbGVcIiAvPlxuICAgICAgICAgIHshZWRpdGluZ1Byb2ZpbGUgJiYgPGJ1dHRvbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1hY3Rpb25cIiB0eXBlPVwiYnV0dG9uXCIgb25DbGljaz17KCkgPT4geyBzZXROYW1lKHVzZXI/Lm5hbWUgPz8gJycpOyBzZXRQaG9uZU51bWJlcih1c2VyPy5waG9uZV9udW1iZXIgPz8gJycpOyBzZXRFZGl0aW5nUHJvZmlsZSh0cnVlKTsgfX0+Q2jhu4luaCBz4butYSBo4buTIHPGoTwvYnV0dG9uPn1cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIHthdmF0YXJOb3RpY2UgJiYgPHAgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtbm90aWNlXCIgcm9sZT1cInN0YXR1c1wiPnthdmF0YXJOb3RpY2V9PC9wPn1cbiAgICAgICAge2VkaXRpbmdQcm9maWxlICYmIDxmb3JtIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLWNhcmQgb2Itc2V0dGluZ3MtcHJvZmlsZS1mb3JtXCIgb25TdWJtaXQ9eyhldmVudCkgPT4gdm9pZCBzYXZlUHJvZmlsZShldmVudCl9PlxuICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1sYWJlbFwiPlTDqm4gaGnhu4NuIHRo4buLPGlucHV0IGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLWlucHV0XCIgcmVxdWlyZWQgbWF4TGVuZ3RoPXsxMDB9IHZhbHVlPXtuYW1lfSBvbkNoYW5nZT17KGV2ZW50KSA9PiBzZXROYW1lKGV2ZW50LnRhcmdldC52YWx1ZSl9IC8+PC9sYWJlbD5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtbGFiZWxcIj5T4buRIMSRaeG7h24gdGhv4bqhaTxpbnB1dCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1pbnB1dFwiIG1heExlbmd0aD17MTJ9IHZhbHVlPXtwaG9uZU51bWJlcn0gb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0UGhvbmVOdW1iZXIoZXZlbnQudGFyZ2V0LnZhbHVlKX0gLz48L2xhYmVsPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtZm9ybS1hY3Rpb25zXCI+PGJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtc2Vjb25kYXJ5XCIgb25DbGljaz17KCkgPT4gc2V0RWRpdGluZ1Byb2ZpbGUoZmFsc2UpfT5I4buneTwvYnV0dG9uPjxidXR0b24gdHlwZT1cInN1Ym1pdFwiIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXByaW1hcnlcIiBkaXNhYmxlZD17c2F2aW5nUHJvZmlsZX0+e3NhdmluZ1Byb2ZpbGUgPyAnxJBhbmcgbMawdeKApicgOiAnTMawdSB0aGF5IMSR4buVaSd9PC9idXR0b24+PC9kaXY+XG4gICAgICAgIDwvZm9ybT59XG4gICAgICAgIHtwcm9maWxlTm90aWNlICYmIDxwIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLW5vdGljZVwiIHJvbGU9XCJzdGF0dXNcIj57cHJvZmlsZU5vdGljZX08L3A+fVxuICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1ncm91cFwiPlxuICAgICAgICA8aDI+SGnhu4NuIHRo4buLPC9oMj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1jYXJkIG9iLXNldHRpbmdzLW9wdGlvbnNcIj5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93XCI+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtb3B0aW9uLWljb25cIj48U3VuIHNpemU9ezE0fSAvPjwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3ctY29weVwiPjxzdHJvbmc+Q2jhur8gxJHhu5kgc8OhbmcvdOG7kWk8L3N0cm9uZz48c21hbGw+R2lhbyBkaeG7h24gT3BlbkJvb2s8L3NtYWxsPjwvc3Bhbj48c2VsZWN0IGFyaWEtbGFiZWw9XCJDaOG6vyDEkeG7mSBzw6FuZy904buRaVwiIHZhbHVlPXt0aGVtZX0gb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0VGhlbWUoZXZlbnQudGFyZ2V0LnZhbHVlIGFzIFRoZW1lUHJlZmVyZW5jZSl9PjxvcHRpb24gdmFsdWU9XCJhdXRvXCI+VOG7sSDEkeG7mW5nPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT1cImxpZ2h0XCI+U8Ohbmc8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwiZGFya1wiPlThu5FpPC9vcHRpb24+PC9zZWxlY3Q+PC9sYWJlbD5cbiAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93XCI+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtb3B0aW9uLWljb25cIj48VXNlclJvdW5kIHNpemU9ezE0fSAvPjwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3ctY29weVwiPjxzdHJvbmc+S8OtY2ggdGjGsOG7m2MgY2jhu68gxJHhu41jPC9zdHJvbmc+PHNtYWxsPsOBcCBk4bulbmcgY2hvIHRyYW5nIMSR4buNYyBzw6FjaDwvc21hbGw+PC9zcGFuPjxzZWxlY3QgYXJpYS1sYWJlbD1cIkvDrWNoIHRoxrDhu5tjIGNo4buvIMSR4buNY1wiIHZhbHVlPXtyZWFkaW5nU2l6ZX0gb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0UmVhZGluZ1NpemUoZXZlbnQudGFyZ2V0LnZhbHVlIGFzIFJlYWRpbmdTaXplKX0+PG9wdGlvbiB2YWx1ZT1cInNtYWxsXCI+Tmjhu488L29wdGlvbj48b3B0aW9uIHZhbHVlPVwibWVkaXVtXCI+VuG7q2E8L29wdGlvbj48b3B0aW9uIHZhbHVlPVwibGFyZ2VcIj5M4bubbjwvb3B0aW9uPjwvc2VsZWN0PjwvbGFiZWw+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3dcIj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1vcHRpb24taWNvblwiPuaWhzwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3ctY29weVwiPjxzdHJvbmc+TmfDtG4gbmfhu688L3N0cm9uZz48c21hbGw+TmfDtG4gbmfhu68gxJFhbmcgZMO5bmcgdHJvbmcg4bupbmcgZOG7pW5nPC9zbWFsbD48L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtc3RhdGljLXZhbHVlXCI+VGnhur9uZyBWaeG7h3Q8L3NwYW4+PC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1ncm91cFwiPlxuICAgICAgICA8aDI+xJDhu41jIHPDoWNoPC9oMj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1jYXJkIG9iLXNldHRpbmdzLW9wdGlvbnNcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXJvd1wiPjxzcGFuIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLW9wdGlvbi1pY29uXCI+PENoZWNrIHNpemU9ezE0fSAvPjwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3ctY29weVwiPjxzdHJvbmc+TMawdSB0aeG6v24gxJHhu5kgxJHhu41jPC9zdHJvbmc+PHNtYWxsPkNoxrDGoW5nIMSRxrDhu6NjIGdoaSBuaOG6rW4ga2hpIGLhuqFuIMSRw6FuaCBk4bqldSBob8OgbiB0aMOgbmg8L3NtYWxsPjwvc3Bhbj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1zdGF0ZVwiPlRoZW8gdMOgaSBraG/huqNuPC9zcGFuPjwvZGl2PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93XCI+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtb3B0aW9uLWljb25cIj48Q2hlY2sgc2l6ZT17MTR9IC8+PC9zcGFuPjxzcGFuIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXJvdy1jb3B5XCI+PHN0cm9uZz7EkOG7k25nIGLhu5kgZOG7ryBsaeG7h3U8L3N0cm9uZz48c21hbGw+VGnhur9uIMSR4buZIHbDoCBjaMawxqFuZyDEkcOjIGzGsHUgZ+G6r24gduG7m2kgdMOgaSBraG/huqNuPC9zbWFsbD48L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtc3RhdGVcIj5Uw6BpIGtob+G6o248L3NwYW4+PC9kaXY+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1yb3cgaXMtbXV0ZWRcIj48c3BhbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1vcHRpb24taWNvblwiPjxBbGVydENpcmNsZSBzaXplPXsxNH0gLz48L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93LWNvcHlcIj48c3Ryb25nPlRow7RuZyBiw6FvIHPDoWNoIG3hu5tpPC9zdHJvbmc+PHNtYWxsPlRow7RuZyBiw6FvIGNoxrBhIMSRxrDhu6NjIGjhu5cgdHLhu6M8L3NtYWxsPjwvc3Bhbj48L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L3NlY3Rpb24+XG5cbiAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLWdyb3VwXCI+XG4gICAgICAgIDxoMj5LaMOhYzwvaDI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtY2FyZCBvYi1zZXR0aW5ncy1vcHRpb25zXCI+XG4gICAgICAgICAgPExpbmsgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93IG9iLXNldHRpbmdzLWxpbmstcm93XCIgdG89XCIvc3VwcG9ydFwiPjxzcGFuIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLW9wdGlvbi1pY29uXCI+PENoZXZyb25SaWdodCBzaXplPXsxNH0gLz48L3NwYW4+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtcm93LWNvcHlcIj48c3Ryb25nPlRy4bujIGdpw7pwICYgSOG7lyB0cuG7ozwvc3Ryb25nPjwvc3Bhbj48Q2hldnJvblJpZ2h0IHNpemU9ezE0fSAvPjwvTGluaz5cbiAgICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXJvdyBvYi1zZXR0aW5ncy1saW5rLXJvd1wiIHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXsoKSA9PiB7IHNldFBhc3N3b3JkT3Blbigob3BlbikgPT4gIW9wZW4pOyBzZXRQYXNzd29yZE5vdGljZShudWxsKTsgfX0+PHNwYW4gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3Mtb3B0aW9uLWljb25cIj48TG9ja0tleWhvbGUgc2l6ZT17MTR9IC8+PC9zcGFuPjxzcGFuIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXJvdy1jb3B5XCI+PHN0cm9uZz57cGFzc3dvcmRPcGVuID8gJ8SQw7NuZyDEkeG7lWkgbeG6rXQga2jhuql1JyA6ICfEkOG7lWkgbeG6rXQga2jhuql1J308L3N0cm9uZz48L3NwYW4+PENoZXZyb25SaWdodCBzaXplPXsxNH0gLz48L2J1dHRvbj5cbiAgICAgICAgICB7cGFzc3dvcmRPcGVuICYmIDxmb3JtIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXBhc3N3b3JkLWZvcm1cIiBvblN1Ym1pdD17KGV2ZW50KSA9PiB2b2lkIHNhdmVQYXNzd29yZChldmVudCl9PlxuICAgICAgICAgICAge3Bhc3N3b3JkTm90aWNlICYmIDxwIGNsYXNzTmFtZT17YG9iLXNldHRpbmdzLW5vdGljZSAke3Bhc3N3b3JkTm90aWNlLmtpbmR9YH0gcm9sZT17cGFzc3dvcmROb3RpY2Uua2luZCA9PT0gJ2Vycm9yJyA/ICdhbGVydCcgOiAnc3RhdHVzJ30+e3Bhc3N3b3JkTm90aWNlLnRleHR9PC9wPn1cbiAgICAgICAgICAgIHshb3RwUmVxdWVzdGVkID8gPGJ1dHRvbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1wcmltYXJ5XCIgZGlzYWJsZWQ9e3NhdmluZ1Bhc3N3b3JkfSBvbkNsaWNrPXsoKSA9PiB2b2lkIHNlbmRQYXNzd29yZE90cCgpfSB0eXBlPVwiYnV0dG9uXCI+e3NhdmluZ1Bhc3N3b3JkID8gJ8SQYW5nIGfhu61p4oCmJyA6ICdH4butaSBtw6MgeMOhYyBtaW5oIHF1YSBlbWFpbCd9PC9idXR0b24+IDogPD48bGFiZWwgY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtbGFiZWxcIj5Nw6MgeMOhYyBtaW5oPGlucHV0IGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLWlucHV0XCIgYXV0b0NvbXBsZXRlPVwib25lLXRpbWUtY29kZVwiIGlucHV0TW9kZT1cIm51bWVyaWNcIiBtYXhMZW5ndGg9ezZ9IHBhdHRlcm49XCJbMC05XXs2fVwiIHJlcXVpcmVkIHZhbHVlPXtvdHB9IG9uQ2hhbmdlPXsoZXZlbnQpID0+IHNldE90cChldmVudC50YXJnZXQudmFsdWUucmVwbGFjZSgvXFxEL2csICcnKS5zbGljZSgwLCA2KSl9IC8+PC9sYWJlbD48ZGl2IGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXBhc3N3b3JkLWZpZWxkc1wiPjxsYWJlbCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1sYWJlbFwiPk3huq10IGto4bqpdSBt4bubaTxpbnB1dCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1pbnB1dFwiIHR5cGU9XCJwYXNzd29yZFwiIGF1dG9Db21wbGV0ZT1cIm5ldy1wYXNzd29yZFwiIG1pbkxlbmd0aD17OH0gbWF4TGVuZ3RoPXsxMjh9IHJlcXVpcmVkIHZhbHVlPXtuZXdQYXNzd29yZH0gb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0TmV3UGFzc3dvcmQoZXZlbnQudGFyZ2V0LnZhbHVlKX0gLz48L2xhYmVsPjxsYWJlbCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1sYWJlbFwiPljDoWMgbmjhuq1uIG3huq10IGto4bqpdTxpbnB1dCBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1pbnB1dFwiIHR5cGU9XCJwYXNzd29yZFwiIGF1dG9Db21wbGV0ZT1cIm5ldy1wYXNzd29yZFwiIG1pbkxlbmd0aD17OH0gbWF4TGVuZ3RoPXsxMjh9IHJlcXVpcmVkIHZhbHVlPXtjb25maXJtUGFzc3dvcmR9IG9uQ2hhbmdlPXsoZXZlbnQpID0+IHNldENvbmZpcm1QYXNzd29yZChldmVudC50YXJnZXQudmFsdWUpfSAvPjwvbGFiZWw+PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0yXCI+PGJ1dHRvbiBjbGFzc05hbWU9XCJvYi1zZXR0aW5ncy1zZWNvbmRhcnlcIiBkaXNhYmxlZD17c2F2aW5nUGFzc3dvcmR9IG9uQ2xpY2s9eygpID0+IHZvaWQgc2VuZFBhc3N3b3JkT3RwKCl9IHR5cGU9XCJidXR0b25cIj5H4butaSBs4bqhaSBtw6M8L2J1dHRvbj48YnV0dG9uIGNsYXNzTmFtZT1cIm9iLXNldHRpbmdzLXByaW1hcnlcIiB0eXBlPVwic3VibWl0XCIgZGlzYWJsZWQ9e3NhdmluZ1Bhc3N3b3JkfT57c2F2aW5nUGFzc3dvcmQgPyAnxJBhbmcgY+G6rXAgbmjhuq104oCmJyA6ICdD4bqtcCBuaOG6rXQgbeG6rXQga2jhuql1J308L2J1dHRvbj48L2Rpdj48Lz59XG4gICAgICAgICAgPC9mb3JtPn1cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L3NlY3Rpb24+XG5cbiAgICAgIDxidXR0b24gY2xhc3NOYW1lPVwib2Itc2V0dGluZ3MtbG9nb3V0XCIgdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9eygpID0+IHZvaWQgc2lnbk91dCgpfT48TG9nT3V0IHNpemU9ezE0fSAvPsSQxINuZyB4deG6pXQ8L2J1dHRvbj5cbiAgICA8L2Rpdj5cbiAgPC9SZWFkZXJMYXlvdXQ+O1xufVxuIl0sImZpbGUiOiJEOi9ETlRVL0hLMV9OYW00XzIwMjYvV2ViX0FQSS9MaWJyYXJ5TWFuYWdlL2FkbWluLXdlYi9zcmMvcGFnZXMvU2V0dGluZ3NQYWdlLnRzeCJ9

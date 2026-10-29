@@ -1,0 +1,308 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/App.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=fc6494bc"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { Navigate, Route, Routes } from "/node_modules/.vite/deps/react-router-dom.js?v=fc6494bc";
+import { ProtectedRoute } from "/src/components/ProtectedRoute.tsx";
+import { AdminDashboard } from "/src/pages/AdminDashboard.tsx";
+import { BookManagement } from "/src/pages/BookManagement.tsx";
+import { ChapterManagement } from "/src/pages/ChapterManagement.tsx";
+import { UserManagement } from "/src/pages/UserManagement.tsx";
+import { SubscriptionManagement } from "/src/pages/SubscriptionManagement.tsx";
+import { ReportManagement } from "/src/pages/ReportManagement.tsx";
+import { AdminCommentsPage } from "/src/pages/AdminCommentsPage.tsx";
+import { BookImportPage } from "/src/pages/BookImportPage.tsx";
+import { LoginPage, RegisterPage } from "/src/pages/AuthPages.tsx";
+import { ReaderHome } from "/src/pages/ReaderHome.tsx";
+import { ReaderLibraryPage } from "/src/pages/ReaderLibraryPage.tsx";
+import { MyLibraryPage } from "/src/pages/MyLibraryPage.tsx";
+import { FavoritesPage } from "/src/pages/FavoritesPage.tsx";
+import { SettingsPage } from "/src/pages/SettingsPage.tsx";
+import { ReadingHistoryPage } from "/src/pages/ReadingHistoryPage.tsx";
+import { ReaderBookPage } from "/src/pages/ReaderBookPage.tsx";
+import { ReaderSupportPage } from "/src/pages/ReaderSupportPage.tsx";
+import { ChapterReaderPage } from "/src/pages/ChapterReaderPage.tsx";
+import { BookReaderPage } from "/src/pages/BookReaderPage.tsx";
+export function App() {
+  return /* @__PURE__ */ jsxDEV(Routes, { children: [
+    /* @__PURE__ */ jsxDEV(Route, { path: "/login", element: /* @__PURE__ */ jsxDEV(LoginPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 52,
+      columnNumber: 37
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 52,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/register", element: /* @__PURE__ */ jsxDEV(RegisterPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 53,
+      columnNumber: 40
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 53,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/admin/login", element: /* @__PURE__ */ jsxDEV(LoginPage, { admin: true }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 54,
+      columnNumber: 43
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 54,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/", element: /* @__PURE__ */ jsxDEV(ReaderHome, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 58,
+      columnNumber: 32
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 58,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/catalog", element: /* @__PURE__ */ jsxDEV(ReaderLibraryPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 59,
+      columnNumber: 39
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 59,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/my-library", element: /* @__PURE__ */ jsxDEV(MyLibraryPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 62,
+      columnNumber: 42
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 62,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/library", element: /* @__PURE__ */ jsxDEV(ReaderLibraryPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 63,
+      columnNumber: 39
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 63,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/favorites", element: /* @__PURE__ */ jsxDEV(FavoritesPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 66,
+      columnNumber: 41
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 66,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/history", element: /* @__PURE__ */ jsxDEV(ReadingHistoryPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 67,
+      columnNumber: 39
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 67,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/settings", element: /* @__PURE__ */ jsxDEV(SettingsPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 70,
+      columnNumber: 40
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 70,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/account", element: /* @__PURE__ */ jsxDEV(SettingsPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 71,
+      columnNumber: 39
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 71,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/books/:bookId", element: /* @__PURE__ */ jsxDEV(ReaderBookPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 74,
+      columnNumber: 45
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 74,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/books/:bookId/read", element: /* @__PURE__ */ jsxDEV(ChapterReaderPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 77,
+      columnNumber: 50
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 77,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/books/:bookId/read/:chapterId", element: /* @__PURE__ */ jsxDEV(ChapterReaderPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 78,
+      columnNumber: 61
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 78,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/books/:bookId/pdf", element: /* @__PURE__ */ jsxDEV(BookReaderPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 79,
+      columnNumber: 49
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 79,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/support", element: /* @__PURE__ */ jsxDEV(ReaderSupportPage, {}, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 82,
+      columnNumber: 39
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 82,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { element: /* @__PURE__ */ jsxDEV(ProtectedRoute, { requireAdmin: true }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 85,
+      columnNumber: 23
+    }, this), children: [
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/dashboard", element: /* @__PURE__ */ jsxDEV(AdminDashboard, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 86,
+        columnNumber: 49
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 86,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin", element: /* @__PURE__ */ jsxDEV(Navigate, { replace: true, to: "/admin/dashboard" }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 87,
+        columnNumber: 39
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 87,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/books", element: /* @__PURE__ */ jsxDEV(BookManagement, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 88,
+        columnNumber: 45
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 88,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/books/import", element: /* @__PURE__ */ jsxDEV(BookImportPage, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 89,
+        columnNumber: 52
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 89,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/chapters", element: /* @__PURE__ */ jsxDEV(ChapterManagement, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 90,
+        columnNumber: 48
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 90,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/users", element: /* @__PURE__ */ jsxDEV(UserManagement, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 91,
+        columnNumber: 45
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 91,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/subscriptions", element: /* @__PURE__ */ jsxDEV(SubscriptionManagement, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 92,
+        columnNumber: 53
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 92,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/reports", element: /* @__PURE__ */ jsxDEV(ReportManagement, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 93,
+        columnNumber: 47
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 93,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "/admin/comments", element: /* @__PURE__ */ jsxDEV(AdminCommentsPage, {}, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 94,
+        columnNumber: 48
+      }, this) }, void 0, false, {
+        fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+        lineNumber: 94,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 85,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "*", element: /* @__PURE__ */ jsxDEV(Navigate, { replace: true, to: "/" }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 98,
+      columnNumber: 32
+    }, this) }, void 0, false, {
+      fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+      lineNumber: 98,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx",
+    lineNumber: 50,
+    columnNumber: 5
+  }, this);
+}
+_c = App;
+var _c;
+$RefreshReg$(_c, "App");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/DNTU/HK1_Nam4_2026/Web_API/LibraryManage/admin-web/src/App.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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YXJkIiwiQm9va01hbmFnZW1lbnQiLCJDaGFwdGVyTWFuYWdlbWVudCIsIlVzZXJNYW5hZ2VtZW50IiwiU3Vic2NyaXB0aW9uTWFuYWdlbWVudCIsIlJlcG9ydE1hbmFnZW1lbnQiLCJBZG1pbkNvbW1lbnRzUGFnZSIsIkJvb2tJbXBvcnRQYWdlIiwiTG9naW5QYWdlIiwiUmVnaXN0ZXJQYWdlIiwiUmVhZGVySG9tZSIsIlJlYWRlckxpYnJhcnlQYWdlIiwiTXlMaWJyYXJ5UGFnZSIsIkZhdm9yaXRlc1BhZ2UiLCJTZXR0aW5nc1BhZ2UiLCJSZWFkaW5nSGlzdG9yeVBhZ2UiLCJSZWFkZXJCb29rUGFnZSIsIlJlYWRlclN1cHBvcnRQYWdlIiwiQ2hhcHRlclJlYWRlclBhZ2UiLCJCb29rUmVhZGVyUGFnZSIsIkFwcCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIkFwcC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTmF2aWdhdGUsIFJvdXRlLCBSb3V0ZXMgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJztcbmltcG9ydCB7IFByb3RlY3RlZFJvdXRlIH0gZnJvbSAnLi9jb21wb25lbnRzL1Byb3RlY3RlZFJvdXRlJztcblxuLy8gSW1wb3J0IGPDoWMgdHJhbmcgQWRtaW5cbmltcG9ydCB7IEFkbWluRGFzaGJvYXJkIH0gZnJvbSAnLi9wYWdlcy9BZG1pbkRhc2hib2FyZCc7XG5pbXBvcnQgeyBCb29rTWFuYWdlbWVudCB9IGZyb20gJy4vcGFnZXMvQm9va01hbmFnZW1lbnQnO1xuaW1wb3J0IHsgQ2hhcHRlck1hbmFnZW1lbnQgfSBmcm9tICcuL3BhZ2VzL0NoYXB0ZXJNYW5hZ2VtZW50JztcbmltcG9ydCB7IFVzZXJNYW5hZ2VtZW50IH0gZnJvbSAnLi9wYWdlcy9Vc2VyTWFuYWdlbWVudCc7XG5pbXBvcnQgeyBTdWJzY3JpcHRpb25NYW5hZ2VtZW50IH0gZnJvbSAnLi9wYWdlcy9TdWJzY3JpcHRpb25NYW5hZ2VtZW50JztcbmltcG9ydCB7IFJlcG9ydE1hbmFnZW1lbnQgfSBmcm9tICcuL3BhZ2VzL1JlcG9ydE1hbmFnZW1lbnQnO1xuaW1wb3J0IHsgQWRtaW5Db21tZW50c1BhZ2UgfSBmcm9tICcuL3BhZ2VzL0FkbWluQ29tbWVudHNQYWdlJztcbmltcG9ydCB7IEJvb2tJbXBvcnRQYWdlIH0gZnJvbSAnLi9wYWdlcy9Cb29rSW1wb3J0UGFnZSc7XG5cbi8vIEltcG9ydCBj4bqjIExvZ2luUGFnZSB2w6AgUmVnaXN0ZXJQYWdlIHThu6sgZmlsZSBBdXRoUGFnZXMudHN4XG5pbXBvcnQgeyBMb2dpblBhZ2UsIFJlZ2lzdGVyUGFnZSB9IGZyb20gJy4vcGFnZXMvQXV0aFBhZ2VzJztcblxuLy8gSW1wb3J0IGPDoWMgdHJhbmcgUmVhZGVyICjEkOG7mWMgZ2nhuqMpIHRoZW8gY2h14bqpbiBCb29rbmVzdCBVSVxuaW1wb3J0IHsgUmVhZGVySG9tZSB9IGZyb20gJy4vcGFnZXMvUmVhZGVySG9tZSc7XG5pbXBvcnQgeyBSZWFkZXJMaWJyYXJ5UGFnZSB9IGZyb20gJy4vcGFnZXMvUmVhZGVyTGlicmFyeVBhZ2UnO1xuaW1wb3J0IHsgTXlMaWJyYXJ5UGFnZSB9IGZyb20gJy4vcGFnZXMvTXlMaWJyYXJ5UGFnZSc7XG5pbXBvcnQgeyBGYXZvcml0ZXNQYWdlIH0gZnJvbSAnLi9wYWdlcy9GYXZvcml0ZXNQYWdlJztcbmltcG9ydCB7IFNldHRpbmdzUGFnZSB9IGZyb20gJy4vcGFnZXMvU2V0dGluZ3NQYWdlJztcbmltcG9ydCB7IFJlYWRpbmdIaXN0b3J5UGFnZSB9IGZyb20gJy4vcGFnZXMvUmVhZGluZ0hpc3RvcnlQYWdlJztcbmltcG9ydCB7IFJlYWRlckJvb2tQYWdlIH0gZnJvbSAnLi9wYWdlcy9SZWFkZXJCb29rUGFnZSc7XG5pbXBvcnQgeyBSZWFkZXJTdXBwb3J0UGFnZSB9IGZyb20gJy4vcGFnZXMvUmVhZGVyU3VwcG9ydFBhZ2UnO1xuaW1wb3J0IHsgQ2hhcHRlclJlYWRlclBhZ2UgfSBmcm9tICcuL3BhZ2VzL0NoYXB0ZXJSZWFkZXJQYWdlJztcbmltcG9ydCB7IEJvb2tSZWFkZXJQYWdlIH0gZnJvbSAnLi9wYWdlcy9Cb29rUmVhZGVyUGFnZSc7XG5cbmV4cG9ydCBmdW5jdGlvbiBBcHAoKSB7XG4gIHJldHVybiAoXG4gICAgPFJvdXRlcz5cbiAgICAgIHsvKiA9PT09PT09PT09PT09PT09PSBQSOG6pk4gWMOBQyBUSOG7sEMgKMSQxIJORyBOSOG6rFAgLyDEkMSCTkcgS8OdKSA9PT09PT09PT09PT09PT09PSAqL31cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL2xvZ2luXCIgZWxlbWVudD17PExvZ2luUGFnZSAvPn0gLz5cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL3JlZ2lzdGVyXCIgZWxlbWVudD17PFJlZ2lzdGVyUGFnZSAvPn0gLz5cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL2xvZ2luXCIgZWxlbWVudD17PExvZ2luUGFnZSBhZG1pbiAvPn0gLz5cblxuICAgICAgey8qID09PT09PT09PT09PT09PT09IFBI4bqmTiBEw4BOSCBDSE8gxJDhu5hDIEdJ4bqiIChVU0VSKSBUSEVPIEJPT0tORVNUIFVJID09PT09PT09PT09PT09PT09ICovfVxuICAgICAgey8qIDEuIFRyYW5nIGNo4bunICovfVxuICAgICAgPFJvdXRlIHBhdGg9XCIvXCIgZWxlbWVudD17PFJlYWRlckhvbWUgLz59IC8+XG4gICAgICA8Um91dGUgcGF0aD1cIi9jYXRhbG9nXCIgZWxlbWVudD17PFJlYWRlckxpYnJhcnlQYWdlIC8+fSAvPlxuXG4gICAgICB7LyogMi4gVOG7pyBzw6FjaCBj4bunYSB0w7RpICovfVxuICAgICAgPFJvdXRlIHBhdGg9XCIvbXktbGlicmFyeVwiIGVsZW1lbnQ9ezxNeUxpYnJhcnlQYWdlIC8+fSAvPlxuICAgICAgPFJvdXRlIHBhdGg9XCIvbGlicmFyeVwiIGVsZW1lbnQ9ezxSZWFkZXJMaWJyYXJ5UGFnZSAvPn0gLz5cblxuICAgICAgey8qIDMuIFPDoWNoIHnDqnUgdGjDrWNoICovfVxuICAgICAgPFJvdXRlIHBhdGg9XCIvZmF2b3JpdGVzXCIgZWxlbWVudD17PEZhdm9yaXRlc1BhZ2UgLz59IC8+XG4gICAgICA8Um91dGUgcGF0aD1cIi9oaXN0b3J5XCIgZWxlbWVudD17PFJlYWRpbmdIaXN0b3J5UGFnZSAvPn0gLz5cblxuICAgICAgey8qIDQuIEPDoGkgxJHhurd0IHTDoGkga2hv4bqjbiAqL31cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL3NldHRpbmdzXCIgZWxlbWVudD17PFNldHRpbmdzUGFnZSAvPn0gLz5cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL2FjY291bnRcIiBlbGVtZW50PXs8U2V0dGluZ3NQYWdlIC8+fSAvPlxuXG4gICAgICB7LyogQ2hpIHRp4bq/dCBzw6FjaCAqL31cbiAgICAgIDxSb3V0ZSBwYXRoPVwiL2Jvb2tzLzpib29rSWRcIiBlbGVtZW50PXs8UmVhZGVyQm9va1BhZ2UgLz59IC8+XG5cbiAgICAgIHsvKiA1LiBUcmFuZyDEkeG7jWMgc8OhY2ggKENoYXB0ZXIgcmVhZGVyICYgUERGIHN0cmVhbSByZWFkZXIpICovfVxuICAgICAgPFJvdXRlIHBhdGg9XCIvYm9va3MvOmJvb2tJZC9yZWFkXCIgZWxlbWVudD17PENoYXB0ZXJSZWFkZXJQYWdlIC8+fSAvPlxuICAgICAgPFJvdXRlIHBhdGg9XCIvYm9va3MvOmJvb2tJZC9yZWFkLzpjaGFwdGVySWRcIiBlbGVtZW50PXs8Q2hhcHRlclJlYWRlclBhZ2UgLz59IC8+XG4gICAgICA8Um91dGUgcGF0aD1cIi9ib29rcy86Ym9va0lkL3BkZlwiIGVsZW1lbnQ9ezxCb29rUmVhZGVyUGFnZSAvPn0gLz5cblxuICAgICAgey8qIEjhu5cgdHLhu6MgLyBiw6FvIGPDoW8gKi99XG4gICAgICA8Um91dGUgcGF0aD1cIi9zdXBwb3J0XCIgZWxlbWVudD17PFJlYWRlclN1cHBvcnRQYWdlIC8+fSAvPlxuXG4gICAgICB7LyogPT09PT09PT09PT09PT09PT0gUEjhuqZOIETDgE5IIENITyBRVeG6ok4gVFLhu4ogKEFETUlOKSA9PT09PT09PT09PT09PT09PSAqL31cbiAgICAgIDxSb3V0ZSBlbGVtZW50PXs8UHJvdGVjdGVkUm91dGUgcmVxdWlyZUFkbWluIC8+fT5cbiAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vZGFzaGJvYXJkXCIgZWxlbWVudD17PEFkbWluRGFzaGJvYXJkIC8+fSAvPlxuICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pblwiIGVsZW1lbnQ9ezxOYXZpZ2F0ZSByZXBsYWNlIHRvPVwiL2FkbWluL2Rhc2hib2FyZFwiIC8+fSAvPlxuICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pbi9ib29rc1wiIGVsZW1lbnQ9ezxCb29rTWFuYWdlbWVudCAvPn0gLz5cbiAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vYm9va3MvaW1wb3J0XCIgZWxlbWVudD17PEJvb2tJbXBvcnRQYWdlIC8+fSAvPlxuICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pbi9jaGFwdGVyc1wiIGVsZW1lbnQ9ezxDaGFwdGVyTWFuYWdlbWVudCAvPn0gLz5cbiAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vdXNlcnNcIiBlbGVtZW50PXs8VXNlck1hbmFnZW1lbnQgLz59IC8+XG4gICAgICAgIDxSb3V0ZSBwYXRoPVwiL2FkbWluL3N1YnNjcmlwdGlvbnNcIiBlbGVtZW50PXs8U3Vic2NyaXB0aW9uTWFuYWdlbWVudCAvPn0gLz5cbiAgICAgICAgPFJvdXRlIHBhdGg9XCIvYWRtaW4vcmVwb3J0c1wiIGVsZW1lbnQ9ezxSZXBvcnRNYW5hZ2VtZW50IC8+fSAvPlxuICAgICAgICA8Um91dGUgcGF0aD1cIi9hZG1pbi9jb21tZW50c1wiIGVsZW1lbnQ9ezxBZG1pbkNvbW1lbnRzUGFnZSAvPn0gLz5cbiAgICAgIDwvUm91dGU+XG5cbiAgICAgIHsvKiDEkGnhu4F1IGjGsOG7m25nIG3hurdjIMSR4buLbmggKi99XG4gICAgICA8Um91dGUgcGF0aD1cIipcIiBlbGVtZW50PXs8TmF2aWdhdGUgcmVwbGFjZSB0bz1cIi9cIiAvPn0gLz5cbiAgICA8L1JvdXRlcz5cbiAgKTtcbn1cbiJdLCJmaWxlIjoiRDovRE5UVS9ISzFfTmFtNF8yMDI2L1dlYl9BUEkvTGlicmFyeU1hbmFnZS9hZG1pbi13ZWIvc3JjL0FwcC50c3gifQ==

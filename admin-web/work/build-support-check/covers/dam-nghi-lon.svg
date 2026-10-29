@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 580" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0E2238"/>
+      <stop offset="45%" stop-color="#163959"/>
+      <stop offset="70%" stop-color="#464A62"/>
+      <stop offset="100%" stop-color="#8E5B3D"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF2B2"/>
+      <stop offset="50%" stop-color="#E5BE65"/>
+      <stop offset="100%" stop-color="#FCEAB3"/>
+    </linearGradient>
+    <linearGradient id="sunGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFDD80" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FF7A30" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="spineShadow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.45"/>
+      <stop offset="4%" stop-color="#000000" stop-opacity="0.1"/>
+      <stop offset="8%" stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="14%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="97%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Sky -->
+  <rect width="400" height="580" fill="url(#skyGrad)"/>
+
+  <!-- Stars in sky -->
+  <circle cx="80" cy="50" r="1" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="320" cy="70" r="1.2" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="210" cy="40" r="0.8" fill="#FFFFFF" opacity="0.7"/>
+  <circle cx="340" cy="120" r="1" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="60" cy="110" r="1.5" fill="#FFFFFF" opacity="0.85"/>
+  <circle cx="150" cy="85" r="0.8" fill="#FFFFFF" opacity="0.5"/>
+
+  <!-- Golden Sun Ray Flare -->
+  <circle cx="200" cy="380" r="180" fill="url(#sunGlow)"/>
+
+  <!-- Mountain Silhouettes -->
+  <!-- Far mountain -->
+  <polygon points="50,450 180,310 280,430 360,400 400,470 400,580 0,580 0,470" fill="#2E3A4D" opacity="0.9"/>
+  <!-- Middle mountain with golden highlight -->
+  <polygon points="120,440 230,290 350,460 270,440 180,450" fill="#D49A55" opacity="0.95"/>
+  <polygon points="230,290 270,440 350,460" fill="#6A462B"/>
+  <polygon points="120,440 230,290 180,450" fill="#F4BE6B"/>
+  <!-- Foreground mountain ridges -->
+  <polygon points="0,520 90,440 210,500 290,460 400,510 400,580 0,580" fill="#1C1824"/>
+  <polygon points="80,460 140,510 220,470 290,520 370,490 400,530 400,580 0,580 0,540" fill="#0E0D14"/>
+
+  <!-- Author Header -->
+  <text x="200" y="80" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="4" fill="#E2EDF8" text-anchor="middle">
+    DAVID J. SCHWARTZ
+  </text>
+
+  <!-- Title: Dám nghĩ lớn -->
+  <text x="200" y="165" font-family="'Playfair Display', Georgia, serif" font-size="44" font-weight="700" fill="url(#goldGrad)" text-anchor="middle" filter="url(#glow)">
+    Dám
+  </text>
+  <text x="200" y="215" font-family="'Playfair Display', Georgia, serif" font-size="44" font-weight="700" fill="url(#goldGrad)" text-anchor="middle" filter="url(#glow)">
+    nghĩ lớn
+  </text>
+
+  <!-- Subtitle: THINK BIG -->
+  <line x1="130" y1="240" x2="160" y2="240" stroke="#E5BE65" stroke-width="1.2" opacity="0.7"/>
+  <text x="200" y="244" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#FFE59E" text-anchor="middle">
+    THINK BIG
+  </text>
+  <line x1="240" y1="240" x2="270" y2="240" stroke="#E5BE65" stroke-width="1.2" opacity="0.7"/>
+
+  <!-- Spine 3D Shadow Overlay -->
+  <rect width="400" height="580" fill="url(#spineShadow)"/>
+</svg>

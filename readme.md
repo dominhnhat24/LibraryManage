@@ -1,175 +1,165 @@
-# LibraryManage
+# Admin UI Implementation Status & Backend Gaps
 
-Ứng dụng quản lý thư viện gồm REST API viết bằng Express/MongoDB và ứng dụng di động đa nền tảng xây dựng bằng Expo, React Native.
+## A. Các chức năng đã tích hợp
 
-## Chức năng
+| Chức năng | API/model thực tế | Trạng thái | Ghi chú |
+|---|---|---|---|
+| Dashboard statistics | Không có endpoint tổng hợp; sử dụng các endpoint danh sách để tính tổng | Hoàn thành (partial) | Tổng số sách, chương, người dùng, thuê bao chờ duyệt và báo cáo mở được tính từ các endpoint riêng |
+| Quản lý sách | `/admin/books` (GET, POST, PUT, DELETE) | Hoàn thành | |
+| Quản lý chương | `/admin/chapters` (GET, POST, PUT, DELETE) | Hoàn thành | |
+| Quản lý người dùng | `/admin/users` (GET, POST, PATCH, DELETE) | Hoàn thành | |
+| Quản lý thuê bao | `/admin/subscriptions/pending`, `/admin/subscriptions/:id/approve`, `/admin/subscriptions/:id/reject` | Hoàn thành | |
+| Quản lý báo cáo | `/admin/reports` (GET, PATCH, DELETE) | Hoàn thành | |
+| Quản lý bình luận | `/books/:bookId/comments`, `/comments/:id` | Hoàn thành | |
 
-- Quản lý đầu sách và các bản sao trong kho.
-- Quản lý tài khoản độc giả, thủ thư và đăng nhập bằng JWT.
-- Tạo, duyệt, hủy phiếu mượn; hỗ trợ trả sách từng phần.
-- Tự ghi nhận tiền phạt do quá hạn, hỏng hoặc mất sách; thủ thư có thể thanh toán hoặc miễn phạt.
-- Trang tổng quan cho thủ thư và các màn hình tra cứu dành cho độc giả.
+## B. Backend gaps
 
-## Công nghệ
+| Chức năng | Thiếu API | Ghi chú |
+|---|---|---|
+| Tổng hợp dashboard (số liệu tổng quan) | Không có endpoint tổng hợp, phải tính thủ công từ các endpoint hiện có | Cần thêm API `/admin/dashboard-stats` để trả về object với các trường `books`, `chapters`, `users`, `pendingSubscriptions`, `openReports` |
+| Biểu đồ lượt đọc theo thời gian | Không có endpoint thống kê lượt đọc | Cần API `/admin/reading-stats?range=weekly` trả về dữ liệu thời gian và lượt đọc |
+| Biểu đồ phân bố thể loại sách | Không có endpoint thống kê thể loại | Cần API `/admin/category-stats` trả về {category, count} |
+| Hoạt động gần đây (audit log) | Không có API ghi log hành động admin | Cần API `/admin/recent-activities` để trả về danh sách hành động gần đây |
 
-- **Backend:** Node.js, Express 5, Mongoose, MongoDB.
-- **Mobile:** Expo SDK 57, React Native, Expo Router, TypeScript.
-- **Kiểm thử:** Node.js test runner; kiểm thử luồng nghiệp vụ có thể chạy với MongoDB.
+## C. Lỗi hoặc giới hạn còn tồn tại
 
-## Cấu trúc dự án
+- Dashboard hiện không hiển thị biểu đồ vì thiếu API thống kê.
+- Sidebar chưa có khả năng thu gọn trên màn hình nhỏ (responsive).
+- Một số màu sắc và border radius chưa hoàn toàn khớp với thiết kế tham chiếu; cần tinh chỉnh CSS vars.
 
-```text
-.
-├── server.js                 # Điểm khởi chạy REST API
-├── src/
-│   ├── controllers/          # Xử lý request/response
-│   ├── middlewares/          # JWT, phân quyền, validation và lỗi
-│   ├── models/               # Schema và kết nối MongoDB
-│   ├── routes/               # Các nhóm endpoint
-│   ├── services/             # Logic nghiệp vụ
-│   └── validators/           # Kiểm tra dữ liệu đầu vào
-├── scripts/seed-admin.js     # Tạo hoặc cập nhật tài khoản thủ thư
-├── test/                     # Kiểm thử API và luồng nghiệp vụ
-└── library-mobile-app/       # Ứng dụng Expo
-```
 
-## Yêu cầu
+HarveyBook là nền tảng đọc nội dung số gồm REST API Node.js/Express 5, MongoDB/Mongoose và ứng dụng Expo trong `library-mobile-app/`. Backend hiện tập trung vào sách số, thuê bao, bình luận, quảng cáo theo lượt đọc và tải sách riêng tư; các nghiệp vụ mượn/trả thủ công, thủ thư và tiền phạt của dự án cũ đã được gỡ khỏi API.
 
-- Node.js và npm.
-- MongoDB Replica Set tên `rs0` (hoặc một MongoDB deployment hỗ trợ transaction) để dùng các luồng mượn/trả sách.
+## Công nghệ và chạy local
 
-Backend dùng MongoDB transaction khi duyệt và trả sách. Nếu MongoDB chạy cục bộ, cần khởi động nó ở chế độ Replica Set và khởi tạo Replica Set trước khi chạy các luồng đó. URI mẫu trong `.env.example` đã dùng `replicaSet=rs0`.
-
-## Cài đặt và chạy backend
-
-Từ thư mục gốc của repository:
+- Node.js 20+, npm và MongoDB Replica Set (ví dụ `rs0`, cần transaction khi duyệt Premium).
+- Express 5, Mongoose 8, JWT, bcryptjs, Nodemailer và Multer.
 
 ```powershell
 npm install
 Copy-Item .env.example .env
 ```
 
-Mở `.env`, kiểm tra `MONGODB_URI` và thay `JWT_SECRET` bằng một chuỗi bí mật ngẫu nhiên riêng, đủ mạnh. Không commit `.env` hoặc chia sẻ secret này. Các biến cấu hình được hỗ trợ:
+Đặt `MONGODB_URI`, một `JWT_SECRET` ngẫu nhiên dài ít nhất 32 ký tự, cấu hình email nếu cần gửi report và cấu hình `BOOK_STORAGE_DIR`. Kho file mặc định `private-books/` không được phục vụ static và đã bị loại khỏi Git.
 
-| Biến | Ý nghĩa |
-| --- | --- |
-| `PORT` | Cổng HTTP; mặc định `5001`. |
-| `MONGODB_URI` | URI kết nối MongoDB; mẫu trỏ tới database `librarymanage` trên Replica Set `rs0`. |
-| `JWT_SECRET` | Khóa ký JWT; bắt buộc để khởi động backend. |
-| `OVERDUE_FINE_PER_DAY` | Mức phạt cho mỗi ngày quá hạn. |
-| `DAMAGED_BOOK_FINE` | Mức phạt khi sách bị hỏng. |
-| `LOST_BOOK_FINE` | Mức phạt khi sách bị mất. |
-| `CORS_ORIGINS` | Tùy chọn: danh sách origin được phép, phân tách bằng dấu phẩy. |
+Trong production, đặt `RATE_LIMIT_REDIS_URL` (hoặc `REDIS_URL`) để chia sẻ bộ đếm rate limit giữa các instance; server từ chối khởi động production nếu chưa cấu hình Redis. Nếu API đứng sau reverse proxy, đặt `TRUST_PROXY` bằng số hop tin cậy hoặc danh sách IP/CIDR proxy cụ thể, ví dụ `TRUST_PROXY=1` cho đúng một proxy. Không đặt `TRUST_PROXY=true`; cấu hình trust proxy sai có thể khiến địa chỉ IP dùng cho rate limit bị giả mạo. Upload sách đối chiếu phần mở rộng, MIME type và magic bytes trước khi ghi file.
 
-Tạo tài khoản thủ thư ban đầu bằng cách đặt `ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_FULL_NAME` và `ADMIN_PASSWORD` trong `.env`, sau đó chạy:
+## Docker và Render
+
+`Dockerfile` build frontend React/Vite và backend Node.js vào cùng một image. Trong production, frontend gọi `/api/v1` trên cùng origin; Express phục vụ SPA và endpoint kiểm tra sức khỏe `/health`.
+
+Build và chạy thử image ở máy local:
+
+```powershell
+docker build -t harveybook .
+docker run --rm -p 10000:10000 --env-file .env -e PORT=10000 harveybook
+```
+
+Khi tạo Render Web Service, chọn triển khai bằng Docker từ repository này và đặt Health Check Path là `/health`. Khai báo các biến môi trường production trên Render: `MONGODB_URI`, `JWT_SECRET`, `RATE_LIMIT_REDIS_URL` (hoặc `REDIS_URL`), `TRUST_PROXY=1`, cùng các biến email/Supabase nếu ứng dụng đang dùng. Render cấp URL HTTPS `onrender.com`; có thể thêm domain riêng sau khi service đã chạy rồi mới khai báo URL webhook SePay.
+
+Lưu ý: sách và ảnh đại diện hiện lưu trong `BOOK_STORAGE_DIR` và `AVATAR_STORAGE_DIR` trên filesystem. Filesystem container không phải kho lưu trữ bền vững; trước khi nhận upload trên production, cần gắn persistent disk vào Render và đặt cả hai biến này vào thư mục được mount (ví dụ `/var/data/private-books` và `/var/data/private-avatars`), hoặc chuyển các file đó sang object storage. MongoDB và Redis cần là dịch vụ ngoài container để dữ liệu/rate limit tồn tại khi deploy lại.
+
+Tạo admin đầu tiên bằng các biến `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` (ít nhất 12 ký tự); có thể truyền `ADMIN_PHONE` để lưu số điện thoại, sau đó chạy:
 
 ```powershell
 npm run seed:admin
-```
-
-Hãy tự đặt thông tin tài khoản, đặc biệt là mật khẩu; không dùng thông tin mặc định khi triển khai thật. Sau khi tạo tài khoản, khởi động API:
-
-```powershell
 npm run dev
 ```
 
-API mặc định chạy tại `http://localhost:5001`. Kiểm tra máy chủ bằng cách mở `http://localhost:5001/`; endpoint này trả về trạng thái hoạt động của API.
+API mặc định ở `http://localhost:5001`; `GET /` là health check. Chạy kiểm thử không yêu cầu MongoDB bằng `npm test`.
 
-Các lệnh backend khác:
+## Ứng dụng người đọc Expo
 
-```powershell
-npm start       # Chạy không dùng nodemon
-npm test        # Chạy kiểm thử không cần MongoDB
-```
-
-Để chạy thêm kiểm thử luồng nghiệp vụ với MongoDB đã cấu hình:
-
-```powershell
-$env:RUN_DB_INTEGRATION = '1'
-npm test
-```
-
-Kiểm thử này tạo dữ liệu riêng và dọn dữ liệu đã tạo khi hoàn tất.
-
-## Chạy ứng dụng di động
-
-Mở terminal thứ hai:
+Ứng dụng người đọc nằm trong `library-mobile-app/`. Các luồng thiết yếu gồm đăng nhập/đăng ký có OTP email, tìm kiếm và lọc catalog, xem chi tiết và chương theo quyền đọc, lưu chương, đọc tiếp, hồ sơ và đăng ký Premium/VIP.
 
 ```powershell
 Set-Location library-mobile-app
 npm install
-npm start
+npm run start
 ```
 
-Expo hiển thị các lựa chọn mở ứng dụng trên thiết bị hoặc emulator. Có thể chạy trực tiếp trên từng nền tảng:
+Thiết lập `EXPO_PUBLIC_API_URL` nếu API không ở địa chỉ mặc định. Android emulator dùng `http://10.0.2.2:5001/api/v1`; thiết bị thật cần dùng địa chỉ LAN của máy chạy backend.
+
+## Web admin React
+
+Web React/Vite trong `admin-web/` cung cấp catalog/trang đọc cơ bản cho độc giả cùng console quản trị:
 
 ```powershell
-npm run android
-npm run ios
-npm run web
+Set-Location admin-web
+npm install
+Copy-Item .env.example .env.local
+npm run dev
 ```
 
-Ứng dụng mặc định kết nối tới backend cổng `5001`; URL được chọn theo nền tảng (web dùng `localhost`, Android Emulator dùng `10.0.2.2`). Để ghi đè URL, đặt biến `EXPO_PUBLIC_API_URL` trước khi chạy Expo, ví dụ:
+Mặc định frontend gọi `http://localhost:5001/api/v1`; có thể đặt `VITE_API_URL` trong `admin-web/.env.local` để đổi API origin. Trang người đọc ở `/`, đăng nhập USER ở `/login`; đăng ký `/register` cần OTP email. Admin đăng nhập riêng ở `/admin/login`, khu vực quản trị nằm tại `/admin/dashboard` (alias `/admin`), sách (`/admin/books`), chương (`/admin/chapters`), người dùng (`/admin/users`), thuê bao (`/admin/subscriptions`) và báo cáo (`/admin/reports`). Admin tải PDF trong form sách; file được lưu ở kho riêng `BOOK_STORAGE_DIR`, không công khai URL nội bộ, và chỉ được stream sau khi backend kiểm tra JWT cùng entitlement. Giá riêng từng sách chưa có trong model; giao diện thể hiện mức truy cập Free/Premium/VIP.
 
-```powershell
-$env:EXPO_PUBLIC_API_URL = 'http://192.168.1.10:5001/api/v1'
-npm start
-```
+## Vai trò và quyền đọc
 
-Thay địa chỉ mẫu bằng địa chỉ backend có thể truy cập từ thiết bị. Điện thoại thật và máy chạy backend cần kết nối cùng mạng; backend phải cho phép origin của ứng dụng web nếu chạy trên trình duyệt. Xem thêm [README của ứng dụng di động](./library-mobile-app/README.md).
+Role quản trị chỉ có `USER` và `ADMIN`. Free/Premium/VIP là trạng thái quyền đọc (entitlement) của tài khoản, không phải role:
 
-## API
+| Role / entitlement | Quyền đọc | Quảng cáo khi đọc | Tải offline |
+| --- | --- | --- | --- |
+| `USER`, không có gói còn hạn (Free) | Nội dung `free` | Có thể xuất hiện theo chu kỳ lượt đọc | Không |
+| `USER`, VIP còn hạn | Nội dung `free` và `vip` | Không | Không |
+| `USER`, Premium còn hạn | Nội dung `free`, `premium` và `vip` | Không | Có |
+| `ADMIN` | Quản trị API và đọc nội dung | Không | Có |
 
-Các endpoint được đặt dưới tiền tố `/api/v1`. Những endpoint cần đăng nhập nhận JWT qua header:
+Yêu cầu thuê bao tháng được tạo qua API và chỉ có hiệu lực sau khi ADMIN đối soát/duyệt. Model hiện chấp nhận `premium_monthly` và `vip_monthly`; phí lưu theo bản ghi thuê bao (mặc định 20.000 VND/tháng).
 
-```http
-Authorization: Bearer <access-token>
-```
+## API chính
 
-Đăng ký độc giả và đăng nhập:
+Tất cả URL bên dưới dùng tiền tố `/api/v1`. API yêu cầu đăng nhập nhận `Authorization: Bearer <access_token>`.
 
-```http
-POST /api/v1/auth/register
-Content-Type: application/json
-
-{
-  "full_name": "Nguyen Van A",
-  "email": "reader@example.com",
-  "password": "your-password"
-}
-```
-
-```http
-POST /api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "reader@example.com",
-  "password": "your-password"
-}
-```
-
-### Các nhóm endpoint
-
-| Nhóm | Endpoint chính | Quyền |
+| Phương thức | Endpoint | Quyền / chức năng |
 | --- | --- | --- |
-| Xác thực | `POST /auth/register`, `POST /auth/login` | Công khai |
-| Đầu sách | `GET /books`, `GET /books/:id`; `POST`, `PUT`, `DELETE /books` | Đọc công khai; tạo/sửa/xóa cần thủ thư |
-| Bản sao | `GET /book-copies`, `GET /book-copies/:id`; `POST`, `PUT`, `DELETE /book-copies` | Đọc công khai; tạo/sửa/xóa cần thủ thư |
-| Độc giả | `GET /readers/me`; CRUD `/readers` và `/readers/:id` | Độc giả chỉ xem hồ sơ của mình; quản lý cần thủ thư |
-| Thủ thư | `/librarians`, `/librarians/me`, `/librarians/:id` | Thủ thư |
-| Phiếu mượn | `GET`, `POST /borrow-cards`; `GET /borrow-cards/:id`; `PATCH /borrow-cards/:id/cancel`, `/approve`, `/return` | Độc giả và thủ thư; hủy dành cho độc giả, duyệt/trả dành cho thủ thư |
-| Tiền phạt | `GET /fines`, `GET /fines/:id`; `PATCH /fines/:id/pay`, `/waive` | Độc giả xem khoản phạt của mình; thủ thư quản lý |
-| Tổng quan | `GET /dashboard` | Thủ thư |
+| `POST` | `/auth/register` | Tạo tài khoản USER chờ xác minh và gửi OTP email |
+| `POST` | `/auth/verify-email` | Xác minh OTP, sau đó trả access và refresh token |
+| `POST` | `/auth/resend-verification` | Gửi lại OTP cho tài khoản chưa xác minh |
+| `POST` | `/auth/login` | Cổng đăng nhập USER; trả access và refresh token có role `USER` |
+| `POST` | `/auth/admin-login` | Cổng đăng nhập ADMIN riêng; backend chỉ cấp token nếu role hiện tại là `ADMIN` |
+| `POST` | `/auth/refresh` | Xoay refresh token; token cũ bị thu hồi |
+| `POST` | `/auth/logout`, `GET /auth/me` | Cần đăng nhập |
+| `GET` | `/books` | Tìm kiếm/lọc `title`, `author`, `year`, `category`, `search`; phân trang |
+| `GET` | `/books/:bookId` | Metadata sách đã xuất bản theo ObjectId hoặc slug |
+| `GET` | `/books/:bookId/chapters` | Cần đăng nhập; phân trang catalog chương, chỉ metadata chương theo entitlement |
+| `POST` | `/books/:bookId/chapters/:chapterId/read` | Cần đăng nhập; kiểm tra quyền đọc và trả cờ quảng cáo |
+| `GET` | `/books/:bookId/stream` | Cần đăng nhập; stream inline nội dung theo quyền Free/Premium/VIP, không lưu cache |
+| `GET` | `/books/:bookId/comments`, `POST` cùng URL | Đọc công khai; tạo bình luận/đánh giá cần đăng nhập |
+| `PATCH`, `DELETE` | `/comments/:commentId` | Chủ bình luận hoặc admin |
+| `POST`, `GET` | `/subscriptions`, `/subscriptions/me` | Gửi yêu cầu thuê bao/chuyển khoản và xem yêu cầu mới nhất |
+| `GET` | `/downloads/:bookId` | Chỉ Premium còn hạn/admin; tải file từ kho private |
+| `POST`, `PUT`, `DELETE` | `/admin/books`, `/admin/books/:bookId` | Chỉ admin; tạo sách nhận JSON hoặc multipart `FormData` (metadata và PDF field `file` trong một request, tối đa 100 MiB), cập nhật/xóa sách |
+| `POST` | `/admin/books/:bookId/file` | Admin; multipart field `file`, tối đa 100 MiB |
+| `DELETE` | `/admin/users/:userId` | Admin; xóa user cùng bookmark, tiến độ, bình luận, báo cáo, thuê bao, sách/chương sở hữu và file sách private |
+| `GET` | `/admin/users/recent` | Admin; tối đa 50 tài khoản mới nhất |
+| `GET` | `/admin/subscriptions/pending` | Admin; chờ đối soát |
+| `PATCH` | `/admin/subscriptions/:subscriptionId/approve` hoặc `/reject` | Admin; duyệt hoặc từ chối |
+| `PATCH` | `/admin/users/:userId/vip` | Admin; cấp VIP bằng `vip_expires_at` |
+| `POST` | `/reports` | Báo cáo lỗi/liên hệ; email tùy chọn nếu đã đăng nhập |
 
-Các URL trong bảng được nối sau `/api/v1`. Ví dụ, endpoint đăng nhập đầy đủ là `/api/v1/auth/login`. Dữ liệu đầu vào không hợp lệ trả HTTP 400; endpoint cần xác thực trả HTTP 401 nếu thiếu/sai token và HTTP 403 nếu không đủ quyền.
+`category` nhận một trong `ebook`, `audiobook`, `comic`, `webnovel`. File upload được lưu với tên UUID trong thư mục riêng, key file không trả qua catalog. Tải xuống kiểm tra quyền tại mọi request, kiểm tra đường dẫn thực chống traversal/symlink và đặt header `no-store`/`nosniff`.
 
-## Chất lượng mã
+Catalog chương cho người đọc yêu cầu đăng nhập và chỉ liệt kê metadata của chương mà tài khoản có entitlement để đọc; nội dung chương chỉ được trả từ endpoint đọc sau khi kiểm tra quyền. `/admin/chapters` vẫn dành riêng cho ADMIN. Xem [API_CONTRACT.md](./API_CONTRACT.md) để biết payload và phân trang.
 
-Ứng dụng di động có các lệnh:
+Ads API quyết định `showAd: true` ở mỗi lượt đọc chương thứ ba. Client chịu trách nhiệm chỉ render Google Ads khi phản hồi cho phép; Premium/VIP luôn nhận `showAd: false`. Không nhúng khóa Google Ads vào backend.
 
-```powershell
-Set-Location library-mobile-app
-npm run lint
-npx tsc --noEmit
+## Cấu hình email và chuyển khoản
+
+Để gửi OTP đăng ký và email report, cấu hình trong `.env` ở thư mục gốc dự án. Tên khuyến nghị là `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASSWORD`; `MAIL_FROM` có thể bỏ trống để dùng `MAIL_USER`. Các tên cũ `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` và `SMTP_FROM` cũng được hỗ trợ. Với Gmail, dùng `smtp.gmail.com`, cổng `587`, tài khoản Gmail và **Google App Password** (không dùng mật khẩu đăng nhập Gmail); bật xác minh 2 bước để tạo App Password. `ADMIN_EMAIL` là địa chỉ nhận report. Khởi động lại backend sau khi sửa `.env`. Đăng ký tạo tài khoản chờ xác minh; client xác minh mã 6 chữ số trong 5 phút qua `POST /auth/verify-email`, có thể yêu cầu gửi lại qua `POST /auth/resend-verification`. Tài khoản mới chỉ được đăng nhập sau khi xác minh; cấu hình SMTP thiếu/sai khiến đăng ký trả lỗi rõ ràng.
+
+Đặt `BANK_NAME`, `BANK_ACCOUNT`, `BANK_ACCOUNT_NAME` sau khi xác nhận tài khoản nhận tiền chính thức. API trả các thông tin này cùng mã nội dung chuyển khoản riêng cho từng yêu cầu; đối soát hiện tại là thủ công.
+
+## Cấu trúc backend
+
+```text
+server.js
+src/
+  config/       # MongoDB
+  models/       # User, Book, Chapter, Subscription, Comment, Bookmark, ReadingProgress, Report
+  middlewares/  # JWT, role, ads cadence, lỗi
+  controllers/  # Auth, books, subscription, downloads, comments, admin, reports
+  routes/       # API versioned theo chức năng
+scripts/seed-admin.js
+test/           # Kiểm thử API và model không cần MongoDB
+library-mobile-app/
 ```

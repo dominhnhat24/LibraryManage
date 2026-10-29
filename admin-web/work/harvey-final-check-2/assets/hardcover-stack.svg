@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="100%" height="100%">
+  <defs>
+    <filter id="stackShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#stackShadow)">
+    <!-- Book 1 (Left, angled) -->
+    <g transform="rotate(-15 60 90)">
+      <rect x="30" y="40" width="65" height="90" rx="3" fill="#D35400"/>
+      <rect x="25" y="42" width="8" height="86" rx="2" fill="#BA4A00"/>
+      <rect x="35" y="45" width="55" height="80" fill="#E67E22" opacity="0.9"/>
+      <text x="62" y="75" font-family="'Plus Jakarta Sans', sans-serif" font-size="6" font-weight="800" fill="#FFFFFF" text-anchor="middle">HARD COVER</text>
+      <text x="62" y="85" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" fill="#FDEBD0" text-anchor="middle">Free Book Mockup</text>
+    </g>
+
+    <!-- Book 2 (Right, leaning) -->
+    <g transform="rotate(10 110 90)">
+      <rect x="90" y="35" width="65" height="92" rx="3" fill="#E67E22"/>
+      <rect x="85" y="37" width="8" height="88" rx="2" fill="#D35400"/>
+      <rect x="95" y="40" width="55" height="82" fill="#EB984E" opacity="0.9"/>
+      <text x="122" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-size="6" font-weight="800" fill="#FFFFFF" text-anchor="middle">HARD COVER</text>
+      <text x="122" y="80" font-family="'Plus Jakarta Sans', sans-serif" font-size="5" fill="#FDEBD0" text-anchor="middle">8 Chapters Each</text>
+    </g>
+  </g>
+</svg>
