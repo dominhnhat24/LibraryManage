@@ -1,8 +1,17 @@
+// Import { useEffect, useRef, useState, type FormEvent, type ReactNode } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/components/AdminLayout.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+// Import { BookOpen, LayoutDashboard, LogOut, UserRound, Users, CreditCard, AlertCircle,  từ lucide-react để dùng trong giao diện.
 import { BookOpen, LayoutDashboard, LogOut, UserRound, Users, CreditCard, AlertCircle, MessageSquareText, Search, Bell, ChevronDown, BookText, BookDown } from 'lucide-react';
+// Import { NavLink, useNavigate } từ react-router-dom để dùng trong giao diện.
 import { NavLink, useNavigate } from 'react-router-dom';
+// Import { errorMessage, fetchBooks, fetchUsers } từ ../api/client để dùng trong giao diện.
 import { errorMessage, fetchBooks, fetchUsers } from '../api/client';
+// Import type { Book, User } từ ../types để dùng trong giao diện.
 import type { Book, User } from '../types';
+// Import { useAuth } từ ../auth/AuthContext để dùng trong giao diện.
 import { useAuth } from '../auth/AuthContext';
 
 /**
@@ -17,82 +26,159 @@ import { useAuth } from '../auth/AuthContext';
  *   Border           : #DDE9E6
  *   Text secondary   : #526B86
  */
+/**
+ * Hàm/thành phần AdminLayout: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { children }.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useAuth, useNavigate, useState, useEffect, trim, setBookMatches, setUserMatches, setSearchError.
+ */
 export function AdminLayout({ children }: { children: ReactNode }) {
+  // Biến { user, logout } nhận giá trị từ useAuth(). const không gán lại; let có thể cập nhật.
   const { user, logout } = useAuth();
+  // Biến navigate nhận giá trị từ useNavigate(). const không gán lại; let có thể cập nhật.
   const navigate = useNavigate();
+  // Biến searchBoxRef nhận giá trị từ useRef<HTMLDivElement | null>(null). const không gán lại; let có thể cập nhật.
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  // Biến [globalSearch, setGlobalSearch] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [globalSearch, setGlobalSearch] = useState('');
+  // Biến [searchOpen, setSearchOpen] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [searchOpen, setSearchOpen] = useState(false);
+  // Biến [searchLoading, setSearchLoading] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [searchLoading, setSearchLoading] = useState(false);
+  // Biến [searchError, setSearchError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [searchError, setSearchError] = useState('');
+  // Biến [bookMatches, setBookMatches] nhận giá trị từ useState<Book[]>([]). const không gán lại; let có thể cập nhật.
   const [bookMatches, setBookMatches] = useState<Book[]>([]);
+  // Biến [userMatches, setUserMatches] nhận giá trị từ useState<User[]>([]). const không gán lại; let có thể cập nhật.
   const [userMatches, setUserMatches] = useState<User[]>([]);
+  // Biến [profileOpen, setProfileOpen] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [profileOpen, setProfileOpen] = useState(false);
 
   // Tìm sách/tác giả và tài khoản thật qua API quản trị khi người dùng nhập từ khóa.
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { const query = globalSearch.trim(); if (query.length < 2) { set
   useEffect(() => {
+    // Biến query nhận giá trị từ globalSearch.trim(). const không gán lại; let có thể cập nhật.
     const query = globalSearch.trim();
+    // if chỉ chạy nhánh này khi điều kiện query.length < 2 đúng.
     if (query.length < 2) {
+      // Gọi/thực thi setBookMatches với đối số để cập nhật logic/giao diện: setBookMatches([])
       setBookMatches([]);
+      // Gọi/thực thi setUserMatches với đối số để cập nhật logic/giao diện: setUserMatches([])
       setUserMatches([]);
+      // Gọi/thực thi setSearchError với đối số để cập nhật logic/giao diện: setSearchError('')
       setSearchError('');
+      // Gọi/thực thi setSearchLoading với đối số để cập nhật logic/giao diện: setSearchLoading(false)
       setSearchLoading(false);
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
 
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    // Biến timer nhận giá trị từ window.setTimeout(async () => { setSearchLoading(true);. const không gán lại; let có thể cập nhật.
     const timer = window.setTimeout(async () => {
+      // Gọi/thực thi setSearchLoading với đối số để cập nhật logic/giao diện: setSearchLoading(true)
       setSearchLoading(true);
+      // Gọi/thực thi setSearchError với đối số để cập nhật logic/giao diện: setSearchError('')
       setSearchError('');
+      // Biến results nhận giá trị từ await Promise.allSettled([ fetchBooks({ page: 1, limit:. const không gán lại; let có thể cập nhật.
       const results = await Promise.allSettled([
         fetchBooks({ page: 1, limit: 5, search: query }),
         fetchUsers({ page: 1, limit: 5, search: query }),
       ]);
+      // if chỉ chạy nhánh này khi điều kiện !active đúng.
       if (!active) return;
+      // if chỉ chạy nhánh này khi điều kiện results[0].status === 'fulfilled' đúng.
       if (results[0].status === 'fulfilled') setBookMatches(results[0].value.books);
       else setBookMatches([]);
+      // if chỉ chạy nhánh này khi điều kiện results[1].status === 'fulfilled' đúng.
       if (results[1].status === 'fulfilled') setUserMatches(results[1].value.users);
       else setUserMatches([]);
+      // if chỉ chạy nhánh này khi điều kiện results.every((result) => result.status === 'rejected') đúng.
       if (results.every((result) => result.status === 'rejected')) {
+        // Gọi/thực thi setSearchError với đối số để cập nhật logic/giao diện: setSearchError(errorMessage(results[0].status === 'rejected' ? results[0].reason
         setSearchError(errorMessage(results[0].status === 'rejected' ? results[0].reason : (results[1] as PromiseRejectedResult).reason));
       }
+      // Gọi/thực thi setSearchLoading với đối số để cập nhật logic/giao diện: setSearchLoading(false)
       setSearchLoading(false);
     }, 300);
 
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; window.clearTimeout(timer); }.
     return () => {
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: active = false
       active = false;
+      // Gọi/thực thi window.clearTimeout với đối số để cập nhật logic/giao diện: window.clearTimeout(timer)
       window.clearTimeout(timer);
     };
   }, [globalSearch]);
 
+  /**
+   * Hàm/thành phần runGlobalSearch: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: trim, setSearchOpen, navigate, encodeURIComponent.
+   */
   function runGlobalSearch() {
+    // Biến query nhận giá trị từ globalSearch.trim(). const không gán lại; let có thể cập nhật.
     const query = globalSearch.trim();
+    // if chỉ chạy nhánh này khi điều kiện !query đúng.
     if (!query) return;
+    // Gọi/thực thi setSearchOpen với đối số để cập nhật logic/giao diện: setSearchOpen(false)
     setSearchOpen(false);
+    // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(`/admin/books?search=${encodeURIComponent(query)}`)
     navigate(`/admin/books?search=${encodeURIComponent(query)}`);
   }
 
+  /**
+   * Hàm/thành phần submitGlobalSearch: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, runGlobalSearch.
+   */
   function submitGlobalSearch(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi runGlobalSearch với đối số để cập nhật logic/giao diện: runGlobalSearch()
     runGlobalSearch();
   }
 
+  /**
+   * Hàm/thành phần openSearchResult: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: path.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSearchOpen, setGlobalSearch, navigate.
+   */
   function openSearchResult(path: string) {
+    // Gọi/thực thi setSearchOpen với đối số để cập nhật logic/giao diện: setSearchOpen(false)
     setSearchOpen(false);
+    // Gọi/thực thi setGlobalSearch với đối số để cập nhật logic/giao diện: setGlobalSearch('')
     setGlobalSearch('');
+    // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(path)
     navigate(path);
   }
 
 
+  /**
+   * Hàm/thành phần handleLogout: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: logout, navigate, alert, errorMessage.
+   * Được tham chiếu tại: admin-web/src/components/ReaderShell.tsx, admin-web/src/pages/ReaderAccountPage.tsx.
+   */
   async function handleLogout() {
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await logout()
       await logout();
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate('/admin/login', { replace: true })
       navigate('/admin/login', { replace: true });
     } catch (error) {
+      // Gọi/thực thi window.alert với đối số để cập nhật logic/giao diện: window.alert(errorMessage(error))
       window.alert(errorMessage(error));
     }
   }
 
+  // Biến mainNav nhận giá trị từ [ { to: '/admin/dashboard', label: 'Tổng quan', Icon: L. const không gán lại; let có thể cập nhật.
   const mainNav = [
     { to: '/admin/dashboard', label: 'Tổng quan', Icon: LayoutDashboard },
     { to: '/admin/books', label: 'Sách', Icon: BookOpen },
@@ -103,10 +189,16 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     { to: '/admin/reports', label: 'Báo cáo', Icon: AlertCircle },
   ];
 
+  // Biến bottomNav nhận giá trị từ [ { to: '/admin/comments', label: 'Bình luận', Icon: Me. const không gán lại; let có thể cập nhật.
   const bottomNav = [
     { to: '/admin/comments', label: 'Bình luận', Icon: MessageSquareText },
   ];
 
+  /**
+   * Hàm/thành phần linkClass: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: { isActive }.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   */
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors ${
       isActive
@@ -114,6 +206,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         : 'text-[#526B86] hover:bg-[#f0f7f3] hover:text-[#24795C]'
     }`;
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="min-h-screen bg-[#F5FAF8]"> {} <header className="fixed inset-.
   return (
     <div className="min-h-screen bg-[#F5FAF8]">
       {/* ─── TOPBAR ─── */}

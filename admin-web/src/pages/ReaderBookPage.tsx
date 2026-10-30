@@ -1,262 +1,485 @@
+// Import { useEffect, useRef, useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/ReaderBookPage.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+// Import { Bookmark, BookOpen, LoaderCircle, Star, Trash2 } từ lucide-react để dùng trong giao diện.
 import { Bookmark, BookOpen, LoaderCircle, Star, Trash2 } from 'lucide-react';
+// Import { useNavigate, useParams } từ react-router-dom để dùng trong giao diện.
 import { useNavigate, useParams } from 'react-router-dom';
+// Import { useAuth } từ ../auth/AuthContext để dùng trong giao diện.
 import { useAuth } from '../auth/AuthContext';
+// Import { ReaderShell } từ ../components/ReaderShell để dùng trong giao diện.
 import { ReaderShell } from '../components/ReaderShell';
+// Import { createBookComment, deleteBookComment, errorMessage, fetchBookComments, fetchPu từ ../api/client để dùng trong giao diện.
 import {
   createBookComment, deleteBookComment, errorMessage, fetchBookComments, fetchPublicBook, streamPublicBook,
   fetchReadableChapters, fetchReaderBookmarks, readBookChapter, saveReaderBookmark, updateBookComment,
 } from '../api/client';
+// Import type { Bookmark as BookmarkType, Book, Chapter, Comment, PaginationData, ReadCha từ ../types để dùng trong giao diện.
 import type { Bookmark as BookmarkType, Book, Chapter, Comment, PaginationData, ReadChapterResult } from '../types';
+// Import { cleanBookDescription } từ ../utils/book-description để dùng trong giao diện.
 import { cleanBookDescription } from '../utils/book-description';
 
 // Hàm ReaderBookPage: Hiển thị thông tin sách và đọc PDF qua endpoint riêng tư có kiểm tra entitlement.
+/**
+ * Hàm/thành phần ReaderBookPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useParams, useAuth, useNavigate, useRef, useState, useEffect, setBook, setLoadingBook.
+ */
 export function ReaderBookPage() {
+  // Biến { bookId = '' } nhận giá trị từ useParams(). const không gán lại; let có thể cập nhật.
   const { bookId = '' } = useParams();
+  // Biến { user, loading: loadingAuth } nhận giá trị từ useAuth(). const không gán lại; let có thể cập nhật.
   const { user, loading: loadingAuth } = useAuth();
+  // Biến navigate nhận giá trị từ useNavigate(). const không gán lại; let có thể cập nhật.
   const navigate = useNavigate();
+  // Biến previousBookIdRef nhận giá trị từ useRef(bookId). const không gán lại; let có thể cập nhật.
   const previousBookIdRef = useRef(bookId);
+  // Biến [book, setBook] nhận giá trị từ useState<Book | null>(null). const không gán lại; let có thể cập nhật.
   const [book, setBook] = useState<Book | null>(null);
+  // Biến [loadingBook, setLoadingBook] nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [loadingBook, setLoadingBook] = useState(true);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
+  // Biến [comments, setComments] nhận giá trị từ useState<Comment[]>([]). const không gán lại; let có thể cập nhật.
   const [comments, setComments] = useState<Comment[]>([]);
+  // Biến [commentPage, setCommentPage] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [commentPage, setCommentPage] = useState(1);
+  // Biến [commentPagination, setCommentPagin nhận giá trị từ useState<PaginationData | null>(null). const không gán lại; let có thể cập nhật.
   const [commentPagination, setCommentPagination] = useState<PaginationData | null>(null);
+  // Biến [commentsLoading, setCommentsLoadin nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [commentsLoading, setCommentsLoading] = useState(true);
+  // Biến [commentError, setCommentError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [commentError, setCommentError] = useState('');
+  // Biến [commentRetryKey, setCommentRetryKe nhận giá trị từ useState(0). const không gán lại; let có thể cập nhật.
   const [commentRetryKey, setCommentRetryKey] = useState(0);
+  // Biến [commentNotice, setCommentNotice] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [commentNotice, setCommentNotice] = useState('');
+  // Biến [commentBody, setCommentBody] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [commentBody, setCommentBody] = useState('');
+  // Biến [commentRating, setCommentRating] nhận giá trị từ useState(5). const không gán lại; let có thể cập nhật.
   const [commentRating, setCommentRating] = useState(5);
+  // Biến [editingComment, setEditingComment] nhận giá trị từ useState<Comment | null>(null). const không gán lại; let có thể cập nhật.
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  // Biến [savingComment, setSavingComment] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [savingComment, setSavingComment] = useState(false);
+  // Biến [chapters, setChapters] nhận giá trị từ useState<Chapter[]>([]). const không gán lại; let có thể cập nhật.
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  // Biến [chapterPagination, setChapterPagin nhận giá trị từ useState<PaginationData | null>(null). const không gán lại; let có thể cập nhật.
   const [chapterPagination, setChapterPagination] = useState<PaginationData | null>(null);
+  // Biến [chapterPage, setChapterPage] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [chapterPage, setChapterPage] = useState(1);
+  // Biến [chapterLoading, setChapterLoading] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [chapterLoading, setChapterLoading] = useState(false);
+  // Biến [chapterError, setChapterError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [chapterError, setChapterError] = useState('');
+  // Biến [chapterRetryKey, setChapterRetryKe nhận giá trị từ useState(0). const không gán lại; let có thể cập nhật.
   const [chapterRetryKey, setChapterRetryKey] = useState(0);
+  // Biến [activeChapter, setActiveChapter] nhận giá trị từ useState<ReadChapterResult | null>(null). const không gán lại; let có thể cập nhật.
   const [activeChapter, setActiveChapter] = useState<ReadChapterResult | null>(null);
+  // Biến [readingChapter, setReadingChapter] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [readingChapter, setReadingChapter] = useState(false);
+  // Biến [savedBookmarks, setSavedBookmarks] nhận giá trị từ useState<BookmarkType[]>([]). const không gán lại; let có thể cập nhật.
   const [savedBookmarks, setSavedBookmarks] = useState<BookmarkType[]>([]);
+  // Biến [savingBookmark, setSavingBookmark] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [savingBookmark, setSavingBookmark] = useState(false);
+  // Biến [pdfUrl, setPdfUrl] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [pdfUrl, setPdfUrl] = useState('');
+  // Biến [pdfLoading, setPdfLoading] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { if (previousBookIdRef.current === bookId) return; previousBook
   useEffect(() => {
+    // if chỉ chạy nhánh này khi điều kiện previousBookIdRef.current === bookId đúng.
     if (previousBookIdRef.current === bookId) return;
+    // Gọi/thực thi biểu thức để cập nhật logic/giao diện: previousBookIdRef.current = bookId
     previousBookIdRef.current = bookId;
+    // Gọi/thực thi setBook với đối số để cập nhật logic/giao diện: setBook(null)
     setBook(null);
+    // Gọi/thực thi setLoadingBook với đối số để cập nhật logic/giao diện: setLoadingBook(true)
     setLoadingBook(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments([])
     setComments([]);
+    // Gọi/thực thi setCommentPage với đối số để cập nhật logic/giao diện: setCommentPage(1)
     setCommentPage(1);
+    // Gọi/thực thi setCommentPagination với đối số để cập nhật logic/giao diện: setCommentPagination(null)
     setCommentPagination(null);
+    // Gọi/thực thi setCommentsLoading với đối số để cập nhật logic/giao diện: setCommentsLoading(true)
     setCommentsLoading(true);
+    // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError('')
     setCommentError('');
+    // Gọi/thực thi setCommentNotice với đối số để cập nhật logic/giao diện: setCommentNotice('')
     setCommentNotice('');
+    // Gọi/thực thi setCommentBody với đối số để cập nhật logic/giao diện: setCommentBody('')
     setCommentBody('');
+    // Gọi/thực thi setEditingComment với đối số để cập nhật logic/giao diện: setEditingComment(null)
     setEditingComment(null);
+    // Gọi/thực thi setChapters với đối số để cập nhật logic/giao diện: setChapters([])
     setChapters([]);
+    // Gọi/thực thi setChapterPagination với đối số để cập nhật logic/giao diện: setChapterPagination(null)
     setChapterPagination(null);
+    // Gọi/thực thi setChapterPage với đối số để cập nhật logic/giao diện: setChapterPage(1)
     setChapterPage(1);
+    // Gọi/thực thi setChapterLoading với đối số để cập nhật logic/giao diện: setChapterLoading(false)
     setChapterLoading(false);
+    // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError('')
     setChapterError('');
+    // Gọi/thực thi setActiveChapter với đối số để cập nhật logic/giao diện: setActiveChapter(null)
     setActiveChapter(null);
+    // Gọi/thực thi setSavedBookmarks với đối số để cập nhật logic/giao diện: setSavedBookmarks([])
     setSavedBookmarks([]);
+    // Gọi/thực thi setPdfUrl với đối số để cập nhật logic/giao diện: setPdfUrl('')
     setPdfUrl('');
   }, [bookId]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl])
   useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { let active = true; setLoadingBook(true); setError(''); fetchPu
   useEffect(() => {
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    // Gọi/thực thi setLoadingBook với đối số để cập nhật logic/giao diện: setLoadingBook(true)
     setLoadingBook(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // Gọi/thực thi fetchPublicBook với đối số để cập nhật logic/giao diện: fetchPublicBook(bookId) .then((result) => { if (active) setBook(result); }) .cat
     fetchPublicBook(bookId)
       .then((result) => { if (active) setBook(result); })
       .catch((loadError: unknown) => { if (active) setError(errorMessage(loadError)); })
       .finally(() => { if (active) setLoadingBook(false); });
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; }.
     return () => { active = false; };
   }, [bookId]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { if (loadingAuth) return; let active = true; setChapterLoading(
   useEffect(() => {
+    // if chỉ chạy nhánh này khi điều kiện loadingAuth đúng.
     if (loadingAuth) return;
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    // Gọi/thực thi setChapterLoading với đối số để cập nhật logic/giao diện: setChapterLoading(true)
     setChapterLoading(true);
+    // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError('')
     setChapterError('');
+    // Gọi/thực thi Promise.allSettled với đối số để cập nhật logic/giao diện: Promise.allSettled([fetchReadableChapters(bookId, chapterPage), user ? fetchRead
     Promise.allSettled([fetchReadableChapters(bookId, chapterPage), user ? fetchReaderBookmarks() : Promise.resolve(null)])
       .then(([catalogResult, bookmarkResult]) => {
+        // if chỉ chạy nhánh này khi điều kiện !active || previousBookIdRef.current !== bookId đúng.
         if (!active || previousBookIdRef.current !== bookId) return;
+        // Biến messages nhận giá trị từ []. const không gán lại; let có thể cập nhật.
         const messages: string[] = [];
+        // if chỉ chạy nhánh này khi điều kiện catalogResult.status === 'fulfilled' đúng.
         if (catalogResult.status === 'fulfilled') {
+          // Biến catalog nhận giá trị từ catalogResult.value. const không gán lại; let có thể cập nhật.
           const catalog = catalogResult.value;
+          // Gọi/thực thi setChapters với đối số để cập nhật logic/giao diện: setChapters((current) => chapterPage === 1 ? catalog.chapters : [...current, ...
           setChapters((current) => chapterPage === 1 ? catalog.chapters : [...current, ...catalog.chapters]);
+          // Gọi/thực thi setChapterPagination với đối số để cập nhật logic/giao diện: setChapterPagination(catalog.pagination)
           setChapterPagination(catalog.pagination);
         } else {
+          // Gọi/thực thi messages.push với đối số để cập nhật logic/giao diện: messages.push(`Không thể tải danh sách chương: ${errorMessage(catalogResult.reas
           messages.push(`Không thể tải danh sách chương: ${errorMessage(catalogResult.reason)}`);
         }
+        // if chỉ chạy nhánh này khi điều kiện bookmarkResult.status === 'fulfilled' && bookmarkResult.value đúng.
         if (bookmarkResult.status === 'fulfilled' && bookmarkResult.value) {
+          // Gọi/thực thi setSavedBookmarks với đối số để cập nhật logic/giao diện: setSavedBookmarks(bookmarkResult.value.bookmarks)
           setSavedBookmarks(bookmarkResult.value.bookmarks);
         } else if (bookmarkResult.status === 'rejected') {
+          // Gọi/thực thi messages.push với đối số để cập nhật logic/giao diện: messages.push(`Không thể tải chương đã lưu: ${errorMessage(bookmarkResult.reason
           messages.push(`Không thể tải chương đã lưu: ${errorMessage(bookmarkResult.reason)}`);
         }
+        // if chỉ chạy nhánh này khi điều kiện messages.length đúng.
         if (messages.length) setChapterError(messages.join(' '));
       })
       .finally(() => { if (active) setChapterLoading(false); });
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; }.
     return () => { active = false; };
   }, [bookId, chapterPage, chapterRetryKey, loadingAuth, user]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { let active = true; setCommentsLoading(true); setCommentError('
   useEffect(() => {
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    // Gọi/thực thi setCommentsLoading với đối số để cập nhật logic/giao diện: setCommentsLoading(true)
     setCommentsLoading(true);
+    // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError('')
     setCommentError('');
+    // Gọi/thực thi fetchBookComments với đối số để cập nhật logic/giao diện: fetchBookComments(bookId, commentPage) .then((result) => { if (!active || previo
     fetchBookComments(bookId, commentPage)
       .then((result) => {
+        // if chỉ chạy nhánh này khi điều kiện !active || previousBookIdRef.current !== bookId đúng.
         if (!active || previousBookIdRef.current !== bookId) return;
+        // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments((current) => commentPage === 1 ? result.comments : [...current, ...r
         setComments((current) => commentPage === 1 ? result.comments : [...current, ...result.comments]);
+        // Gọi/thực thi setCommentPagination với đối số để cập nhật logic/giao diện: setCommentPagination(result.pagination)
         setCommentPagination(result.pagination);
       })
       .catch((loadError: unknown) => { if (active) setCommentError(errorMessage(loadError)); })
       .finally(() => { if (active) setCommentsLoading(false); });
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; }.
     return () => { active = false; };
   }, [bookId, commentPage, commentRetryKey]);
 
+  // Biến bookDescription nhận giá trị từ cleanBookDescription(book?.description). const không gán lại; let có thể cập nhật.
   const bookDescription = cleanBookDescription(book?.description);
+  // Biến currentUserId nhận giá trị từ user?._id ?? user?.id. const không gán lại; let có thể cập nhật.
   const currentUserId = user?._id ?? user?.id;
+  // Biến myComment nhận giá trị từ comments.find((comment) => referenceId(comment.user) ==. const không gán lại; let có thể cập nhật.
   const myComment = comments.find((comment) => referenceId(comment.user) === currentUserId);
+  // Biến activeChapterId nhận giá trị từ activeChapter?.chapter.id. const không gán lại; let có thể cập nhật.
   const activeChapterId = activeChapter?.chapter.id;
+  // Biến savedBookmark nhận giá trị từ savedBookmarks.find((bookmark) => { const bookRef = boo. const không gán lại; let có thể cập nhật.
   const savedBookmark = savedBookmarks.find((bookmark) => {
+  // Biến bookRef nhận giá trị từ bookmark?.book. const không gán lại; let có thể cập nhật.
   const bookRef = bookmark?.book;
+  // Biến bookIdStr nhận giá trị từ typeof bookRef === 'object' && bookRef !== null ? (book. const không gán lại; let có thể cập nhật.
   const bookIdStr = typeof bookRef === 'object' && bookRef !== null 
     ? (bookRef._id || bookRef.id || '') 
     : String(bookRef || '');
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: referenceId(bookIdStr) === bookId.
   return referenceId(bookIdStr) === bookId;
 });
 
+/**
+ * Hàm/thành phần referenceId: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: ref.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: String.
+ * Được tham chiếu tại: admin-web/src/pages/ReaderAccountPage.tsx.
+ */
 function referenceId(ref: any): string {
+  // if chỉ chạy nhánh này khi điều kiện !ref đúng.
   if (!ref) return '';
+  // if chỉ chạy nhánh này khi điều kiện typeof ref === 'string' đúng.
   if (typeof ref === 'string') return ref;
+  // if chỉ chạy nhánh này khi điều kiện typeof ref === 'object' đúng.
   if (typeof ref === 'object') {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ref._id || ref.id || ''.
     return ref._id || ref.id || '';
   }
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: String(ref).
   return String(ref);
 }
 
+/**
+ * Hàm/thành phần extractId: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: item.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 function extractId(item: any): string {
+  // if chỉ chạy nhánh này khi điều kiện !item đúng.
   if (!item) return '';
+  // if chỉ chạy nhánh này khi điều kiện typeof item === 'string' đúng.
   if (typeof item === 'string') return item;
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: item._id || item.id || ''.
   return item._id || item.id || '';
 }
 
   // Hàm openChapter: Đọc chương qua endpoint được bảo vệ để backend kiểm tra quyền và ghi nhận lượt đọc.
+  /**
+   * Hàm/thành phần openChapter: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: chapter.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: navigate, encodeURIComponent, setReadingChapter, setChapterError, readBookChapter, setActiveChapter, errorMessage.
+   */
   async function openChapter(chapter: Chapter) {
+    // if chỉ chạy nhánh này khi điều kiện !user đúng.
     if (!user) {
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}/read`
       navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}/read` } });
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // Gọi/thực thi setReadingChapter với đối số để cập nhật logic/giao diện: setReadingChapter(true)
     setReadingChapter(true);
+    // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError('')
     setChapterError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến result nhận giá trị từ await readBookChapter(bookId, chapter._id). const không gán lại; let có thể cập nhật.
       const result = await readBookChapter(bookId, chapter._id);
+      // Gọi/thực thi setActiveChapter với đối số để cập nhật logic/giao diện: setActiveChapter(result)
       setActiveChapter(result);
     } catch (readError: unknown) {
+      // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError(errorMessage(readError))
       setChapterError(errorMessage(readError));
     } finally {
+      // Gọi/thực thi setReadingChapter với đối số để cập nhật logic/giao diện: setReadingChapter(false)
       setReadingChapter(false);
     }
   }
 
   // Hàm saveChapterBookmark: Tạo bookmark hoặc chuyển bookmark hiện tại sang chương đang chọn.
+  /**
+   * Hàm/thành phần saveChapterBookmark: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: chapterId.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSavingBookmark, setChapterError, saveReaderBookmark, setSavedBookmarks, map, errorMessage.
+   */
   async function saveChapterBookmark(chapterId: string) {
+    // Gọi/thực thi setSavingBookmark với đối số để cập nhật logic/giao diện: setSavingBookmark(true)
     setSavingBookmark(true);
+    // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError('')
     setChapterError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến saved nhận giá trị từ await saveReaderBookmark(bookId, chapterId, savedBookma. const không gán lại; let có thể cập nhật.
       const saved = await saveReaderBookmark(bookId, chapterId, savedBookmark?._id);
+      // Gọi/thực thi setSavedBookmarks với đối số để cập nhật logic/giao diện: setSavedBookmarks((current) => savedBookmark ? current.map((bookmark) => bookmar
       setSavedBookmarks((current) => savedBookmark
         ? current.map((bookmark) => bookmark._id === saved._id ? saved : bookmark)
         : [...current, saved]);
     } catch (saveError: unknown) {
+      // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError(errorMessage(saveError))
       setChapterError(errorMessage(saveError));
     } finally {
+      // Gọi/thực thi setSavingBookmark với đối số để cập nhật logic/giao diện: setSavingBookmark(false)
       setSavingBookmark(false);
     }
   }
 
   // Hàm saveComment: Tạo hoặc cập nhật đánh giá của người đọc theo quyền sở hữu do backend xác thực.
+  /**
+   * Hàm/thành phần saveComment: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, navigate, encodeURIComponent, trim, setCommentError, setSavingComment, setCommentNotice, updateBookComment.
+   */
   async function saveComment(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // if chỉ chạy nhánh này khi điều kiện !user đúng.
     if (!user) {
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}` } })
       navigate('/login', { state: { from: `/books/${encodeURIComponent(bookId)}` } });
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // Biến body nhận giá trị từ commentBody.trim(). const không gán lại; let có thể cập nhật.
     const body = commentBody.trim();
+    // if chỉ chạy nhánh này khi điều kiện !body đúng.
     if (!body) {
+      // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError('Vui lòng nhập nội dung đánh giá.')
       setCommentError('Vui lòng nhập nội dung đánh giá.');
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // Gọi/thực thi setSavingComment với đối số để cập nhật logic/giao diện: setSavingComment(true)
     setSavingComment(true);
+    // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError('')
     setCommentError('');
+    // Gọi/thực thi setCommentNotice với đối số để cập nhật logic/giao diện: setCommentNotice('')
     setCommentNotice('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến targetComment nhận giá trị từ editingComment ?? myComment. const không gán lại; let có thể cập nhật.
       const targetComment = editingComment ?? myComment;
+      // Biến saved nhận giá trị từ targetComment ? await updateBookComment(targetComment._. const không gán lại; let có thể cập nhật.
       const saved = targetComment
         ? await updateBookComment(targetComment._id, { body, rating: commentRating })
         : await createBookComment(bookId, body, commentRating);
+      // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments((current) => targetComment ? current.map((comment) => comment._id ==
       setComments((current) => targetComment
         ? current.map((comment) => comment._id === saved._id ? saved : comment)
         : [saved, ...current]);
+      // Gọi/thực thi setEditingComment với đối số để cập nhật logic/giao diện: setEditingComment(null)
       setEditingComment(null);
+      // Gọi/thực thi setCommentBody với đối số để cập nhật logic/giao diện: setCommentBody('')
       setCommentBody('');
+      // Gọi/thực thi setCommentRating với đối số để cập nhật logic/giao diện: setCommentRating(5)
       setCommentRating(5);
+      // Gọi/thực thi setCommentNotice với đối số để cập nhật logic/giao diện: setCommentNotice('Đã lưu đánh giá của bạn.')
       setCommentNotice('Đã lưu đánh giá của bạn.');
     } catch (saveError: unknown) {
+      // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError(errorMessage(saveError))
       setCommentError(errorMessage(saveError));
     } finally {
+      // Gọi/thực thi setSavingComment với đối số để cập nhật logic/giao diện: setSavingComment(false)
       setSavingComment(false);
     }
   }
 
   // Hàm removeComment: Xóa bình luận sau xác nhận và cập nhật danh sách đang hiển thị.
+  /**
+   * Hàm/thành phần removeComment: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: comment.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: confirm, setCommentError, deleteBookComment, setComments, filter, setCommentNotice, setEditingComment, setCommentBody.
+   */
   async function removeComment(comment: Comment) {
+    // if chỉ chạy nhánh này khi điều kiện !window.confirm('Bạn có chắc muốn xóa đánh giá này?') đúng.
     if (!window.confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+    // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError('')
     setCommentError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await deleteBookComment(comment._id)
       await deleteBookComment(comment._id);
+      // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments((current) => current.filter((item) => item._id !== comment._id))
       setComments((current) => current.filter((item) => item._id !== comment._id));
+      // Gọi/thực thi setCommentNotice với đối số để cập nhật logic/giao diện: setCommentNotice('Đã xóa đánh giá.')
       setCommentNotice('Đã xóa đánh giá.');
+      // if chỉ chạy nhánh này khi điều kiện editingComment?._id === comment._id đúng.
       if (editingComment?._id === comment._id) {
+        // Gọi/thực thi setEditingComment với đối số để cập nhật logic/giao diện: setEditingComment(null)
         setEditingComment(null);
+        // Gọi/thực thi setCommentBody với đối số để cập nhật logic/giao diện: setCommentBody('')
         setCommentBody('');
       }
     } catch (deleteError: unknown) {
+      // Gọi/thực thi setCommentError với đối số để cập nhật logic/giao diện: setCommentError(errorMessage(deleteError))
       setCommentError(errorMessage(deleteError));
     }
   }
 
   // Hàm openReader: Mở trang đọc riêng cho tài khoản đã đăng nhập, kể cả ADMIN có quyền đọc nội dung.
+  /**
+   * Hàm/thành phần openReader: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setPdfLoading, setChapterError, streamPublicBook, setPdfUrl, createObjectURL, errorMessage, navigate, encodeURIComponent.
+   */
   async function openReader() {
+    // if chỉ chạy nhánh này khi điều kiện loadingAuth đúng.
     if (loadingAuth) return;
+    // if chỉ chạy nhánh này khi điều kiện book?.reader_mode === 'pdf' đúng.
     if (book?.reader_mode === 'pdf') {
+      // Gọi/thực thi setPdfLoading với đối số để cập nhật logic/giao diện: setPdfLoading(true)
       setPdfLoading(true);
+      // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError('')
       setChapterError('');
+      // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
       try {
+        // Biến blob nhận giá trị từ await streamPublicBook(book._id). const không gán lại; let có thể cập nhật.
         const blob = await streamPublicBook(book._id);
+        // Gọi/thực thi setPdfUrl với đối số để cập nhật logic/giao diện: setPdfUrl(URL.createObjectURL(blob))
         setPdfUrl(URL.createObjectURL(blob));
       } catch (streamError: unknown) {
+        // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError(errorMessage(streamError))
         setChapterError(errorMessage(streamError));
       } finally { setPdfLoading(false); }
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // if chỉ chạy nhánh này khi điều kiện book?.reader_mode === 'chapters' đúng.
     if (book?.reader_mode === 'chapters') {
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(`/books/${encodeURIComponent(book._id)}/read`)
       navigate(`/books/${encodeURIComponent(book._id)}/read`);
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // Gọi/thực thi setChapterError với đối số để cập nhật logic/giao diện: setChapterError(book?.reader_mode === 'unsupported' ? `Định dạng ${book.file_for
     setChapterError(book?.reader_mode === 'unsupported'
       ? `Định dạng ${book.file_format || 'này'} chưa có trình đọc trong ứng dụng.`
       : 'Sách chưa có chương đọc được hoặc tệp gốc hợp lệ.');
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <ReaderShell> <div className="harvey-detail"> <div className="harvey-detail-co.
   return (
     <ReaderShell>
       <div className="harvey-detail">
@@ -381,14 +604,18 @@ function extractId(item: any): string {
               ) : comments.length ? (
                 <ul className="mt-4 divide-y divide-[#e9e8e2]">
                   {comments.map((comment) => {
+                    // Biến ownerId nhận giá trị từ referenceId(comment.user). const không gán lại; let có thể cập nhật.
                     const ownerId = referenceId(comment.user);
+                    // Biến canManage nhận giá trị từ user?.role === 'ADMIN' || ownerId === currentUserId. const không gán lại; let có thể cập nhật.
                     const canManage = user?.role === 'ADMIN' || ownerId === currentUserId;
                     
                     // Xử lý an toàn trường hợp comment.user là chuỗi, object đầy đủ hoặc null
+                    // Biến author nhận giá trị từ typeof comment.user === 'object' && comment.user !== nu. const không gán lại; let có thể cập nhật.
                     const author = typeof comment.user === 'object' && comment.user !== null
                       ? (comment.user.name || 'Thành viên')
                       : 'Độc giả';
 
+                    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <li className="py-4" key={comment._id}> <div className="flex items-start justi.
                     return (
                       <li className="py-4" key={comment._id}>
                         <div className="flex items-start justify-between gap-3">
@@ -425,7 +652,13 @@ function extractId(item: any): string {
   );
 }
 
+/**
+ * Hàm/thành phần genreLabel: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: genre optional.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 function genreLabel(genre?: Book['genre']) {
+  // Biến labels nhận giá trị từ { van_hoc_viet_nam: 'Văn học Việt Nam', truyen_ngan_vie. const không gán lại; let có thể cập nhật.
   const labels: Record<NonNullable<Book['genre']>, string> = {
     van_hoc_viet_nam: 'Văn học Việt Nam',
     truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
@@ -438,6 +671,7 @@ function genreLabel(genre?: Book['genre']) {
     lich_su: 'Lịch sử',
     khoa_hoc: 'Khoa học',
   };
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: genre ? labels[genre] : labels.van_hoc_viet_nam.
   return genre ? labels[genre] : labels.van_hoc_viet_nam;
 }
 
@@ -447,7 +681,16 @@ function referenceId(reference: Comment['user']): string {
 }*/
 
 // Hàm formatDate: Hiển thị ngày bình luận theo múi giờ và định dạng tiếng Việt.
+/**
+ * Hàm/thành phần formatDate: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: value.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: Date, isNaN, getTime, DateTimeFormat, format.
+ * Được tham chiếu tại: admin-web/src/pages/UserManagement.tsx, admin-web/src/pages/SubscriptionManagement.tsx, admin-web/src/pages/ReportManagement.tsx, admin-web/src/pages/ReaderAccountPage.tsx.
+ */
 function formatDate(value: string): string {
+  // Biến date nhận giá trị từ new Date(value). const không gán lại; let có thể cập nhật.
   const date = new Date(value);
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('vi-VN', { dateStyl.
   return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(date);
 }

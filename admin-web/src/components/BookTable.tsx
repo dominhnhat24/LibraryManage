@@ -1,14 +1,23 @@
+// Import { BookOpen, FileUp, Pencil, Trash2 } từ lucide-react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/components/BookTable.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { BookOpen, FileUp, Pencil, Trash2 } from 'lucide-react';
+// Import { useState } từ react để dùng trong giao diện.
 import { useState } from 'react';
+// Import axios từ axios để dùng trong giao diện.
 import axios from 'axios';
+// Import type { Book } từ ../types để dùng trong giao diện.
 import type { Book } from '../types';
 
+// Biến categories nhận giá trị từ { ebook: 'E-book', audiobook: 'Sách nói', comic: 'Truyệ. const không gán lại; let có thể cập nhật.
 const categories: Record<Book['category'], string> = {
   ebook: 'E-book',
   audiobook: 'Sách nói',
   comic: 'Truyện tranh',
   webnovel: 'Web novel',
 };
+// Biến genres nhận giá trị từ { van_hoc_viet_nam: 'Văn học Việt Nam', truyen_ngan_vie. const không gán lại; let có thể cập nhật.
 const genres: Record<NonNullable<Book['genre']>, string> = {
   van_hoc_viet_nam: 'Văn học Việt Nam',
   truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
@@ -22,12 +31,19 @@ const genres: Record<NonNullable<Book['genre']>, string> = {
   khoa_hoc: 'Khoa học',
 };
 
+// Biến accessNames nhận giá trị từ { free: 'Miễn phí', premium: 'Premium', vip: 'VIP', }. const không gán lại; let có thể cập nhật.
 const accessNames: Record<Book['access_level'], string> = {
   free: 'Miễn phí',
   premium: 'Premium',
   vip: 'VIP',
 };
 
+/**
+ * Hàm/thành phần BookTable: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { books, setBooks, token, onEdit, onDele.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: map, setSelectedIds, includes, filter, async, confirm, alert, delete.
+ */
 export function BookTable({
   books,
   setBooks,
@@ -45,44 +61,77 @@ export function BookTable({
   onUpload: (book: Book) => void;
   onRead: (book: Book) => void;
 }) {
+  // Biến [selectedIds, setSelectedIds] nhận giá trị từ useState<string[]>([]). const không gán lại; let có thể cập nhật.
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Xử lý chọn/bỏ chọn tất cả các checkbox
+  /**
+   * Hàm/thành phần handleSelectAll: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: e.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: map, setSelectedIds.
+   */
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // if chỉ chạy nhánh này khi điều kiện e.target.checked đúng.
     if (e.target.checked) {
+      // Biến allIds nhận giá trị từ books.map((book) => book._id). const không gán lại; let có thể cập nhật.
       const allIds = books.map((book) => book._id);
+      // Gọi/thực thi setSelectedIds với đối số để cập nhật logic/giao diện: setSelectedIds(allIds)
       setSelectedIds(allIds);
     } else {
+      // Gọi/thực thi setSelectedIds với đối số để cập nhật logic/giao diện: setSelectedIds([])
       setSelectedIds([]);
     }
   };
 
   // Xử lý chọn/bỏ chọn từng dòng sách độc lập
+  /**
+   * Hàm/thành phần handleSelectOne: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: id.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: includes, setSelectedIds, filter.
+   */
   const handleSelectOne = (id: string) => {
+    // if chỉ chạy nhánh này khi điều kiện selectedIds.includes(id) đúng.
     if (selectedIds.includes(id)) {
+      // Gọi/thực thi setSelectedIds với đối số để cập nhật logic/giao diện: setSelectedIds(selectedIds.filter((item) => item !== id))
       setSelectedIds(selectedIds.filter((item) => item !== id));
     } else {
+      // Gọi/thực thi setSelectedIds với đối số để cập nhật logic/giao diện: setSelectedIds([...selectedIds, id])
       setSelectedIds([...selectedIds, id]);
     }
   };
 
   // Gọi API xóa hàng loạt
-  
+/**
+ * Hàm/thành phần handleBulkDelete: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: confirm, alert, delete, setBooks, filter, includes, setSelectedIds, error.
+ */
 const handleBulkDelete = async () => {
+  // if chỉ chạy nhánh này khi điều kiện selectedIds.length === 0 đúng.
   if (selectedIds.length === 0) return;
 
+  // Biến confirmDelete nhận giá trị từ window.confirm( `Bạn có chắc chắn muốn xóa vĩnh viễn ${. const không gán lại; let có thể cập nhật.
   const confirmDelete = window.confirm(
     `Bạn có chắc chắn muốn xóa vĩnh viễn ${selectedIds.length} cuốn sách đã chọn không?`
   );
 
+  // if chỉ chạy nhánh này khi điều kiện !confirmDelete đúng.
   if (!confirmDelete) return;
 
+  // if chỉ chạy nhánh này khi điều kiện !token đúng.
   if (!token) {
+    // Gọi/thực thi alert với đối số để cập nhật logic/giao diện: alert('Phiên đăng nhập không tồn tại. Vui lòng đăng nhập lại.')
     alert('Phiên đăng nhập không tồn tại. Vui lòng đăng nhập lại.');
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
     return;
   }
 
+  // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
   try {
+    // Biến response nhận giá trị từ await axios.delete( 'http:. const không gán lại; let có thể cập nhật.
     const response = await axios.delete(
       'http://localhost:5000/api/v1/books/bulk',
       {
@@ -95,19 +144,24 @@ const handleBulkDelete = async () => {
       }
     );
 
+    // Gọi/thực thi alert với đối số để cập nhật logic/giao diện: alert(response.data.message)
     alert(response.data.message);
 
+    // Gọi/thực thi setBooks với đối số để cập nhật logic/giao diện: setBooks((prevBooks) => prevBooks.filter((book) => !selectedIds.includes(book._i
     setBooks((prevBooks) =>
       prevBooks.filter((book) => !selectedIds.includes(book._id))
     );
 
+    // Gọi/thực thi setSelectedIds với đối số để cập nhật logic/giao diện: setSelectedIds([])
     setSelectedIds([]);
   } catch (error: any) {
+    // Gọi/thực thi console.error với đối số để cập nhật logic/giao diện: console.error( 'Lỗi khi xóa hàng loạt:', error.response?.data || error.message )
     console.error(
       'Lỗi khi xóa hàng loạt:',
       error.response?.data || error.message
     );
 
+    // Gọi/thực thi alert với đối số để cập nhật logic/giao diện: alert( error.response?.data?.message || 'Có lỗi xảy ra khi thực hiện xóa hàng lo
     alert(
       error.response?.data?.message ||
       'Có lỗi xảy ra khi thực hiện xóa hàng loạt.'
@@ -116,7 +170,9 @@ const handleBulkDelete = async () => {
 };
 
 
+  // if chỉ chạy nhánh này khi điều kiện books.length === 0 đúng.
   if (books.length === 0) {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="flex min-h-64 flex-col items-center justify-center px-6 text-c.
     return (
       <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
         <span className="grid h-14 w-14 place-items-center border border-[#e6e4dc] bg-[#faf9f6] text-[#78837c]">
@@ -128,6 +184,7 @@ const handleBulkDelete = async () => {
     );
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="space-y-4"> {} {selectedIds.length > 0 && ( <div className="mx.
   return (
     <div className="space-y-4">
   {/* 🛠️ Thanh công cụ hành động hàng loạt (Thiết kế mới hiện đại, trực quan hơn) */}
@@ -190,7 +247,9 @@ const handleBulkDelete = async () => {
           </thead>
           <tbody className="divide-y divide-[#EEF3F0]">
             {books.map((book) => {
+              // Biến isSelected nhận giá trị từ selectedIds.includes(book._id). const không gán lại; let có thể cập nhật.
               const isSelected = selectedIds.includes(book._id);
+              // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <tr className={`group transition-colors hover:bg-[#FFFFFF] ${isSelected ? 'bg-.
               return (
                 <tr className={`group transition-colors hover:bg-[#FFFFFF] ${isSelected ? 'bg-indigo-50/40' : ''}`} key={book._id}>
                   <td className="p-4 text-center">

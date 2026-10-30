@@ -1,65 +1,119 @@
+// Import { useCallback, useEffect, useState } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/AdminCommentsPage.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useCallback, useEffect, useState } from 'react';
+// Import { AlertCircle, LoaderCircle, MessageSquareText, Search, Star, Trash2, X } từ lucide-react để dùng trong giao diện.
 import { AlertCircle, LoaderCircle, MessageSquareText, Search, Star, Trash2, X } from 'lucide-react';
+// Import { AdminLayout } từ ../components/AdminLayout để dùng trong giao diện.
 import { AdminLayout } from '../components/AdminLayout';
+// Import { Pagination } từ ../components/Pagination để dùng trong giao diện.
 import { Pagination } from '../components/Pagination';
+// Import { deleteBookComment, errorMessage, fetchAdminComments } từ ../api/client để dùng trong giao diện.
 import { deleteBookComment, errorMessage, fetchAdminComments } from '../api/client';
+// Import type { Comment, PaginationData } từ ../types để dùng trong giao diện.
 import type { Comment, PaginationData } from '../types';
 
+// Biến emptyPagination nhận giá trị từ { total: 0, page: 1, limit: 20, totalPages: 0 }. const không gán lại; let có thể cập nhật.
 const emptyPagination: PaginationData = { total: 0, page: 1, limit: 20, totalPages: 0 };
 
+/**
+ * Hàm/thành phần AdminCommentsPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, useEffect, setTimeout, setPage, setSearch, trim, return, clearTimeout.
+ */
 export function AdminCommentsPage() {
+  // Biến [comments, setComments] nhận giá trị từ useState<Comment[]>([]). const không gán lại; let có thể cập nhật.
   const [comments, setComments] = useState<Comment[]>([]);
+  // Biến [pagination, setPagination] nhận giá trị từ useState<PaginationData>(emptyPagination). const không gán lại; let có thể cập nhật.
   const [pagination, setPagination] = useState<PaginationData>(emptyPagination);
+  // Biến [searchInput, setSearchInput] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [searchInput, setSearchInput] = useState('');
+  // Biến [search, setSearch] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [search, setSearch] = useState('');
+  // Biến [page, setPage] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [page, setPage] = useState(1);
+  // Biến [loading, setLoading] nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [loading, setLoading] = useState(true);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
+  // Biến [deletingId, setDeletingId] nhận giá trị từ useState<string | null>(null). const không gán lại; let có thể cập nhật.
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { const timer = window.setTimeout(() => { setPage(1); setSearch(
   useEffect(() => {
+    // Biến timer nhận giá trị từ window.setTimeout(() => { setPage(1); setSearch(searchI. const không gán lại; let có thể cập nhật.
     const timer = window.setTimeout(() => {
+      // Gọi/thực thi setPage với đối số để cập nhật logic/giao diện: setPage(1)
       setPage(1);
+      // Gọi/thực thi setSearch với đối số để cập nhật logic/giao diện: setSearch(searchInput.trim())
       setSearch(searchInput.trim());
     }, 250);
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => window.clearTimeout(timer).
     return () => window.clearTimeout(timer);
   }, [searchInput]);
 
+  // Biến loadComments nhận giá trị từ useCallback(async () => { setLoading(true); setError(''. const không gán lại; let có thể cập nhật.
   const loadComments = useCallback(async () => {
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
     setLoading(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến result nhận giá trị từ await fetchAdminComments({ page, limit: pagination.limi. const không gán lại; let có thể cập nhật.
       const result = await fetchAdminComments({
         page,
         limit: pagination.limit || 20,
         ...(search ? { search } : {}),
       });
+      // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments(result.comments)
       setComments(result.comments);
+      // Gọi/thực thi setPagination với đối số để cập nhật logic/giao diện: setPagination(result.pagination)
       setPagination(result.pagination);
     } catch (loadError: unknown) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(loadError))
       setError(errorMessage(loadError));
     } finally {
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
       setLoading(false);
     }
   }, [page, pagination.limit, search]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { void loadComments(); }, [loadComments])
   useEffect(() => { void loadComments(); }, [loadComments]);
 
+  /**
+   * Hàm/thành phần handleDelete: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: commentId.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: confirm, setDeletingId, setError, deleteBookComment, setPage, loadComments, errorMessage.
+   */
   async function handleDelete(commentId: string) {
+    // if chỉ chạy nhánh này khi điều kiện !window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?') đúng.
     if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?')) return;
+    // Gọi/thực thi setDeletingId với đối số để cập nhật logic/giao diện: setDeletingId(commentId)
     setDeletingId(commentId);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await deleteBookComment(commentId)
       await deleteBookComment(commentId);
+      // if chỉ chạy nhánh này khi điều kiện comments.length === 1 && page > 1 đúng.
       if (comments.length === 1 && page > 1) setPage((current) => current - 1);
       else await loadComments();
     } catch (deleteError: unknown) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(deleteError) || 'Không thể xóa bình luận.')
       setError(errorMessage(deleteError) || 'Không thể xóa bình luận.');
     } finally {
+      // Gọi/thực thi setDeletingId với đối số để cập nhật logic/giao diện: setDeletingId(null)
       setDeletingId(null);
     }
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <AdminLayout> <section className="mb-6 flex flex-col justify-between gap-4 md:.
   return (
     <AdminLayout>
       <section className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -110,8 +164,11 @@ export function AdminCommentsPage() {
               </thead>
               <tbody className="divide-y divide-[#EEF3F0]">
                 {comments.map((comment) => {
+                  // Biến author nhận giá trị từ typeof comment.user === 'object' && comment.user !== nu. const không gán lại; let có thể cập nhật.
                   const author = typeof comment.user === 'object' && comment.user !== null ? comment.user : null;
+                  // Biến book nhận giá trị từ typeof comment.book === 'object' && comment.book !== nu. const không gán lại; let có thể cập nhật.
                   const book = typeof comment.book === 'object' && comment.book !== null ? comment.book : null;
+                  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <tr className="transition-colors hover:bg-[#F8FBF9]" key={comment._id}> <td cl.
                   return (
                     <tr className="transition-colors hover:bg-[#F8FBF9]" key={comment._id}>
                       <td className="px-5 py-3.5">

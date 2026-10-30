@@ -1,20 +1,45 @@
+// Import { useEffect, useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/components/ChapterModal.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useState, type FormEvent } from 'react';
+// Import { BookOpen, BookPlus, LoaderCircle, Search, X } từ lucide-react để dùng trong giao diện.
 import { BookOpen, BookPlus, LoaderCircle, Search, X } from 'lucide-react';
+// Import { errorMessage, fetchBooks, type ChapterFormPayload, type ChapterUpdatePayload } từ ../api/client để dùng trong giao diện.
 import { errorMessage, fetchBooks, type ChapterFormPayload, type ChapterUpdatePayload } from '../api/client';
+// Import type { Book, Chapter, ChapterBookReference } từ ../types để dùng trong giao diện.
 import type { Book, Chapter, ChapterBookReference } from '../types';
 
 // Hàm toDateTimeLocal: Chuyển ISO date thành giá trị giờ địa phương phù hợp với input datetime-local.
+/**
+ * Hàm/thành phần toDateTimeLocal: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: value optional.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: Date, isNaN, getTime, getTimezoneOffset, toISOString, slice.
+ */
 function toDateTimeLocal(value?: string): string {
+  // Biến date nhận giá trị từ value ? new Date(value) : new Date(). const không gán lại; let có thể cập nhật.
   const date = value ? new Date(value) : new Date();
+  // if chỉ chạy nhánh này khi điều kiện Number.isNaN(date.getTime()) đúng.
   if (Number.isNaN(date.getTime())) return '';
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice.
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
 // Hàm getBookReference: Chuẩn hóa sách đã populate hoặc ID sách thành thông tin hiển thị trong form sửa.
+/**
+ * Hàm/thành phần getBookReference: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: book.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: slice.
+ */
 function getBookReference(book: Chapter['book_id']): ChapterBookReference {
+  // if chỉ chạy nhánh này khi điều kiện typeof book === 'string' đúng.
   if (typeof book === 'string') {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: { title: `Sách ${book.slice(-6)}` }.
     return { title: `Sách ${book.slice(-6)}` };
   }
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: { ...book, title: book?.title ?? '',.
   return {
     ...book,
     title: book?.title ?? '', // Đảm bảo title luôn là string, tránh lỗi undefined
@@ -22,84 +47,155 @@ function getBookReference(book: Chapter['book_id']): ChapterBookReference {
 }
 
 // Hàm ChapterModal: Hiển thị form tạo/sửa chương và tìm sách cha qua API phân trang, không tải toàn bộ catalog.
+/**
+ * Hàm/thành phần ChapterModal: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { chapter, saving, onClose, onSave }.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, toDateTimeLocal, useEffect, setTitle, setContent, setChapterNumber, setAccessLevel, setPublishedAt.
+ */
 export function ChapterModal({ chapter, saving, onClose, onSave }: {
   chapter: Chapter | null;
   saving: boolean;
   onClose: () => void;
   onSave: (payload: ChapterFormPayload | ChapterUpdatePayload) => Promise<void>;
 }) {
+  // Biến [title, setTitle] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [title, setTitle] = useState('');
+  // Biến [content, setContent] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [content, setContent] = useState('');
+  // Biến [chapterNumber, setChapterNumber] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [chapterNumber, setChapterNumber] = useState(1);
+  // Biến [accessLevel, setAccessLevel] nhận giá trị từ useState<Book['access_level']>('free'). const không gán lại; let có thể cập nhật.
   const [accessLevel, setAccessLevel] = useState<Book['access_level']>('free');
+  // Biến [publishedAt, setPublishedAt] nhận giá trị từ useState(toDateTimeLocal()). const không gán lại; let có thể cập nhật.
   const [publishedAt, setPublishedAt] = useState(toDateTimeLocal());
+  // Biến [bookSearch, setBookSearch] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [bookSearch, setBookSearch] = useState('');
+  // Biến [bookResults, setBookResults] nhận giá trị từ useState<Book[]>([]). const không gán lại; let có thể cập nhật.
   const [bookResults, setBookResults] = useState<Book[]>([]);
+  // Biến [selectedBook, setSelectedBook] nhận giá trị từ useState<Book | null>(null). const không gán lại; let có thể cập nhật.
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  // Biến [searchingBooks, setSearchingBooks] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [searchingBooks, setSearchingBooks] = useState(false);
+  // Biến [bookSearchError, setBookSearchErro nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [bookSearchError, setBookSearchError] = useState('');
+  // Biến [formError, setFormError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [formError, setFormError] = useState('');
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { setTitle(chapter?.title ?? ''); setContent(chapter?.content ??
   useEffect(() => {
+    // Gọi/thực thi setTitle với đối số để cập nhật logic/giao diện: setTitle(chapter?.title ?? '')
     setTitle(chapter?.title ?? '');
+    // Gọi/thực thi setContent với đối số để cập nhật logic/giao diện: setContent(chapter?.content ?? '')
     setContent(chapter?.content ?? '');
+    // Gọi/thực thi setChapterNumber với đối số để cập nhật logic/giao diện: setChapterNumber(chapter?.chapter_number ?? 1)
     setChapterNumber(chapter?.chapter_number ?? 1);
+    // Gọi/thực thi setAccessLevel với đối số để cập nhật logic/giao diện: setAccessLevel(chapter?.access_level ?? 'free')
     setAccessLevel(chapter?.access_level ?? 'free');
+    // Gọi/thực thi setPublishedAt với đối số để cập nhật logic/giao diện: setPublishedAt(toDateTimeLocal(chapter?.published_at))
     setPublishedAt(toDateTimeLocal(chapter?.published_at));
+    // Gọi/thực thi setBookSearch với đối số để cập nhật logic/giao diện: setBookSearch('')
     setBookSearch('');
+    // Gọi/thực thi setBookResults với đối số để cập nhật logic/giao diện: setBookResults([])
     setBookResults([]);
+    // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(null)
     setSelectedBook(null);
+    // Gọi/thực thi setBookSearchError với đối số để cập nhật logic/giao diện: setBookSearchError('')
     setBookSearchError('');
+    // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError('')
     setFormError('');
   }, [chapter]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { const query = bookSearch.trim(); if (chapter || selectedBook |
   useEffect(() => {
+    // Biến query nhận giá trị từ bookSearch.trim(). const không gán lại; let có thể cập nhật.
     const query = bookSearch.trim();
+    // if chỉ chạy nhánh này khi điều kiện chapter || selectedBook || query.length < 2 đúng.
     if (chapter || selectedBook || query.length < 2) {
+      // Gọi/thực thi setBookResults với đối số để cập nhật logic/giao diện: setBookResults([])
       setBookResults([]);
+      // Gọi/thực thi setSearchingBooks với đối số để cập nhật logic/giao diện: setSearchingBooks(false)
       setSearchingBooks(false);
+      // Gọi/thực thi setBookSearchError với đối số để cập nhật logic/giao diện: setBookSearchError('')
       setBookSearchError('');
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
 
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    // Biến timeout nhận giá trị từ window.setTimeout(async () => { setSearchingBooks(true). const không gán lại; let có thể cập nhật.
     const timeout = window.setTimeout(async () => {
+      // Gọi/thực thi setSearchingBooks với đối số để cập nhật logic/giao diện: setSearchingBooks(true)
       setSearchingBooks(true);
+      // Gọi/thực thi setBookSearchError với đối số để cập nhật logic/giao diện: setBookSearchError('')
       setBookSearchError('');
+      // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
       try {
+        // Biến result nhận giá trị từ await fetchBooks({ page: 1, limit: 10, search: query }). const không gán lại; let có thể cập nhật.
         const result = await fetchBooks({ page: 1, limit: 10, search: query });
+        // if chỉ chạy nhánh này khi điều kiện active đúng.
         if (active) setBookResults(result.books);
       } catch (error) {
+        // if chỉ chạy nhánh này khi điều kiện active đúng.
         if (active) setBookSearchError(errorMessage(error));
       } finally {
+        // if chỉ chạy nhánh này khi điều kiện active đúng.
         if (active) setSearchingBooks(false);
       }
     }, 250);
 
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; window.clearTimeout(timeout); }.
     return () => {
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: active = false
       active = false;
+      // Gọi/thực thi window.clearTimeout với đối số để cập nhật logic/giao diện: window.clearTimeout(timeout)
       window.clearTimeout(timeout);
     };
   }, [bookSearch, chapter, selectedBook]);
 
   // Hàm selectBook: Chọn một đầu sách làm cha cho chương mới.
+  /**
+   * Hàm/thành phần selectBook: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: book.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSelectedBook, setBookSearch, setBookResults, setBookSearchError.
+   */
   function selectBook(book: Book) {
+    // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(book)
     setSelectedBook(book);
+    // Gọi/thực thi setBookSearch với đối số để cập nhật logic/giao diện: setBookSearch(book.title)
     setBookSearch(book.title);
+    // Gọi/thực thi setBookResults với đối số để cập nhật logic/giao diện: setBookResults([])
     setBookResults([]);
+    // Gọi/thực thi setBookSearchError với đối số để cập nhật logic/giao diện: setBookSearchError('')
     setBookSearchError('');
   }
 
   // Hàm submitForm: Kiểm tra sách cha, chuẩn hóa dữ liệu và gửi payload theo chế độ tạo hoặc cập nhật.
+  /**
+   * Hàm/thành phần submitForm: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setFormError, trim, Date, toISOString, onSave.
+   * Được tham chiếu tại: admin-web/src/components/BookModal.tsx.
+   */
   async function submitForm(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError('')
     setFormError('');
+    // if chỉ chạy nhánh này khi điều kiện !chapter && !selectedBook đúng.
     if (!chapter && !selectedBook) {
+      // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError('Hãy tìm và chọn đầu sách chứa chương này.')
       setFormError('Hãy tìm và chọn đầu sách chứa chương này.');
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
 
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến chapterFields nhận giá trị từ { title: title.trim(), content, chapter_number: chapter. const không gán lại; let có thể cập nhật.
       const chapterFields: ChapterUpdatePayload = {
         title: title.trim(),
         content,
@@ -107,16 +203,20 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
         access_level: accessLevel,
         published_at: new Date(publishedAt).toISOString(),
       };
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await onSave(chapter ? chapterFields : { ...chapterFields, book_id: selectedBook
       await onSave(chapter
         ? chapterFields
         : { ...chapterFields, book_id: selectedBook?._id ?? selectedBook?.id ?? '' });
     } catch (error) {
+      // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError(error instanceof Error ? error.message : 'Không thể lưu thông tin c
       setFormError(error instanceof Error ? error.message : 'Không thể lưu thông tin chương.');
     }
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="modal-backdrop" onMouseDown={(event) => { if (event.target ===.
   return (
     <div className="modal-backdrop" onMouseDown={(event) => {
+      // if chỉ chạy nhánh này khi điều kiện event.target === event.currentTarget && !saving đúng.
       if (event.target === event.currentTarget && !saving) onClose();
     }} role="presentation">
       <section aria-labelledby="chapter-modal-title" aria-modal="true" className="modal-panel" role="dialog">
@@ -155,7 +255,9 @@ export function ChapterModal({ chapter, saving, onClose, onSave }: {
                     aria-expanded={bookResults.length > 0}
                     className="form-input pl-10"
                     onChange={(event) => {
+                      // Gọi/thực thi setBookSearch với đối số để cập nhật logic/giao diện: setBookSearch(event.target.value)
                       setBookSearch(event.target.value);
+                      // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(null)
                       setSelectedBook(null);
                     }}
                     placeholder="Nhập ít nhất 2 ký tự tên sách..."

@@ -1,0 +1,3900 @@
+[
+  {
+    "id": "6ae342c50b925fad3af20278",
+    "title": "A History of Science — Volume 1",
+    "author": "Williams, Henry Smith",
+    "candidate": {
+      "title": "A History of Science Volume 1",
+      "authors": [
+        "Henry Smith Williams M.D. LL.D."
+      ],
+      "coverId": 2890646,
+      "editionCount": 2,
+      "year": 2007,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8643340W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33f82fbddcbf17334155c",
+    "title": "A Message to Garcia Being a Preachment",
+    "author": "Hubbard, Elbert",
+    "candidate": {
+      "title": "A Message to Garcia: Being a Preachment",
+      "authors": [
+        "Elbert Hubbard"
+      ],
+      "coverId": 9804858,
+      "editionCount": 1,
+      "year": 1908,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL13097769W"
+    },
+    "alternates": [
+      {
+        "title": "A Message to Garcia; Being a Preachment",
+        "authors": [
+          "Elbert Hubbard",
+          "H H Fmo Charles",
+          "F Ins Bacon"
+        ],
+        "coverId": 11115034,
+        "editionCount": 1,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 0.6666666666666666,
+        "score": 0.8833333333333333,
+        "work": "/works/OL24495580W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33637af86dcd994c39156",
+    "title": "A Tale of Two Cities",
+    "author": "Dickens, Charles",
+    "candidate": {
+      "title": "A Tale of Two Cities",
+      "authors": [
+        "Charles Dickens"
+      ],
+      "coverId": 13301713,
+      "editionCount": 2059,
+      "year": 1800,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8193465W"
+    },
+    "alternates": [
+      {
+        "title": "A Tale Of Two Cities",
+        "authors": [
+          "Charles Dickens"
+        ],
+        "coverId": 15048753,
+        "editionCount": 8,
+        "year": 1946,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL43318590W"
+      },
+      {
+        "title": "A Tale of Two Cities [adaptation]",
+        "authors": [
+          "Charles Dickens"
+        ],
+        "coverId": 8324921,
+        "editionCount": 1,
+        "year": 1992,
+        "titleScore": 0.875,
+        "authorScore": 1,
+        "score": 0.91875,
+        "work": "/works/OL14869647W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c4cab5eff076c11802f",
+    "title": "A Unique Story of a Marvellous Career: Life of Hon. Phineas T. Barnum",
+    "author": "Benton, Joel",
+    "candidate": {
+      "title": "A Unique Story of a Marvellous Career. Life of Hon. Phineas T. Barnum",
+      "authors": [
+        "Joel Benton"
+      ],
+      "coverId": 2837773,
+      "editionCount": 1,
+      "year": 2007,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL6673138W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33f86fbddcbf173341561",
+    "title": "Acres of Diamonds",
+    "author": "Conwell, Russell H.",
+    "candidate": {
+      "title": "Acres of Diamonds",
+      "authors": [
+        "Russell Herman Conwell"
+      ],
+      "coverId": 879931,
+      "editionCount": 1,
+      "year": 2006,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL8902443M"
+    },
+    "alternates": [
+      {
+        "title": "Acres of Diamonds",
+        "authors": [
+          "Gregory A. Dixon",
+          "Russell Herman Conwell"
+        ],
+        "coverId": 1714794,
+        "editionCount": 1,
+        "year": 2005,
+        "titleScore": 1,
+        "authorScore": 0.7,
+        "score": 0.895,
+        "work": "/works/OL8581642M"
+      },
+      {
+        "title": "Acres of Diamonds",
+        "authors": [
+          "Gregory A. Dixon",
+          "Russell Herman Conwell"
+        ],
+        "coverId": 1714795,
+        "editionCount": 1,
+        "year": 2005,
+        "titleScore": 1,
+        "authorScore": 0.7,
+        "score": 0.895,
+        "work": "/works/OL8581643M"
+      }
+    ]
+  },
+  {
+    "id": "6ae341d2d02ec1db04c962ca",
+    "title": "Aeroplanes",
+    "author": "Zerbe, James Slough",
+    "candidate": {
+      "title": "Aeroplanes",
+      "authors": [
+        "James Slough Zerbe"
+      ],
+      "coverId": 2890222,
+      "editionCount": 5,
+      "year": 1915,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL200069W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33657af86dcd994c3980d",
+    "title": "Alice's Adventures in Wonderland",
+    "author": "Carroll, Lewis",
+    "candidate": {
+      "title": "Alice's Adventures in Wonderland",
+      "authors": [
+        "Lewis Carroll"
+      ],
+      "coverId": 10527843,
+      "editionCount": 3548,
+      "year": 1865,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL138052W"
+    },
+    "alternates": [
+      {
+        "title": "Alice's Adventures in Wonderland / Through the Looking Glass",
+        "authors": [
+          "Lewis Carroll"
+        ],
+        "coverId": 8595966,
+        "editionCount": 545,
+        "year": 1889,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL151411W"
+      },
+      {
+        "title": "Alice's Adventures in Wonderland [adaptation]",
+        "authors": [
+          "Jennifer Bassett",
+          "Lewis Carroll"
+        ],
+        "coverId": 1123322,
+        "editionCount": 3,
+        "year": 1995,
+        "titleScore": 0.875,
+        "authorScore": 0.75,
+        "score": 0.8312499999999999,
+        "work": "/works/OL8000394W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335f1af86dcd994c385f6",
+    "title": "An Inquiry into the Nature and Causes of the Wealth of Nations",
+    "author": "Smith, Adam",
+    "candidate": {
+      "title": "An inquiry into the nature and causes of the wealth of nations",
+      "authors": [
+        "Adam Smith"
+      ],
+      "coverId": 8748441,
+      "editionCount": 46,
+      "year": 1784,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL20073866W"
+    },
+    "alternates": [
+      {
+        "title": "An inquiry into the nature and causes of the wealth of nations",
+        "authors": [
+          "Adam Smith"
+        ],
+        "coverId": 14541405,
+        "editionCount": 9,
+        "year": 1776,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL33156840W"
+      },
+      {
+        "title": "An Inquiry Into the Nature and Causes of the Wealth of Nations; Volume 2",
+        "authors": [
+          "Adam Smith"
+        ],
+        "coverId": 10938500,
+        "editionCount": 9,
+        "year": 2015,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24399364W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33602af86dcd994c3898a",
+    "title": "An Iron Will",
+    "author": "Marden, Orison Swett",
+    "candidate": {
+      "title": "An Iron Will",
+      "authors": [
+        "Orison Swett Marden"
+      ],
+      "coverId": 1991074,
+      "editionCount": 7,
+      "year": 2003,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8519605W"
+    },
+    "alternates": [
+      {
+        "title": "An Iron Will",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 9061987,
+        "editionCount": 2,
+        "year": 2009,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL14993431W"
+      },
+      {
+        "title": "An Iron Will",
+        "authors": [
+          "Orison Swett Marden",
+          "Abner Bayley"
+        ],
+        "coverId": 1654539,
+        "editionCount": 1,
+        "year": 1996,
+        "titleScore": 1,
+        "authorScore": 0.8,
+        "score": 0.9299999999999999,
+        "work": "/works/OL38071625W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341e7d02ec1db04c963ea",
+    "title": "Andersen's Fairy Tales",
+    "author": "Andersen, H. C. (Hans Christian)",
+    "candidate": {
+      "title": "Andersen's Fairy Tales",
+      "authors": [
+        "Hans Christian Andersen"
+      ],
+      "coverId": 288820,
+      "editionCount": 2,
+      "year": 1973,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24328W"
+    },
+    "alternates": [
+      {
+        "title": "Hans Andersen's Fairy Tales",
+        "authors": [
+          "Hans Christian Andersen"
+        ],
+        "coverId": 320591,
+        "editionCount": 298,
+        "year": 1846,
+        "titleScore": 0.875,
+        "authorScore": 1,
+        "score": 0.91875,
+        "work": "/works/OL16249171W"
+      },
+      {
+        "title": "Fairy tales from Hans Andersen",
+        "authors": [
+          "Hans Christian Andersen"
+        ],
+        "coverId": 1122772,
+        "editionCount": 4,
+        "year": 1908,
+        "titleScore": 0.875,
+        "authorScore": 1,
+        "score": 0.91875,
+        "work": "/works/OL25483W"
+      }
+    ]
+  },
+  {
+    "id": "6ae343fd9fd8fa11a25dc8bf",
+    "title": "Architects of Fate; Or, Steps to Success and Power",
+    "author": "Marden, Orison Swett",
+    "candidate": {
+      "title": "Architects of Fate Or Steps to Success and Power",
+      "authors": [
+        "Orison Swett Marden"
+      ],
+      "coverId": 2901510,
+      "editionCount": 2,
+      "year": 2007,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL9786929W"
+    },
+    "alternates": [
+      {
+        "title": "Architects of fate, or, Steps to success and power",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 6474682,
+        "editionCount": 2,
+        "year": 1897,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL2342812W"
+      },
+      {
+        "title": "Architects of Fate or Steps to Success and Power",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 1449995,
+        "editionCount": 1,
+        "year": 2003,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8519049W"
+      }
+    ]
+  },
+  {
+    "id": "6ae342b40b925fad3af20149",
+    "title": "As a Matter of Course",
+    "author": "Call, Annie Payson",
+    "candidate": {
+      "title": "As A Matter Of Course",
+      "authors": [
+        "Annie Payson Call"
+      ],
+      "coverId": 5608852,
+      "editionCount": 13,
+      "year": 1894,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL7711728W"
+    },
+    "alternates": [
+      {
+        "title": "As A Matter Of Course",
+        "authors": [
+          "Payson Annie Call"
+        ],
+        "coverId": 1849258,
+        "editionCount": 2,
+        "year": 2006,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8810433W"
+      },
+      {
+        "title": "As a matter of course",
+        "authors": [
+          "Annie Payson Call"
+        ],
+        "coverId": 7115608,
+        "editionCount": 1,
+        "year": 1901,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL16620953W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f7ffbddcbf173341555",
+    "title": "As a man thinketh",
+    "author": "Allen, James",
+    "candidate": {
+      "title": "As a Man Thinketh",
+      "authors": [
+        "James Allen"
+      ],
+      "coverId": 6268048,
+      "editionCount": 658,
+      "year": 1902,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL43024W"
+    },
+    "alternates": [
+      {
+        "title": "As a man thinketh",
+        "authors": [
+          "James Allen"
+        ],
+        "coverId": 8005782,
+        "editionCount": 1,
+        "year": 1993,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17728089W"
+      },
+      {
+        "title": "As a Man Thinketh",
+        "authors": [
+          "James Allen"
+        ],
+        "coverId": 15216410,
+        "editionCount": 1,
+        "year": 2025,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL45267348W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fb9fbddcbf17334179f",
+    "title": "Autobiography and Selected Essays",
+    "author": "Huxley, Thomas Henry",
+    "candidate": {
+      "title": "Autobiography and Selected Essays",
+      "authors": [
+        "Thomas Henry Huxley"
+      ],
+      "coverId": 2837796,
+      "editionCount": 10,
+      "year": 1909,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1102944W"
+    },
+    "alternates": [
+      {
+        "title": "Autobiography and Selected Essays",
+        "authors": [
+          "Thomas Henry Huxley"
+        ],
+        "coverId": 2846847,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8811190W"
+      }
+    ]
+  },
+  {
+    "id": "6ae343458afd996f5c9fef22",
+    "title": "Bulfinch's Mythology: The Age of Fable",
+    "author": "Bulfinch, Thomas",
+    "candidate": {
+      "title": "Bulfinch's Mythology : The Age of Fable",
+      "authors": [
+        "Thomas Bulfinch"
+      ],
+      "coverId": 12096443,
+      "editionCount": 1,
+      "year": 2017,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL26141011W"
+    },
+    "alternates": [
+      {
+        "title": "Bulfinch's Mythology - The Age of Fable",
+        "authors": [
+          "Thomas Bulfinch"
+        ],
+        "coverId": 6430151,
+        "editionCount": 1,
+        "year": 2005,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL15172575W"
+      },
+      {
+        "title": "Bulfinch's Mythology (The Age of Fable / The Age of Chivalry / Legends of Charlemagne)",
+        "authors": [
+          "Thomas Bulfinch"
+        ],
+        "coverId": 7212732,
+        "editionCount": 57,
+        "year": 1867,
+        "titleScore": 0.7857142857142857,
+        "authorScore": 1,
+        "score": 0.8607142857142857,
+        "work": "/works/OL77565W"
+      }
+    ]
+  },
+  {
+    "id": "6ae342ab0b925fad3af200e7",
+    "title": "Captains of Industry; or, Men of Business Who Did Something Besides Making Money",
+    "author": "Parton, James",
+    "candidate": {
+      "title": "Captains of Industry Or Men of Business Who Did Something Besides Making Money",
+      "authors": [
+        "James Parton"
+      ],
+      "coverId": 2848186,
+      "editionCount": 4,
+      "year": 1893,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL253283W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae343ec9fd8fa11a25dc809",
+    "title": "Character",
+    "author": "Smiles, Samuel",
+    "candidate": {
+      "title": "Character",
+      "authors": [
+        "Samuel Smiles"
+      ],
+      "coverId": 5779636,
+      "editionCount": 19,
+      "year": 1800,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL2321831W"
+    },
+    "alternates": [
+      {
+        "title": "Character",
+        "authors": [
+          "Samuel Smiles"
+        ],
+        "coverId": 8423161,
+        "editionCount": 1,
+        "year": 1917,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19142087W"
+      },
+      {
+        "title": "Character",
+        "authors": [
+          "Samuel Smiles"
+        ],
+        "coverId": 14926867,
+        "editionCount": 3,
+        "year": 1800,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL40281814W"
+      }
+    ]
+  },
+  {
+    "id": "6ae23381028d6d8ba1d84d45",
+    "title": "Chút phận linh đinh",
+    "author": "Hồ Biểu Chánh",
+    "already": true
+  },
+  {
+    "id": "6ae22c0f68c80621d2d21029",
+    "title": "Con nhà nghèo",
+    "author": "Hồ Biểu Chánh",
+    "already": true
+  },
+  {
+    "id": "6ae33c72ab5eff076c1181fd",
+    "title": "Criminal Sociology",
+    "author": "Ferri, Enrico",
+    "candidate": {
+      "title": "Criminal Sociology",
+      "authors": [
+        "Enrico Ferri"
+      ],
+      "coverId": 1844113,
+      "editionCount": 18,
+      "year": 1895,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL3857649W"
+    },
+    "alternates": [
+      {
+        "title": "Criminal sociology",
+        "authors": [
+          "Ferri, Enrico"
+        ],
+        "coverId": 5816496,
+        "editionCount": 13,
+        "year": 1896,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL2293818W"
+      },
+      {
+        "title": "Criminal sociology",
+        "authors": [
+          "Ferri, Enrico"
+        ],
+        "coverId": 7904434,
+        "editionCount": 1,
+        "year": 1898,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17628252W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33616af86dcd994c38be5",
+    "title": "Fact and Fable in Psychology",
+    "author": "Jastrow, Joseph",
+    "candidate": {
+      "title": "Fact and fable in psychology",
+      "authors": [
+        "Joseph Jastrow"
+      ],
+      "coverId": 5908007,
+      "editionCount": 7,
+      "year": 1900,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL3705055W"
+    },
+    "alternates": [
+      {
+        "title": "Fact and fable in psychology",
+        "authors": [
+          "Joseph Jastrow"
+        ],
+        "coverId": 6999242,
+        "editionCount": 2,
+        "year": 1901,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL15436734W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fb0fbddcbf173341715",
+    "title": "Faraday as a Discoverer",
+    "author": "Tyndall, John",
+    "candidate": {
+      "title": "Faraday as a discoverer",
+      "authors": [
+        "John Tyndall"
+      ],
+      "coverId": 5571507,
+      "editionCount": 16,
+      "year": 1868,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1523353W"
+    },
+    "alternates": [
+      {
+        "title": "Faraday As a Discoverer",
+        "authors": [
+          "John Tyndall"
+        ],
+        "coverId": 2837797,
+        "editionCount": 9,
+        "year": 1894,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL6950238W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33cacab5eff076c118430",
+    "title": "Flower Fables",
+    "author": "Alcott, Louisa May",
+    "candidate": {
+      "title": "Flower Fables",
+      "authors": [
+        "Louisa May Alcott"
+      ],
+      "coverId": 755980,
+      "editionCount": 448,
+      "year": 1854,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL30056W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33633af86dcd994c390ec",
+    "title": "Frankenstein; or, The modern Prometheus",
+    "author": "Shelley, Mary Wollstonecraft",
+    "candidate": {
+      "title": "Frankenstein; or, The Modern Prometheus",
+      "authors": [
+        "Mary Shelley"
+      ],
+      "coverId": 12356249,
+      "editionCount": 2187,
+      "year": 1818,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL450063W"
+    },
+    "alternates": [
+      {
+        "title": "Frankenstein or the Modern Prometheus",
+        "authors": [
+          "Mary Shelley"
+        ],
+        "coverId": 13775547,
+        "editionCount": 4,
+        "year": 1972,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL34949767W"
+      },
+      {
+        "title": "Frankenstein or The Modern Prometheus",
+        "authors": [
+          "Mary Shelley"
+        ],
+        "coverId": 12108976,
+        "editionCount": 1,
+        "year": 2019,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL26150918W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c93ab5eff076c118366",
+    "title": "Glaucus; Or, The Wonders of the Shore",
+    "author": "Kingsley, Charles",
+    "candidate": {
+      "title": "Glaucus, or, The wonders of the shore",
+      "authors": [
+        "Charles Kingsley"
+      ],
+      "coverId": 6136650,
+      "editionCount": 16,
+      "year": 1855,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1130064W"
+    },
+    "alternates": [
+      {
+        "title": "Glaucus, or, the Wonders of the Shore",
+        "authors": [
+          "Charles Kingsley"
+        ],
+        "coverId": 14705445,
+        "editionCount": 2,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL28540283W"
+      },
+      {
+        "title": "Glaucus or Wonders of the Shore",
+        "authors": [
+          "Charles Kingsley"
+        ],
+        "coverId": 2745967,
+        "editionCount": 1,
+        "year": 2002,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL1129855W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3363faf86dcd994c39366",
+    "title": "Great Expectations",
+    "author": "Dickens, Charles",
+    "candidate": {
+      "title": "Great Expectations",
+      "authors": [
+        "Charles Dickens"
+      ],
+      "coverId": 13322313,
+      "editionCount": 1489,
+      "year": 1861,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8721462W"
+    },
+    "alternates": [
+      {
+        "title": "Great Expectations [adaptation]",
+        "authors": [
+          "Rick Geary",
+          "Charles Dickens"
+        ],
+        "coverId": 7097513,
+        "editionCount": 5,
+        "year": 1990,
+        "titleScore": 0.8333333333333333,
+        "authorScore": 0.75,
+        "score": 0.8041666666666666,
+        "work": "/works/OL526364W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341a5d02ec1db04c96071",
+    "title": "Great Fortunes, and How They Were Made",
+    "author": "McCabe, James Dabney",
+    "candidate": {
+      "title": "Great fortunes and how they were made",
+      "authors": [
+        "James Dabney McCabe"
+      ],
+      "coverId": 4754245,
+      "editionCount": 3,
+      "year": 1871,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL4887019W"
+    },
+    "alternates": [
+      {
+        "title": "Great Fortunes and How They Were Made",
+        "authors": [
+          "James Dabney McCabe Jr."
+        ],
+        "coverId": 2842445,
+        "editionCount": 2,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL9786263W"
+      },
+      {
+        "title": "Great Fortunes, and how They Were Made: Or, The Struggles and Triumphs of Our Self-made Men",
+        "authors": [
+          "James Dabney McCabe"
+        ],
+        "coverId": 7045606,
+        "editionCount": 2,
+        "year": 1872,
+        "titleScore": 0.7727272727272727,
+        "authorScore": 1,
+        "score": 0.8522727272727273,
+        "work": "/works/OL8793453W"
+      }
+    ]
+  },
+  {
+    "id": "6ae342d30b925fad3af20304",
+    "title": "Grimms' Fairy Tales",
+    "author": "Grimm, Jacob",
+    "candidate": {
+      "title": "Grimms' Fairy Tales",
+      "authors": [
+        "Wilhelm Grimm",
+        "Jacob Grimm"
+      ],
+      "coverId": 14973757,
+      "editionCount": 9,
+      "year": 1945,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL30742009W"
+    },
+    "alternates": [
+      {
+        "title": "Grimms' fairy tales",
+        "authors": [
+          "Jacob Grimm",
+          "Wilhelm Grimm",
+          "Fritz Kredel"
+        ],
+        "coverId": 6507518,
+        "editionCount": 1,
+        "year": 1945,
+        "titleScore": 1,
+        "authorScore": 0.7,
+        "score": 0.895,
+        "work": "/works/OL15141288W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c97ab5eff076c118382",
+    "title": "History of the Conflict Between Religion and Science",
+    "author": "Draper, John William",
+    "candidate": {
+      "title": "History of the conflict between religion and science",
+      "authors": [
+        "John William Draper",
+        "Nicolás Salmerón y Alonso"
+      ],
+      "coverId": 5617753,
+      "editionCount": 94,
+      "year": 1874,
+      "titleScore": 1,
+      "authorScore": 0.75,
+      "score": 0.9125,
+      "work": "/works/OL1398327W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae342b80b925fad3af20158",
+    "title": "History of the Warfare of Science with Theology in Christendom",
+    "author": "White, Andrew Dickson",
+    "candidate": {
+      "title": "A history of the warfare of science with theology in Christendom",
+      "authors": [
+        "Andrew Dickson White"
+      ],
+      "coverId": 8242973,
+      "editionCount": 36,
+      "year": 1896,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1461765W"
+    },
+    "alternates": [
+      {
+        "title": "A History of the Warfare of Science With Theology in Christendom; Volume 2",
+        "authors": [
+          "Andrew Dickson White"
+        ],
+        "coverId": 11369964,
+        "editionCount": 5,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24670671W"
+      },
+      {
+        "title": "A history of the warfare of science with theology in Christendom",
+        "authors": [
+          "Andrew Dickson White"
+        ],
+        "coverId": 9811064,
+        "editionCount": 4,
+        "year": 1919,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19666146W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33604af86dcd994c38998",
+    "title": "How to Live on 24 Hours a Day",
+    "author": "Bennett, Arnold",
+    "candidate": {
+      "title": "How to live on 24 hours a day",
+      "authors": [
+        "Arnold Bennett"
+      ],
+      "coverId": 1760143,
+      "editionCount": 168,
+      "year": 1900,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL109213W"
+    },
+    "alternates": [
+      {
+        "title": "How to Live on 24 Hours a Day",
+        "authors": [
+          "Mxumu Mxama",
+          "Arnold Bennett"
+        ],
+        "coverId": 13813675,
+        "editionCount": 7,
+        "year": 2019,
+        "titleScore": 1,
+        "authorScore": 0.75,
+        "score": 0.9125,
+        "work": "/works/OL30051498W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33601af86dcd994c3895a",
+    "title": "How to Succeed; Or, Stepping-Stones to Fame and Fortune",
+    "author": "Marden, Orison Swett",
+    "candidate": {
+      "title": "How to Succeed Or Stepping-Stones to Fame and Fortune",
+      "authors": [
+        "Orison Swett Marden"
+      ],
+      "coverId": 2849103,
+      "editionCount": 2,
+      "year": 2007,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL9786930W"
+    },
+    "alternates": [
+      {
+        "title": "How to Succeed or Stepping Stones to Fame and Fortune",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 1447320,
+        "editionCount": 1,
+        "year": 2003,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8519238W"
+      },
+      {
+        "title": "How to Succeed; or Stepping Stones to Fame and Fortune",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 9061906,
+        "editionCount": 1,
+        "year": 2012,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL20395119W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341c8d02ec1db04c96267",
+    "title": "In Darkest England, and the Way Out",
+    "author": "Booth, William",
+    "candidate": {
+      "title": "In Darkest England and the Way Out",
+      "authors": [
+        "William Booth"
+      ],
+      "coverId": 2837689,
+      "editionCount": 13,
+      "year": 1890,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8542218W"
+    },
+    "alternates": [
+      {
+        "title": "In darkest England, and the way out",
+        "authors": [
+          "William Booth"
+        ],
+        "coverId": 5886049,
+        "editionCount": 9,
+        "year": 1890,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL6068920W"
+      },
+      {
+        "title": "In darkest England, and the way out",
+        "authors": [
+          "William Booth"
+        ],
+        "coverId": 7116192,
+        "editionCount": 1,
+        "year": 1890,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL16594512W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fa0fbddcbf173341692",
+    "title": "Indian Heroes and Great Chieftains",
+    "author": "Eastman, Charles A.",
+    "candidate": {
+      "title": "Indian Heroes and Great Chieftains",
+      "authors": [
+        "Charles A. Eastman"
+      ],
+      "coverId": 765600,
+      "editionCount": 28,
+      "year": 1994,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8080717W"
+    },
+    "alternates": [
+      {
+        "title": "Indian Heroes and Great Chieftains",
+        "authors": [
+          "Charles A Eastman"
+        ],
+        "coverId": 4813686,
+        "editionCount": 1,
+        "year": 2004,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8252911W"
+      },
+      {
+        "title": "Indian heroes and great chieftains",
+        "authors": [
+          "Charles A. Eastman"
+        ],
+        "coverId": 8599711,
+        "editionCount": 1,
+        "year": 1921,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19798594W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fa5fbddcbf1733416a9",
+    "title": "Industrial Biography: Iron Workers and Tool Makers",
+    "author": "Smiles, Samuel",
+    "candidate": {
+      "title": "Industrial Biography, Iron Workers and Tool Makers",
+      "authors": [
+        "Samuel Smiles"
+      ],
+      "coverId": 2837792,
+      "editionCount": 3,
+      "year": 1877,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL2321801W"
+    },
+    "alternates": [
+      {
+        "title": "Industrial Biography: Iron-workers and Tool-makers",
+        "authors": [
+          "Samuel Smiles"
+        ],
+        "coverId": 5995973,
+        "editionCount": 2,
+        "year": 1876,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL13084848W"
+      },
+      {
+        "title": "INDUSTRIAL BIOGRAPHY: IRON-WORKERS AND TOOL-MAKERS",
+        "authors": [
+          "Samuel Smiles"
+        ],
+        "coverId": 9983693,
+        "editionCount": 1,
+        "year": 1864,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL13158460W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f74fbddcbf173341514",
+    "title": "Industrial Progress and Human Economics",
+    "author": "Hartness, James",
+    "candidate": {
+      "title": "Industrial Progress and Human Economics",
+      "authors": [
+        "James Hartness"
+      ],
+      "coverId": 5153259,
+      "editionCount": 14,
+      "year": 1921,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8769175W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33642af86dcd994c393e0",
+    "title": "Jane Eyre: An Autobiography",
+    "author": "Brontë, Charlotte",
+    "candidate": {
+      "title": "Jane Eyre: An Autobiography",
+      "authors": [
+        "Charlotte Brontë"
+      ],
+      "coverId": 1737356,
+      "editionCount": 2,
+      "year": 2000,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL9167525W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33fa9fbddcbf173341701",
+    "title": "John Jacob Astor",
+    "author": "Hubbard, Elbert",
+    "candidate": {
+      "title": "John Jacob Astor",
+      "authors": [
+        "Elbert Hubbard"
+      ],
+      "coverId": 763126,
+      "editionCount": 1,
+      "year": 2004,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8471173M"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae232f4bac24cab2f9152f4",
+    "title": "Kẻ làm người chịu",
+    "author": "Hồ Biểu Chánh",
+    "already": true
+  },
+  {
+    "id": "6ae342d80b925fad3af20336",
+    "title": "Legends and Tales",
+    "author": "Harte, Bret",
+    "candidate": {
+      "title": "Legends and Tales",
+      "authors": [
+        "Bret Harte"
+      ],
+      "coverId": 2752626,
+      "editionCount": 1,
+      "year": 2007,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1127744W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae342ca0b925fad3af202af",
+    "title": "Legends of Babylon and Egypt in Relation to Hebrew Tradition",
+    "author": "King, L. W. (Leonard William)",
+    "candidate": {
+      "title": "Legends of Babylon and Egypt in Relation to Hebrew Tradition (Schweich Lectures)",
+      "authors": [
+        "Leonard William King"
+      ],
+      "coverId": 1999972,
+      "editionCount": 1,
+      "year": 2005,
+      "titleScore": 0.875,
+      "authorScore": 1,
+      "score": 0.91875,
+      "work": "/works/OL8080397W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33c87ab5eff076c1182dc",
+    "title": "Life on the Mississippi",
+    "author": "Twain, Mark",
+    "candidate": {
+      "title": "Life on the Mississippi",
+      "authors": [
+        "Mark Twain"
+      ],
+      "coverId": 9164717,
+      "editionCount": 157,
+      "year": 1883,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL53959W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33c56ab5eff076c1180ca",
+    "title": "Lombard Street: A Description of the Money Market",
+    "author": "Bagehot, Walter",
+    "candidate": {
+      "title": "Lombard Street A Description of the Money Market",
+      "authors": [
+        "Walter Bagehot"
+      ],
+      "coverId": 11281630,
+      "editionCount": 15,
+      "year": 1962,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24613125W"
+    },
+    "alternates": [
+      {
+        "title": "Lombard Street. A Description of the Money Market",
+        "authors": [
+          "Walter Bagehot"
+        ],
+        "coverId": 2037723,
+        "editionCount": 2,
+        "year": 1909,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL29278865W"
+      }
+    ]
+  },
+  {
+    "id": "6ae342c10b925fad3af2024f",
+    "title": "Madam How and Lady Why; Or, First Lessons in Earth Lore for Children",
+    "author": "Kingsley, Charles",
+    "candidate": {
+      "title": "Madam How and Lady Why, or, First lessons in earth lore for children",
+      "authors": [
+        "Charles Kingsley"
+      ],
+      "coverId": 6016967,
+      "editionCount": 8,
+      "year": 1880,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1130053W"
+    },
+    "alternates": [
+      {
+        "title": "Madame How and Lady Why; Or, First Lessons in Earth Lore for Children",
+        "authors": [
+          "Charles Kingsley"
+        ],
+        "coverId": 10900751,
+        "editionCount": 2,
+        "year": 2018,
+        "titleScore": 0.8888888888888888,
+        "authorScore": 1,
+        "score": 0.9277777777777777,
+        "work": "/works/OL24370968W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c7aab5eff076c118236",
+    "title": "Memoirs of Extraordinary Popular Delusions — Volume 1",
+    "author": "Mackay, Charles",
+    "candidate": {
+      "title": "Memoirs Of Extraordinary Popular Delusions; Volume 1",
+      "authors": [
+        "Mackay, Charles"
+      ],
+      "coverId": 11662442,
+      "editionCount": 2,
+      "year": 2018,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24836916W"
+    },
+    "alternates": [
+      {
+        "title": "Memoirs of Extraordinary Popular Delusions and the Madness of Crowds, Volumes 1-2",
+        "authors": [
+          "Mackay, Charles"
+        ],
+        "coverId": 11974701,
+        "editionCount": 1,
+        "year": 2015,
+        "titleScore": 0.7857142857142857,
+        "authorScore": 1,
+        "score": 0.8607142857142857,
+        "work": "/works/OL25139870W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f8afbddcbf17334156c",
+    "title": "Memoirs of Extraordinary Popular Delusions — Volume 2",
+    "author": "Mackay, Charles",
+    "candidate": {
+      "title": "Memoirs of Extraordinary Popular Delusions and the Madness of Crowds, Volumes 1-2",
+      "authors": [
+        "Mackay, Charles"
+      ],
+      "coverId": 11974701,
+      "editionCount": 1,
+      "year": 2015,
+      "titleScore": 0.7857142857142857,
+      "authorScore": 1,
+      "score": 0.8607142857142857,
+      "work": "/works/OL25139870W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae344039fd8fa11a25dc8fb",
+    "title": "Mental Efficiency, and Other Hints to Men and Women",
+    "author": "Bennett, Arnold",
+    "candidate": {
+      "title": "Mental efficiency, and other hints to men and women",
+      "authors": [
+        "Arnold Bennett"
+      ],
+      "coverId": 6538729,
+      "editionCount": 2,
+      "year": 1911,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL16763349W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae3364daf86dcd994c39679",
+    "title": "Metamorphosis",
+    "author": "Kafka, Franz",
+    "candidate": {
+      "title": "Metamorphosis",
+      "authors": [
+        "Franz Kafka"
+      ],
+      "coverId": 12820198,
+      "editionCount": 957,
+      "year": 1915,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL498556W"
+    },
+    "alternates": [
+      {
+        "title": "Metamorphosis",
+        "authors": [
+          "Franz Kafka"
+        ],
+        "coverId": 12195215,
+        "editionCount": 1,
+        "year": 2013,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL26200795W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3364baf86dcd994c395ab",
+    "title": "Middlemarch",
+    "author": "Eliot, George",
+    "candidate": {
+      "title": "Middlemarch",
+      "authors": [
+        "George Eliot"
+      ],
+      "coverId": 252882,
+      "editionCount": 331,
+      "year": 1800,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL20867W"
+    },
+    "alternates": [
+      {
+        "title": "Middlemarch",
+        "authors": [
+          "George Eliot"
+        ],
+        "coverId": 13995808,
+        "editionCount": 15,
+        "year": 1964,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL30272167W"
+      },
+      {
+        "title": "Middlemarch",
+        "authors": [
+          "George Eliot"
+        ],
+        "coverId": 13163629,
+        "editionCount": 16,
+        "year": 2017,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL29701998W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33631af86dcd994c3902e",
+    "title": "Moby Dick; Or, The Whale",
+    "author": "Melville, Herman",
+    "candidate": {
+      "title": "Moby Dick or The White Whale",
+      "authors": [
+        "Herman Melville"
+      ],
+      "coverId": 15018616,
+      "editionCount": 7,
+      "year": 1910,
+      "titleScore": 0.875,
+      "authorScore": 1,
+      "score": 0.91875,
+      "work": "/works/OL36417598W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33c82ab5eff076c118288",
+    "title": "My Bondage and My Freedom",
+    "author": "Douglass, Frederick",
+    "candidate": {
+      "title": "My bondage and my freedom",
+      "authors": [
+        "Frederick Douglass"
+      ],
+      "coverId": 14847114,
+      "editionCount": 509,
+      "year": 1815,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL69179W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae335f5af86dcd994c3872f",
+    "title": "My Life and Work",
+    "author": "Ford, Henry",
+    "candidate": {
+      "title": "My Life and Work",
+      "authors": [
+        "Henry Ford Jr."
+      ],
+      "coverId": 9112846,
+      "editionCount": 1,
+      "year": 2010,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL20446789W"
+    },
+    "alternates": [
+      {
+        "title": "My Life and Work",
+        "authors": [
+          "Henry Ford"
+        ],
+        "coverId": 15218021,
+        "editionCount": 1,
+        "year": 2017,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL45325362W"
+      },
+      {
+        "title": "My Life and Work",
+        "authors": [
+          "Henry Jones Ford"
+        ],
+        "coverId": 4813399,
+        "editionCount": 1,
+        "year": 2004,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL1797776W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341e3d02ec1db04c963be",
+    "title": "Myths and Myth-Makers Old Tales and Superstitions Interpreted by Comparative Mythology",
+    "author": "Fiske, John",
+    "candidate": {
+      "title": "Myths and Myth Makers- Old tales and superstitions interpreted by comparative mythology",
+      "authors": [
+        "John Fiske"
+      ],
+      "coverId": 1446640,
+      "editionCount": 1,
+      "year": 1942,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL2988994W"
+    },
+    "alternates": [
+      {
+        "title": "Myths and Myth-makers: Old Tales and Superstitions Interpreted by Comparative Mythology",
+        "authors": [
+          "John Fiske"
+        ],
+        "coverId": 9268746,
+        "editionCount": 2,
+        "year": 1873,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL13105633W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c7eab5eff076c11826d",
+    "title": "Narrative of the Life of Frederick Douglass, an American Slave",
+    "author": "Douglass, Frederick",
+    "candidate": {
+      "title": "Narrative of the Life of Frederick Douglass, an American Slave / Incidents in the Life of a Slave Girl",
+      "authors": [
+        "Harriet A. Jacobs",
+        "Frederick Douglass"
+      ],
+      "coverId": 14812069,
+      "editionCount": 5,
+      "year": 1960,
+      "titleScore": 0.875,
+      "authorScore": 0.75,
+      "score": 0.8312499999999999,
+      "work": "/works/OL8211661W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae341b7d02ec1db04c9615f",
+    "title": "Nerves and Common Sense",
+    "author": "Call, Annie Payson",
+    "candidate": {
+      "title": "Nerves and Common Sense",
+      "authors": [
+        "Annie Payson Call"
+      ],
+      "coverId": 6264042,
+      "editionCount": 13,
+      "year": 1909,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL7711729W"
+    },
+    "alternates": [
+      {
+        "title": "Nerves and Common Sense",
+        "authors": [
+          "Annie Payson Call"
+        ],
+        "coverId": 9005876,
+        "editionCount": 37,
+        "year": 2008,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL20341110W"
+      },
+      {
+        "title": "Nerves and common sense",
+        "authors": [
+          "Annie Payson Call"
+        ],
+        "coverId": 6543633,
+        "editionCount": 1,
+        "year": 1916,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL15355808W"
+      }
+    ]
+  },
+  {
+    "id": "6ae23221c9dc097387588361",
+    "title": "Nụ cười (Nam Cao)",
+    "author": "Nam Cao",
+    "already": true
+  },
+  {
+    "id": "6ae33cafab5eff076c118444",
+    "title": "Old Indian Legends",
+    "author": "Zitkala-Sa",
+    "candidate": {
+      "title": "Old Indian legends",
+      "authors": [
+        "Zitkála-Šá"
+      ],
+      "coverId": 5856917,
+      "editionCount": 67,
+      "year": 1901,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL5478556W"
+    },
+    "alternates": [
+      {
+        "title": "American Indian Stories and Old Indian Legends",
+        "authors": [
+          "Zitkála-Šá"
+        ],
+        "coverId": 12043770,
+        "editionCount": 4,
+        "year": 2014,
+        "titleScore": 0.8,
+        "authorScore": 1,
+        "score": 0.87,
+        "work": "/works/OL21074962W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fb4fbddcbf173341735",
+    "title": "On the Origin of Species By Means of Natural Selection Or, the Preservation of Favoured Races in the Struggle for Life",
+    "author": "Darwin, Charles",
+    "candidate": {
+      "title": "On the Origin of Species by Means of Natural Selection, or, The Preservation of Favoured Races in the Struggle for Life",
+      "authors": [
+        "Charles Darwin"
+      ],
+      "coverId": 11180877,
+      "editionCount": 3,
+      "year": 2018,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24541557W"
+    },
+    "alternates": [
+      {
+        "title": "On the Origin of Species by Means of Natural Selection, or the Preservation of Favoured Races in the Struggle for Life",
+        "authors": [
+          "Charles Darwin"
+        ],
+        "coverId": 12076032,
+        "editionCount": 2,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL26125625W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3362faf86dcd994c38fd3",
+    "title": "Pride and Prejudice",
+    "author": "Austen, Jane",
+    "candidate": {
+      "title": "Pride and Prejudice",
+      "authors": [
+        "Jane Austen"
+      ],
+      "coverId": 14348537,
+      "editionCount": 4042,
+      "year": 1813,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL66554W"
+    },
+    "alternates": [
+      {
+        "title": "Pride and Prejudice",
+        "authors": [
+          "Jane Austen"
+        ],
+        "coverId": 13148521,
+        "editionCount": 132,
+        "year": 1813,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL15165350W"
+      },
+      {
+        "title": "Pride and Prejudice [adaptation]",
+        "authors": [
+          "Jane Austen"
+        ],
+        "coverId": 8094315,
+        "editionCount": 1,
+        "year": 1984,
+        "titleScore": 0.8333333333333333,
+        "authorScore": 1,
+        "score": 0.8916666666666666,
+        "work": "/works/OL17737918W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341a0d02ec1db04c9604c",
+    "title": "Psychology and Industrial Efficiency",
+    "author": "Münsterberg, Hugo",
+    "candidate": {
+      "title": "Psychology and industrial efficiency",
+      "authors": [
+        "Hugo Münsterberg"
+      ],
+      "coverId": 5826439,
+      "editionCount": 10,
+      "year": 1913,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL36047W"
+    },
+    "alternates": [
+      {
+        "title": "Psychology and Industrial Efficiency",
+        "authors": [
+          "Hugo Munsterberg"
+        ],
+        "coverId": 6427142,
+        "editionCount": 4,
+        "year": 1913,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL15169483W"
+      },
+      {
+        "title": "Psychology and Industrial Efficiency",
+        "authors": [
+          "Hugo Münsterberg - undifferentiated"
+        ],
+        "coverId": 9082449,
+        "editionCount": 3,
+        "year": 2011,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL20414611W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33611af86dcd994c38b46",
+    "title": "Psychology: Briefer Course",
+    "author": "James, William",
+    "candidate": {
+      "title": "Psychology, briefer course",
+      "authors": [
+        "William James"
+      ],
+      "coverId": 413835,
+      "editionCount": 4,
+      "year": 1923,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1502035W"
+    },
+    "alternates": [
+      {
+        "title": "Psychology: the briefer course",
+        "authors": [
+          "William James"
+        ],
+        "coverId": 5815026,
+        "editionCount": 1,
+        "year": 1961,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL1502010W"
+      },
+      {
+        "title": "Psychology : briefer course",
+        "authors": [
+          "William James"
+        ],
+        "coverId": 7409655,
+        "editionCount": 1,
+        "year": 1904,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17331425W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335ffaf86dcd994c388b6",
+    "title": "Pushing to the Front",
+    "author": "Marden, Orison Swett",
+    "candidate": {
+      "title": "Pushing to the front",
+      "authors": [
+        "Orison Swett Marden"
+      ],
+      "coverId": 5821293,
+      "editionCount": 7,
+      "year": 1894,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL2342872W"
+    },
+    "alternates": [
+      {
+        "title": "Pushing to the Front",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 1654544,
+        "editionCount": 2,
+        "year": 1997,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8519578W"
+      },
+      {
+        "title": "Pushing to the Front",
+        "authors": [
+          "Orison Swett Marden"
+        ],
+        "coverId": 1991032,
+        "editionCount": 2,
+        "year": 1914,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8519577W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341a8d02ec1db04c96109",
+    "title": "Random Reminiscences of Men and Events",
+    "author": "Rockefeller, John D. (John Davison)",
+    "candidate": {
+      "title": "Random reminiscences of men and events",
+      "authors": [
+        "John D. Rockefeller"
+      ],
+      "coverId": 5381455,
+      "editionCount": 12,
+      "year": 1909,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL5355278W"
+    },
+    "alternates": [
+      {
+        "title": "Random Reminiscences of Men and Events",
+        "authors": [
+          "John D. Rockefeller"
+        ],
+        "coverId": 1759520,
+        "editionCount": 6,
+        "year": 1995,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL8084374W"
+      },
+      {
+        "title": "Random Reminiscences of Men and Events",
+        "authors": [
+          "John D. Rockefeller"
+        ],
+        "coverId": 1760073,
+        "editionCount": 1,
+        "year": 2006,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL9160076W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f9dfbddcbf17334166e",
+    "title": "Records of a Family of Engineers",
+    "author": "Stevenson, Robert Louis",
+    "candidate": {
+      "title": "Records of a Family of Engineers",
+      "authors": [
+        "Robert Louis Stevenson"
+      ],
+      "coverId": 1993632,
+      "editionCount": 10,
+      "year": 1912,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1833185W"
+    },
+    "alternates": [
+      {
+        "title": "Records Of A Family Of Engineers",
+        "authors": [
+          "Robert Louis Stevenson"
+        ],
+        "coverId": 4813533,
+        "editionCount": 3,
+        "year": 2004,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8776438W"
+      },
+      {
+        "title": "Memoir of Fleeming Jenkin ; Records of a family of engineers",
+        "authors": [
+          "Robert Louis Stevenson"
+        ],
+        "coverId": 1279224,
+        "editionCount": 4,
+        "year": 1909,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL24017W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3362daf86dcd994c38fbb",
+    "title": "Relativity: The Special and General Theory",
+    "author": "Einstein, Albert",
+    "candidate": {
+      "title": "Relativity : the Special and General Theory",
+      "authors": [
+        "Albert Einstein"
+      ],
+      "coverId": 10862312,
+      "editionCount": 6,
+      "year": 2004,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24339701W"
+    },
+    "alternates": [
+      {
+        "title": "Relativity: The Special and General Theory",
+        "authors": [
+          "Albert Einstein",
+          "Robert Lawson"
+        ],
+        "coverId": 6233018,
+        "editionCount": 5,
+        "year": 1920,
+        "titleScore": 1,
+        "authorScore": 0.75,
+        "score": 0.9125,
+        "work": "/works/OL13127756W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c65ab5eff076c11814d",
+    "title": "Self Help; with Illustrations of Conduct and Perseverance",
+    "author": "Smiles, Samuel",
+    "candidate": {
+      "title": "Self-help with illustrations of conduct and perseverance",
+      "authors": [
+        "Samuel Smiles"
+      ],
+      "coverId": 5891979,
+      "editionCount": 3,
+      "year": 1905,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL2321806W"
+    },
+    "alternates": [
+      {
+        "title": "Self Help with Illustrations of Character, Conduct and Perseverance",
+        "authors": [
+          "Samuel Smiles"
+        ],
+        "coverId": 1787753,
+        "editionCount": 3,
+        "year": 1882,
+        "titleScore": 0.9166666666666667,
+        "authorScore": 1,
+        "score": 0.9458333333333334,
+        "work": "/works/OL2321805W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f6dfbddcbf1733414ee",
+    "title": "Shop Management",
+    "author": "Taylor, Frederick Winslow",
+    "candidate": {
+      "title": "Shop Management",
+      "authors": [
+        "Frederick Winslow Taylor"
+      ],
+      "coverId": 1847030,
+      "editionCount": 21,
+      "year": 1903,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1866670W"
+    },
+    "alternates": [
+      {
+        "title": "Shop Management",
+        "authors": [
+          "Frederick Winslow Taylor"
+        ],
+        "coverId": 11232205,
+        "editionCount": 18,
+        "year": 2008,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24577444W"
+      },
+      {
+        "title": "Scientific Management, Comprising Shop Management",
+        "authors": [
+          "Frederick Winslow Taylor"
+        ],
+        "coverId": 13198328,
+        "editionCount": 2,
+        "year": 1947,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL1866667W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33635af86dcd994c39122",
+    "title": "The Adventures of Sherlock Holmes",
+    "author": "Doyle, Arthur Conan",
+    "candidate": {
+      "title": "The Adventures of Sherlock Holmes [12 stories]",
+      "authors": [
+        "Arthur Conan Doyle"
+      ],
+      "coverId": 6717853,
+      "editionCount": 1134,
+      "year": 1892,
+      "titleScore": 0.875,
+      "authorScore": 1,
+      "score": 0.91875,
+      "work": "/works/OL262421W"
+    },
+    "alternates": [
+      {
+        "title": "The final adventures of Sherlock Holmes. Completing the canon",
+        "authors": [
+          "Arthur Conan Doyle",
+          "Peter Haining"
+        ],
+        "coverId": 8352435,
+        "editionCount": 11,
+        "year": 1952,
+        "titleScore": 0.75,
+        "authorScore": 0.8,
+        "score": 0.7675000000000001,
+        "work": "/works/OL262440W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33608af86dcd994c389b2",
+    "title": "The Autobiography of Benjamin Franklin",
+    "author": "Franklin, Benjamin",
+    "candidate": {
+      "title": "The Autobiography of Benjamin Franklin",
+      "authors": [
+        "Benjamin Franklin"
+      ],
+      "coverId": 5647361,
+      "editionCount": 679,
+      "year": 1791,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL26492W"
+    },
+    "alternates": [
+      {
+        "title": "The Autobiography of Benjamin Franklin",
+        "authors": [
+          "Benjamin Franklin"
+        ],
+        "coverId": 14442542,
+        "editionCount": 5,
+        "year": 1918,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL33649384W"
+      },
+      {
+        "title": "The autobiography of Benjamin Franklin",
+        "authors": [
+          "Benjamin Franklin"
+        ],
+        "coverId": 11592174,
+        "editionCount": 2,
+        "year": 1937,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24814518W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fc1fbddcbf1733417ca",
+    "title": "The Blue Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Blue Fairy Book",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 10323665,
+      "editionCount": 752,
+      "year": 1889,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1088770W"
+    },
+    "alternates": [
+      {
+        "title": "Cinderella and other stories from The blue fairy book",
+        "authors": [
+          "Andrew Lang"
+        ],
+        "coverId": 312092,
+        "editionCount": 3,
+        "year": 1996,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL16553254W"
+      }
+    ]
+  },
+  {
+    "id": "6ae343418afd996f5c9feef3",
+    "title": "The Brown Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Brown Fairy Book",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 12025280,
+      "editionCount": 312,
+      "year": 1904,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1088779W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33624af86dcd994c38e5a",
+    "title": "The Chemical History of a Candle",
+    "author": "Faraday, Michael",
+    "candidate": {
+      "title": "The chemical history of a candle",
+      "authors": [
+        "Michael Faraday"
+      ],
+      "coverId": 6473543,
+      "editionCount": 46,
+      "year": 1894,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL15135728W"
+    },
+    "alternates": [
+      {
+        "title": "The chemical history of a candle",
+        "authors": [
+          "Michael Faraday"
+        ],
+        "coverId": 9469458,
+        "editionCount": 1,
+        "year": 2010,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL16974033W"
+      },
+      {
+        "title": "The Chemical History of a Candle (Michael Faraday)",
+        "authors": [
+          "Michael Faraday"
+        ],
+        "coverId": 2981284,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 0.8,
+        "authorScore": 1,
+        "score": 0.87,
+        "work": "/works/OL2008427W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3419bd02ec1db04c96005",
+    "title": "The Complete English Tradesman (1839 ed.)",
+    "author": "Defoe, Daniel",
+    "candidate": {
+      "title": "The Complete English Tradesman (1839 ed.)",
+      "authors": [
+        "Daniel Defoe"
+      ],
+      "coverId": 1759878,
+      "editionCount": 1,
+      "year": 2006,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL411491W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33652af86dcd994c396a1",
+    "title": "The Count of Monte Cristo",
+    "author": "Dumas, Alexandre",
+    "candidate": {
+      "title": "The Count of Monte-Cristo [3/5]",
+      "authors": [
+        "Alexandre Dumas"
+      ],
+      "coverId": 15267475,
+      "editionCount": 3,
+      "year": 1888,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL36277W"
+    },
+    "alternates": [
+      {
+        "title": "The Count of Monte Cristo",
+        "authors": [
+          "Alexandre Dumas"
+        ],
+        "coverId": 14937760,
+        "editionCount": 3,
+        "year": 1964,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL43161739W"
+      },
+      {
+        "title": "The Count of Monte Cristo",
+        "authors": [
+          "Alexandre Dumas"
+        ],
+        "coverId": 8851690,
+        "editionCount": 13,
+        "year": 1920,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL20201553W"
+      }
+    ]
+  },
+  {
+    "id": "6ae342ce0b925fad3af202d5",
+    "title": "The Crimson Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Crimson Fairy Book",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 7113496,
+      "editionCount": 510,
+      "year": 1903,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1088783W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae341acd02ec1db04c96121",
+    "title": "The Education of the Child",
+    "author": "Key, Ellen",
+    "candidate": {
+      "title": "The Education of the Child",
+      "authors": [
+        "Ellen Key",
+        "Adeline CHARNEAU"
+      ],
+      "coverId": 4813358,
+      "editionCount": 22,
+      "year": 1888,
+      "titleScore": 1,
+      "authorScore": 0.75,
+      "score": 0.9125,
+      "work": "/works/OL255350W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae3361aaf86dcd994c38c78",
+    "title": "The Expression of the Emotions in Man and Animals",
+    "author": "Darwin, Charles",
+    "candidate": {
+      "title": "The expression of emotions in man and animals",
+      "authors": [
+        "Charles Darwin"
+      ],
+      "coverId": 10708716,
+      "editionCount": 62,
+      "year": 1872,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL515301W"
+    },
+    "alternates": [
+      {
+        "title": "The Expression of the Emotions in Man and Animals",
+        "authors": [
+          "Charles Darwin"
+        ],
+        "coverId": 12082158,
+        "editionCount": 3,
+        "year": 1969,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL26130202W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33626af86dcd994c38e71",
+    "title": "The Formation of Vegetable Mould Through the Action of Worms With Observations on Their Habits",
+    "author": "Darwin, Charles",
+    "candidate": {
+      "title": "The formation of vegetable mould through the action of worms, with observations on their habits",
+      "authors": [
+        "Charles Darwin"
+      ],
+      "coverId": 4711509,
+      "editionCount": 11,
+      "year": 1881,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL515337W"
+    },
+    "alternates": [
+      {
+        "title": "The formation of vegetable mould, through the action of worms : with observations on their habits",
+        "authors": [
+          "Charles Darwin"
+        ],
+        "coverId": 7966291,
+        "editionCount": 1,
+        "year": 1881,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17692506W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341b3d02ec1db04c9614c",
+    "title": "The Freedom of Life",
+    "author": "Call, Annie Payson",
+    "candidate": {
+      "title": "The Freedom of Life",
+      "authors": [
+        "Annie Payson Call"
+      ],
+      "coverId": 10857731,
+      "editionCount": 19,
+      "year": 1905,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL7711731W"
+    },
+    "alternates": [
+      {
+        "title": "The Freedom of Life",
+        "authors": [
+          "Annie Payson Call"
+        ],
+        "coverId": 10930689,
+        "editionCount": 29,
+        "year": 2008,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24393650W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3364faf86dcd994c39687",
+    "title": "The Great Gatsby",
+    "author": "Fitzgerald, F. Scott (Francis Scott)",
+    "candidate": {
+      "title": "The Great Gatsby",
+      "authors": [
+        "F. Scott Fitzgerald"
+      ],
+      "coverId": 10590366,
+      "editionCount": 1181,
+      "year": 1920,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL468431W"
+    },
+    "alternates": [
+      {
+        "title": "The Great Gatsby",
+        "authors": [
+          "F. Scott Fitzgerald"
+        ],
+        "coverId": 13869870,
+        "editionCount": 4,
+        "year": 2004,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL34613639W"
+      },
+      {
+        "title": "THE GREAT GATSBY",
+        "authors": [
+          "F. Scott Fitzgerald"
+        ],
+        "coverId": 14972791,
+        "editionCount": 1,
+        "year": 1925,
+        "titleScore": 1,
+        "authorScore": 0.8333333333333333,
+        "score": 0.9416666666666667,
+        "work": "/works/OL43053311W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341e0d02ec1db04c9639b",
+    "title": "The Heroes; Or, Greek Fairy Tales for My Children",
+    "author": "Kingsley, Charles",
+    "candidate": {
+      "title": "The heroes, or, Greek fairy tales for my children",
+      "authors": [
+        "Charles Kingsley"
+      ],
+      "coverId": 5706349,
+      "editionCount": 18,
+      "year": 1856,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1130065W"
+    },
+    "alternates": [
+      {
+        "title": "The heroes, or, Greek fairy tales for my children",
+        "authors": [
+          "Charles Kingsley"
+        ],
+        "coverId": 7103533,
+        "editionCount": 1,
+        "year": 1884,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL16583934W"
+      },
+      {
+        "title": "The Heroes; Or, Greek Fairy Tales for My Children",
+        "authors": [
+          "Charles Kingsley"
+        ],
+        "coverId": 11505972,
+        "editionCount": 1,
+        "year": 2019,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24758142W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c8fab5eff076c11834d",
+    "title": "The History and Practice of the Art of Photography",
+    "author": "Snelling, Henry Hunt",
+    "candidate": {
+      "title": "The history and practice of the art of photography",
+      "authors": [
+        "Henry Hunt Snelling"
+      ],
+      "coverId": 14475398,
+      "editionCount": 11,
+      "year": 1849,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL10513352W"
+    },
+    "alternates": [
+      {
+        "title": "The history and practice of the art of photography",
+        "authors": [
+          "Henry Hunt Snelling"
+        ],
+        "coverId": 1760713,
+        "editionCount": 2,
+        "year": 1970,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL6909829W"
+      },
+      {
+        "title": "The history and practice of the art of photography",
+        "authors": [
+          "Henry Hunt Snelling"
+        ],
+        "coverId": 7439795,
+        "editionCount": 2,
+        "year": 1850,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17362233W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3361daf86dcd994c38cc5",
+    "title": "The History of England, from the Accession of James II — Volume 1",
+    "author": "Macaulay, Thomas Babington Macaulay, Baron",
+    "candidate": {
+      "title": "History of England from the Accession of James II; Volume 1",
+      "authors": [
+        "Thomas Babington Macaulay"
+      ],
+      "coverId": 14733356,
+      "editionCount": 2,
+      "year": 2022,
+      "titleScore": 1,
+      "authorScore": 0.875,
+      "score": 0.95625,
+      "work": "/works/OL34124869W"
+    },
+    "alternates": [
+      {
+        "title": "The History of England from the Accession of James II- Volume 1",
+        "authors": [
+          "Thomas Babington Macaulay"
+        ],
+        "coverId": 2895034,
+        "editionCount": 2,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 0.875,
+        "score": 0.95625,
+        "work": "/works/OL7981093W"
+      },
+      {
+        "title": "The History of England From the Accession of James II; Volume 1",
+        "authors": [
+          "Thomas Babington Macaulay"
+        ],
+        "coverId": 12022681,
+        "editionCount": 1,
+        "year": 2017,
+        "titleScore": 1,
+        "authorScore": 0.875,
+        "score": 0.95625,
+        "work": "/works/OL25420172W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33620af86dcd994c38d52",
+    "title": "The History of England, from the Accession of James II — Volume 2",
+    "author": "Macaulay, Thomas Babington Macaulay, Baron",
+    "candidate": {
+      "title": "The History of England, from the Accession of James II - (Volume 2, Chapter 06)",
+      "authors": [
+        "Thomas Babington Macaulay"
+      ],
+      "coverId": 14851713,
+      "editionCount": 1,
+      "year": 2007,
+      "titleScore": 0.9,
+      "authorScore": 0.875,
+      "score": 0.8912500000000001,
+      "work": "/works/OL42324043W"
+    },
+    "alternates": [
+      {
+        "title": "The History of England, from the Accession of James II - (Volume 2, Chapter 08)",
+        "authors": [
+          "Thomas Babington Macaulay"
+        ],
+        "coverId": 14832694,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 0.9,
+        "authorScore": 0.875,
+        "score": 0.8912500000000001,
+        "work": "/works/OL42324050W"
+      },
+      {
+        "title": "The History of England, from the Accession of James II - (Volume 2, Chapter 09)",
+        "authors": [
+          "Thomas Babington Macaulay"
+        ],
+        "coverId": 14832695,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 0.9,
+        "authorScore": 0.875,
+        "score": 0.8912500000000001,
+        "work": "/works/OL42324074W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335fbaf86dcd994c387ae",
+    "title": "The History of the Standard Oil Company",
+    "author": "Tarbell, Ida M. (Ida Minerva)",
+    "candidate": {
+      "title": "The history of the Standard Oil Company",
+      "authors": [
+        "Ida Minerva Tarbell"
+      ],
+      "coverId": 313809,
+      "editionCount": 21,
+      "year": 1904,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1100467W"
+    },
+    "alternates": [
+      {
+        "title": "The history of the Standard Oil Company",
+        "authors": [
+          "Ida Minerva Tarbell"
+        ],
+        "coverId": 9313992,
+        "editionCount": 2,
+        "year": 1937,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19666963W"
+      },
+      {
+        "title": "The History of the Standard Oil Company; Volume 1",
+        "authors": [
+          "Ida Minerva Tarbell"
+        ],
+        "coverId": 10909086,
+        "editionCount": 3,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24377419W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33ca4ab5eff076c1183ef",
+    "title": "The Legend of Sleepy Hollow",
+    "author": "Irving, Washington",
+    "candidate": {
+      "title": "The Legend of Sleepy Hollow",
+      "authors": [
+        "Washington Irving"
+      ],
+      "coverId": 8243083,
+      "editionCount": 1017,
+      "year": 1820,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL63985W"
+    },
+    "alternates": [
+      {
+        "title": "The legend of Sleepy Hollow",
+        "authors": [
+          "Washington Irving"
+        ],
+        "coverId": 8339426,
+        "editionCount": 1,
+        "year": 2001,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL18178211W"
+      },
+      {
+        "title": "The legend of Sleepy Hollow and other tales",
+        "authors": [
+          "Washington Irving"
+        ],
+        "coverId": 10669707,
+        "editionCount": 5,
+        "year": 1974,
+        "titleScore": 0.8,
+        "authorScore": 1,
+        "score": 0.87,
+        "work": "/works/OL63923W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3434a8afd996f5c9fef88",
+    "title": "The Lilac Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Lilac Fairy Book",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 5709196,
+      "editionCount": 325,
+      "year": 1910,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1088811W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33618af86dcd994c38c26",
+    "title": "The Mind and Its Education",
+    "author": "Betts, George Herbert",
+    "candidate": {
+      "title": "The mind and its education",
+      "authors": [
+        "Betts, George Herbert"
+      ],
+      "coverId": 5850120,
+      "editionCount": 8,
+      "year": 1906,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL6706461W"
+    },
+    "alternates": [
+      {
+        "title": "The Mind and its Education",
+        "authors": [
+          "George Herbert Betts"
+        ],
+        "coverId": 4618262,
+        "editionCount": 13,
+        "year": 1989,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL8078637W"
+      },
+      {
+        "title": "The Mind and Its Education",
+        "authors": [
+          "Herbert George Betts"
+        ],
+        "coverId": 2848260,
+        "editionCount": 2,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL9787141W"
+      }
+    ]
+  },
+  {
+    "id": "6ae3433c8afd996f5c9feec3",
+    "title": "The Orange Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Orange Fairy Book",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 13463493,
+      "editionCount": 504,
+      "year": 1906,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1088838W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33646af86dcd994c39499",
+    "title": "The Picture of Dorian Gray",
+    "author": "Wilde, Oscar",
+    "candidate": {
+      "title": "The Picture of Dorian Gray",
+      "authors": [
+        "Oscar Wilde"
+      ],
+      "coverId": 14314858,
+      "editionCount": 3013,
+      "year": 1890,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL8193416W"
+    },
+    "alternates": [
+      {
+        "title": "The Picture of Dorian Gray / De Profundis",
+        "authors": [
+          "Oscar Wilde"
+        ],
+        "coverId": 15038055,
+        "editionCount": 4,
+        "year": 1926,
+        "titleScore": 0.875,
+        "authorScore": 1,
+        "score": 0.91875,
+        "work": "/works/OL43892241W"
+      },
+      {
+        "title": "The Picture of Dorian Gray",
+        "authors": [
+          "Oscar Wilde",
+          "Paul Lincoln"
+        ],
+        "coverId": 12062319,
+        "editionCount": 8,
+        "year": 2016,
+        "titleScore": 1,
+        "authorScore": 0.75,
+        "score": 0.9125,
+        "work": "/works/OL25965892W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f7cfbddcbf17334153e",
+    "title": "The Power of Concentration",
+    "author": "Atkinson, William Walker",
+    "candidate": {
+      "title": "The Power of Concentration",
+      "authors": [
+        "Theron Q. Dumont",
+        "William Walker Atkinson"
+      ],
+      "coverId": 2889848,
+      "editionCount": 118,
+      "year": 1877,
+      "titleScore": 1,
+      "authorScore": 0.8,
+      "score": 0.9299999999999999,
+      "work": "/works/OL8520797W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae3360eaf86dcd994c38a91",
+    "title": "The Principles of Psychology, Volume 2 (of 2)",
+    "author": "James, William",
+    "candidate": {
+      "title": "The Principles of Psychology; Volume 2",
+      "authors": [
+        "James, William"
+      ],
+      "coverId": 10929396,
+      "editionCount": 4,
+      "year": 2018,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24392661W"
+    },
+    "alternates": [
+      {
+        "title": "The Principles Of Psychology; Volume 2",
+        "authors": [
+          "James, William"
+        ],
+        "coverId": 11448947,
+        "editionCount": 1,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL24720787W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335f3af86dcd994c38719",
+    "title": "The Principles of Scientific Management",
+    "author": "Taylor, Frederick Winslow",
+    "candidate": {
+      "title": "The Principles of Scientific Management",
+      "authors": [
+        "Frederick Winslow Taylor"
+      ],
+      "coverId": 8235250,
+      "editionCount": 37,
+      "year": 1911,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1866671W"
+    },
+    "alternates": [
+      {
+        "title": "The Principles of Scientific Management",
+        "authors": [
+          "Frederick Winslow Taylor"
+        ],
+        "coverId": 9110843,
+        "editionCount": 45,
+        "year": 1913,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL20444902W"
+      },
+      {
+        "title": "The principles of scientific management",
+        "authors": [
+          "Frederick Winslow Taylor"
+        ],
+        "coverId": 13453651,
+        "editionCount": 4,
+        "year": 1916,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19968819W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335f7af86dcd994c38767",
+    "title": "The Psychology of Management The Function of the Mind in Determining, Teaching and Installing Methods of Least Waste",
+    "author": "Gilbreth, Lillian Moller",
+    "candidate": {
+      "title": "The Psychology Of Management; The Function Of The Mind In Determining, Teaching And Installing Methods Of Least Waste",
+      "authors": [
+        "Lillian Moller 1878-1972 Gilbreth"
+      ],
+      "coverId": 10606801,
+      "editionCount": 2,
+      "year": 2018,
+      "titleScore": 1,
+      "authorScore": 0.8,
+      "score": 0.9299999999999999,
+      "work": "/works/OL24182187W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33c6eab5eff076c1181bd",
+    "title": "The Psychology of Revolution",
+    "author": "Le Bon, Gustave",
+    "candidate": {
+      "title": "The Psychology Of Revolution",
+      "authors": [
+        "Gustave Le Bon"
+      ],
+      "coverId": 11091293,
+      "editionCount": 3,
+      "year": 2018,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24479512W"
+    },
+    "alternates": [
+      {
+        "title": "The Psychology of Revolution",
+        "authors": [
+          "Gustave Le Bon"
+        ],
+        "coverId": 2901978,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL9807633W"
+      },
+      {
+        "title": "The Psychology of Revolution",
+        "authors": [
+          "Gustave Le Bon"
+        ],
+        "coverId": 12074844,
+        "editionCount": 1,
+        "year": 2017,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL26124701W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33605af86dcd994c3899e",
+    "title": "The Science of Getting Rich",
+    "author": "Wattles, W. D. (Wallace Delois)",
+    "candidate": {
+      "title": "The Science of Getting Rich",
+      "authors": [
+        "Wallace D. Wattles"
+      ],
+      "coverId": 12520268,
+      "editionCount": 1,
+      "year": 2021,
+      "titleScore": 1,
+      "authorScore": 0.8333333333333333,
+      "score": 0.9416666666666667,
+      "work": "/works/OL27018789W"
+    },
+    "alternates": [
+      {
+        "title": "The Science of Getting Rich",
+        "authors": [
+          "Wallace D. Wattles",
+          "T. Cymbalisty"
+        ],
+        "coverId": 12064965,
+        "editionCount": 1,
+        "year": 2015,
+        "titleScore": 1,
+        "authorScore": 0.6666666666666666,
+        "score": 0.8833333333333333,
+        "work": "/works/OL26019411W"
+      },
+      {
+        "title": "The Science of Getting Rich and the Art of Money Getting",
+        "authors": [
+          "Wallace D. Wattles"
+        ],
+        "coverId": 1811810,
+        "editionCount": 1,
+        "year": 2005,
+        "titleScore": 0.8,
+        "authorScore": 0.8333333333333333,
+        "score": 0.8116666666666666,
+        "work": "/works/OL14936067W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c8cab5eff076c118343",
+    "title": "The Smalcald Articles",
+    "author": "Luther, Martin",
+    "candidate": {
+      "title": "The Smalcald Articles",
+      "authors": [
+        "Martin Luther"
+      ],
+      "coverId": 1803714,
+      "editionCount": 1,
+      "year": 2004,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL795454W"
+    },
+    "alternates": [
+      {
+        "title": "The Smalcald Articles",
+        "authors": [
+          "Martin Luther"
+        ],
+        "coverId": 8686892,
+        "editionCount": 1,
+        "year": 2010,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL19883055W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33629af86dcd994c38ea0",
+    "title": "The Story of the Heavens",
+    "author": "Ball, Robert S. (Robert Stawell)",
+    "candidate": {
+      "title": "The story of the heavens",
+      "authors": [
+        "Sir Robert Stawell Ball"
+      ],
+      "coverId": 5719444,
+      "editionCount": 13,
+      "year": 1885,
+      "titleScore": 1,
+      "authorScore": 0.875,
+      "score": 0.95625,
+      "work": "/works/OL2292632W"
+    },
+    "alternates": [
+      {
+        "title": "The Story of the Heavens",
+        "authors": [
+          "Sir Robert Stawell Ball"
+        ],
+        "coverId": 10887496,
+        "editionCount": 3,
+        "year": 2010,
+        "titleScore": 1,
+        "authorScore": 0.875,
+        "score": 0.95625,
+        "work": "/works/OL24360380W"
+      },
+      {
+        "title": "The story of the heavens",
+        "authors": [
+          "Sir Robert Stawell Ball"
+        ],
+        "coverId": 7295779,
+        "editionCount": 1,
+        "year": 1893,
+        "titleScore": 1,
+        "authorScore": 0.875,
+        "score": 0.95625,
+        "work": "/works/OL17052702W"
+      }
+    ]
+  },
+  {
+    "id": "6ae335fdaf86dcd994c3886e",
+    "title": "The Theory of the Leisure Class",
+    "author": "Veblen, Thorstein",
+    "candidate": {
+      "title": "The Theory of the Leisure Class",
+      "authors": [
+        "Thorstein Veblen"
+      ],
+      "coverId": 5815298,
+      "editionCount": 236,
+      "year": 1899,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1868441W"
+    },
+    "alternates": [
+      {
+        "title": "The theory of the leisure class",
+        "authors": [
+          "Thorstein Veblen"
+        ],
+        "coverId": 15077579,
+        "editionCount": 3,
+        "year": 1912,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL36506044W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c61ab5eff076c118134",
+    "title": "The University of Hard Knocks",
+    "author": "Parlette, Ralph Albert",
+    "candidate": {
+      "title": "The University of Hard Knocks",
+      "authors": [
+        "Ralph Albert Parlette"
+      ],
+      "coverId": 10889716,
+      "editionCount": 8,
+      "year": 1918,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24362138W"
+    },
+    "alternates": [
+      {
+        "title": "The university of hard knocks",
+        "authors": [
+          "Parlette, Ralph Albert"
+        ],
+        "coverId": 5561199,
+        "editionCount": 2,
+        "year": 1916,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL205532W"
+      },
+      {
+        "title": "The university of hard knocks",
+        "authors": [
+          "Parlette, Ralph Albert"
+        ],
+        "coverId": 8028556,
+        "editionCount": 1,
+        "year": 1914,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL7736232W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341d9d02ec1db04c96337",
+    "title": "The Unseen World, and Other Essays",
+    "author": "Fiske, John",
+    "candidate": {
+      "title": "The unseen world, and other essays",
+      "authors": [
+        "John Fiske"
+      ],
+      "coverId": 5704468,
+      "editionCount": 10,
+      "year": 1876,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL1100411W"
+    },
+    "alternates": [
+      {
+        "title": "The unseen world, and other essays",
+        "authors": [
+          "John Fiske"
+        ],
+        "coverId": 14406233,
+        "editionCount": 2,
+        "year": 1876,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL32005142W"
+      },
+      {
+        "title": "The Unseen World, and Other Essays",
+        "authors": [
+          "John Fiske"
+        ],
+        "coverId": 6031624,
+        "editionCount": 3,
+        "year": 1899,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL13105631W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33c76ab5eff076c11822c",
+    "title": "The Varieties of Religious Experience: A Study in Human Nature",
+    "author": "James, William",
+    "candidate": {
+      "title": "The Varieties Of Religious Experience A Study In Human Nature",
+      "authors": [
+        "William James"
+      ],
+      "coverId": 7543486,
+      "editionCount": 1,
+      "year": 2012,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL17420496W"
+    },
+    "alternates": [
+      {
+        "title": "THE VARIETIES OF RELIGIOUS EXPERIENCE - A Study in Human Nature",
+        "authors": [
+          "William James"
+        ],
+        "coverId": 1994198,
+        "editionCount": 1,
+        "year": 2007,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL1073517W"
+      },
+      {
+        "title": "The Varieties Of Religious Experience A Study In Human Nature",
+        "authors": [
+          "William James"
+        ],
+        "coverId": 7726624,
+        "editionCount": 1,
+        "year": null,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL17512451W"
+      }
+    ]
+  },
+  {
+    "id": "6ae341ddd02ec1db04c9636a",
+    "title": "The Violet Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Violet Fairy Book (Large Print)",
+      "authors": [
+        "Andrew Lang"
+      ],
+      "coverId": 12014563,
+      "editionCount": 459,
+      "year": 1901,
+      "titleScore": 0.8,
+      "authorScore": 1,
+      "score": 0.87,
+      "work": "/works/OL1088883W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33622af86dcd994c38ddc",
+    "title": "The Voyage of the Beagle",
+    "author": "Darwin, Charles",
+    "candidate": {
+      "title": "The Voyage of the Beagle",
+      "authors": [
+        "Charles Darwin"
+      ],
+      "coverId": 10375623,
+      "editionCount": 5,
+      "year": 2008,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL21487166W"
+    },
+    "alternates": [
+      {
+        "title": "Charles Darwin's The Voyage of the Beagle:",
+        "authors": [
+          "Charles Darwin"
+        ],
+        "coverId": 12973721,
+        "editionCount": 92,
+        "year": 1839,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL515065W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33fc8fbddcbf1733417ec",
+    "title": "The Yellow Fairy Book",
+    "author": "Lang, Andrew",
+    "candidate": {
+      "title": "The Yellow Fairy Book",
+      "authors": [
+        "Andrew Lang",
+        "Leonora Blanche Lang"
+      ],
+      "coverId": 5275099,
+      "editionCount": 458,
+      "year": 1894,
+      "titleScore": 1,
+      "authorScore": 0.75,
+      "score": 0.9125,
+      "work": "/works/OL1088888W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae3365aaf86dcd994c39821",
+    "title": "The three musketeers",
+    "author": "Dumas, Alexandre",
+    "candidate": {
+      "title": "The three musketeers",
+      "authors": [
+        "Alexandre Dumas"
+      ],
+      "coverId": 15079464,
+      "editionCount": 4,
+      "year": 1933,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL38438001W"
+    },
+    "alternates": [
+      {
+        "title": "The three musketeers [adaptation]",
+        "authors": [
+          "Alexandre Dumas"
+        ],
+        "coverId": 14564075,
+        "editionCount": 1,
+        "year": 1999,
+        "titleScore": 0.8333333333333333,
+        "authorScore": 1,
+        "score": 0.8916666666666666,
+        "work": "/works/OL15196889W"
+      },
+      {
+        "title": "The three musketeers [adaptation]",
+        "authors": [
+          "Alexandre Dumas"
+        ],
+        "coverId": 10589435,
+        "editionCount": 1,
+        "year": 1985,
+        "titleScore": 0.8333333333333333,
+        "authorScore": 1,
+        "score": 0.8916666666666666,
+        "work": "/works/OL24172814W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33656af86dcd994c397ea",
+    "title": "The war of the worlds",
+    "author": "Wells, H. G. (Herbert George)",
+    "candidate": {
+      "title": "The War of the Worlds",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "coverId": 36314,
+      "editionCount": 457,
+      "year": null,
+      "titleScore": 1,
+      "authorScore": 0.6666666666666666,
+      "score": 0.8833333333333333,
+      "work": "/works/OL52114W"
+    },
+    "alternates": [
+      {
+        "title": "War of the Worlds",
+        "authors": [
+          "H. G. Wells"
+        ],
+        "coverId": 14265131,
+        "editionCount": 14,
+        "year": 2019,
+        "titleScore": 1,
+        "authorScore": 0.6666666666666666,
+        "score": 0.8833333333333333,
+        "work": "/works/OL30251972W"
+      },
+      {
+        "title": "The War of the Worlds",
+        "authors": [
+          "H. G. Wells"
+        ],
+        "coverId": 11639024,
+        "editionCount": 9,
+        "year": 1974,
+        "titleScore": 1,
+        "authorScore": 0.6666666666666666,
+        "score": 0.8833333333333333,
+        "work": "/works/OL8068969W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33f8efbddcbf1733415a4",
+    "title": "Thoughts on Man, His Nature, Productions and Discoveries Interspersed with Some Particulars Respecting the Author",
+    "author": "Godwin, William",
+    "candidate": {
+      "title": "Thoughts on Man His Nature, Productions and Discoveries Interspersed with some Particulars Respecting the Author",
+      "authors": [
+        "William Godwin"
+      ],
+      "coverId": 1758605,
+      "editionCount": 1,
+      "year": 2006,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL15261440W"
+    },
+    "alternates": []
+  },
+  {
+    "id": "6ae33cb3ab5eff076c118450",
+    "title": "Through the Looking-Glass",
+    "author": "Carroll, Lewis",
+    "candidate": {
+      "title": "Through the Looking-Glass",
+      "authors": [
+        "Lewis Carroll"
+      ],
+      "coverId": 11272464,
+      "editionCount": 1379,
+      "year": 1865,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL151406W"
+    },
+    "alternates": [
+      {
+        "title": "Hunting of the Snark / Through the Looking-Glass",
+        "authors": [
+          "Lewis Carroll"
+        ],
+        "coverId": 11273801,
+        "editionCount": 6,
+        "year": 1969,
+        "titleScore": 0.8,
+        "authorScore": 1,
+        "score": 0.87,
+        "work": "/works/OL151397W"
+      },
+      {
+        "title": "Alice's Adventures in Wonderland / Through the Looking Glass",
+        "authors": [
+          "Lewis Carroll"
+        ],
+        "coverId": 8595966,
+        "editionCount": 545,
+        "year": 1889,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL151411W"
+      }
+    ]
+  },
+  {
+    "id": "6ae33654af86dcd994c397c0",
+    "title": "Treasure Island",
+    "author": "Stevenson, Robert Louis",
+    "candidate": {
+      "title": "Treasure Island",
+      "authors": [
+        "Robert Louis Stevenson"
+      ],
+      "coverId": 13859660,
+      "editionCount": 1992,
+      "year": 1880,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL24034W"
+    },
+    "alternates": [
+      {
+        "title": "Treasure Island",
+        "authors": [
+          "Robert Louis Stevenson"
+        ],
+        "coverId": 14922264,
+        "editionCount": 9,
+        "year": 1896,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL43045916W"
+      },
+      {
+        "title": "Treasure Island",
+        "authors": [
+          "Robert Louis Stevenson"
+        ],
+        "coverId": 13280949,
+        "editionCount": 19,
+        "year": 2018,
+        "titleScore": 1,
+        "authorScore": 1,
+        "score": 1,
+        "work": "/works/OL29787769W"
+      }
+    ]
+  },
+  {
+    "id": "6ae20101112775c25210f079",
+    "title": "Truyện Kiều",
+    "author": "Nguyễn Du",
+    "already": true
+  },
+  {
+    "id": "6ae232dfbac24cab2f9152e3",
+    "title": "Từ hôn",
+    "author": "Hồ Biểu Chánh",
+    "already": true
+  },
+  {
+    "id": "6ae33644af86dcd994c3944e",
+    "title": "Wuthering Heights",
+    "author": "Brontë, Emily",
+    "candidate": {
+      "title": "Wuthering Heights",
+      "authors": [
+        "Emily Brontë"
+      ],
+      "coverId": 12818862,
+      "editionCount": 2889,
+      "year": 1846,
+      "titleScore": 1,
+      "authorScore": 1,
+      "score": 1,
+      "work": "/works/OL21177W"
+    },
+    "alternates": [
+      {
+        "title": "Works (Poems / Wuthering Heights)",
+        "authors": [
+          "Emily Brontë"
+        ],
+        "coverId": 12390904,
+        "editionCount": 18,
+        "year": 1907,
+        "titleScore": 0.75,
+        "authorScore": 1,
+        "score": 0.8375,
+        "work": "/works/OL21170W"
+      },
+      {
+        "title": "Wuthering Heights / Agnes Grey",
+        "authors": [
+          "Emily Brontë",
+          "Anne Brontë"
+        ],
+        "coverId": 14836743,
+        "editionCount": 31,
+        "year": 1870,
+        "titleScore": 0.75,
+        "authorScore": 0.8333333333333333,
+        "score": 0.7791666666666667,
+        "work": "/works/OL17392581W"
+      }
+    ]
+  }
+]

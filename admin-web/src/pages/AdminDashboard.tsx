@@ -1,18 +1,29 @@
+// Import { useEffect, useMemo, useState } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/AdminDashboard.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useMemo, useState } from 'react';
+// Import { AlertCircle, ArrowRight, BookOpen, Calendar, ChevronRight, Clock, CreditCard,  từ lucide-react để dùng trong giao diện.
 import {
   AlertCircle, ArrowRight, BookOpen, Calendar, ChevronRight,
   Clock, CreditCard, FileText, MoreVertical, Plus, Star, Trash2, Users,
 } from 'lucide-react';
+// Import { Link } từ react-router-dom để dùng trong giao diện.
 import { Link } from 'react-router-dom';
+// Import { AdminLayout } từ ../components/AdminLayout để dùng trong giao diện.
 import { AdminLayout } from '../components/AdminLayout';
+// Import { errorMessage, fetchAdminComments, fetchAdminDashboard, fetchBooks, fetchRecent từ ../api/client để dùng trong giao diện.
 import {
   errorMessage, fetchAdminComments, fetchAdminDashboard, fetchBooks, fetchRecentUsers,
   fetchReports, fetchSubscriptions, deleteBookComment, type AdminDashboardResponse,
 } from '../api/client';
+// Import type { Book, User, Report, Subscription } từ ../types để dùng trong giao diện.
 import type { Book, User, Report, Subscription } from '../types';
+// Import { useAuth } từ ../auth/AuthContext để dùng trong giao diện.
 import { useAuth } from '../auth/AuthContext';
 
 /* ───── Comment type (kept from original) ───── */
+// Interface CommentItem quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface CommentItem {
   _id: string;
   body: string;
@@ -24,6 +35,7 @@ export interface CommentItem {
 }
 
 /* ───── Dashboard data ───── */
+// Interface DashboardCounts quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 interface DashboardCounts {
   books: number | null;
   chapters: number | null;
@@ -32,28 +44,49 @@ interface DashboardCounts {
   openReports: number | null;
 }
 
+// Biến emptyCounts nhận giá trị từ { books: null, chapters: null, users: null, activeSubsc. const không gán lại; let có thể cập nhật.
 const emptyCounts: DashboardCounts = {
   books: null, chapters: null, users: null, activeSubscriptions: null, openReports: null,
 };
 
 /* ═══════════════════════════════════════════════ */
+/**
+ * Hàm/thành phần AdminDashboard: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useAuth, useState, useMemo, Date, toLocaleDateString, toLocaleTimeString, useEffect, load.
+ */
 export function AdminDashboard() {
+  // Biến { user: currentUser } nhận giá trị từ useAuth(). const không gán lại; let có thể cập nhật.
   const { user: currentUser } = useAuth();
+  // Biến [summary, setSummary] nhận giá trị từ useState<AdminDashboardResponse | null>(null). const không gán lại; let có thể cập nhật.
   const [summary, setSummary] = useState<AdminDashboardResponse | null>(null);
+  // Biến [recentBooks, setRecentBooks] nhận giá trị từ useState<Book[]>([]). const không gán lại; let có thể cập nhật.
   const [recentBooks, setRecentBooks] = useState<Book[]>([]);
+  // Biến [recentUsers, setRecentUsers] nhận giá trị từ useState<User[]>([]). const không gán lại; let có thể cập nhật.
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
+  // Biến [recentReports, setRecentReports] nhận giá trị từ useState<Report[]>([]). const không gán lại; let có thể cập nhật.
   const [recentReports, setRecentReports] = useState<Report[]>([]);
+  // Biến [recentSubscriptions, setRecentSubs nhận giá trị từ useState<Subscription[]>([]). const không gán lại; let có thể cập nhật.
   const [recentSubscriptions, setRecentSubscriptions] = useState<Subscription[]>([]);
+  // Biến [comments, setComments] nhận giá trị từ useState<(CommentItem & { bookTitle?: string })[]>([]). const không gán lại; let có thể cập nhật.
   const [comments, setComments] = useState<(CommentItem & { bookTitle?: string })[]>([]);
+  // Biến [period, setPeriod] nhận giá trị từ useState<7 | 30 | 90>(7). const không gán lại; let có thể cập nhật.
   const [period, setPeriod] = useState<7 | 30 | 90>(7);
+  // Biến [loading, setLoading] nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [loading, setLoading] = useState(true);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
 
   /* Date/time is refreshed on each dashboard load rather than hard-coded. */
+  // Biến now nhận giá trị từ useMemo(() => new Date(), [summary]). const không gán lại; let có thể cập nhật.
   const now = useMemo(() => new Date(), [summary]);
+  // Biến dateStr nhận giá trị từ now.toLocaleDateString('vi-VN', { weekday: 'long', day:. const không gán lại; let có thể cập nhật.
   const dateStr = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  // Biến timeStr nhận giá trị từ now.toLocaleTimeString('vi-VN', { hour: '2-digit', minu. const không gán lại; let có thể cập nhật.
   const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
+  // Biến counts nhận giá trị từ summary ? { books: summary.metrics.totalBooks, chapters. const không gán lại; let có thể cập nhật.
   const counts: DashboardCounts = summary ? {
     books: summary.metrics.totalBooks,
     chapters: summary.metrics.totalChapters,
@@ -64,11 +97,22 @@ export function AdminDashboard() {
 
   /* Load persisted data through the real admin endpoints. Each panel can still render
      when an unrelated endpoint fails, and the dashboard never substitutes sample values. */
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { let active = true; async function load() { setLoading(true); s
   useEffect(() => {
+    // Biến active nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let active = true;
+    /**
+     * Hàm/thành phần load: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+     * Tham số/props: không có tham số.
+     * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+     * Gọi tiếp: setLoading, setError, allSettled, fetchAdminDashboard, fetchBooks, fetchRecentUsers, fetchReports, fetchAdminComments.
+     */
     async function load() {
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
       setLoading(true);
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
       setError('');
+      // Biến results nhận giá trị từ await Promise.allSettled([ fetchAdminDashboard(period),. const không gán lại; let có thể cập nhật.
       const results = await Promise.allSettled([
         fetchAdminDashboard(period),
         fetchBooks({ page: 1, limit: 5 }),
@@ -77,43 +121,69 @@ export function AdminDashboard() {
         fetchAdminComments({ page: 1, limit: 10 }),
         fetchSubscriptions({ page: 1, limit: 5 }),
       ]);
+      // if chỉ chạy nhánh này khi điều kiện !active đúng.
       if (!active) return;
 
+      // if chỉ chạy nhánh này khi điều kiện results[0].status === 'fulfilled' đúng.
       if (results[0].status === 'fulfilled') setSummary(results[0].value);
       else setError(errorMessage(results[0].reason));
+      // if chỉ chạy nhánh này khi điều kiện results[1].status === 'fulfilled' đúng.
       if (results[1].status === 'fulfilled') setRecentBooks(results[1].value.books);
+      // if chỉ chạy nhánh này khi điều kiện results[2].status === 'fulfilled' đúng.
       if (results[2].status === 'fulfilled') setRecentUsers(results[2].value.slice(0, 6));
+      // if chỉ chạy nhánh này khi điều kiện results[3].status === 'fulfilled' đúng.
       if (results[3].status === 'fulfilled') setRecentReports(results[3].value.reports.slice(0, 5));
+      // if chỉ chạy nhánh này khi điều kiện results[4].status === 'fulfilled' đúng.
       if (results[4].status === 'fulfilled') {
+        // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments(results[4].value.comments.map((comment) => ({ ...comment, bookTitle:
         setComments(results[4].value.comments.map((comment) => ({
           ...comment,
           bookTitle: typeof comment.book === 'object' && comment.book !== null ? comment.book.title ?? 'Sách' : 'Sách',
         })));
       }
+      // if chỉ chạy nhánh này khi điều kiện results[5].status === 'fulfilled' đúng.
       if (results[5].status === 'fulfilled') setRecentSubscriptions(results[5].value.subscriptions);
 
+      // Biến firstFailure nhận giá trị từ results.find((result) => result.status === 'rejected'). const không gán lại; let có thể cập nhật.
       const firstFailure = results.find((result) => result.status === 'rejected');
+      // if chỉ chạy nhánh này khi điều kiện firstFailure?.status === 'rejected' đúng.
       if (firstFailure?.status === 'rejected') {
+        // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError((currentError) => currentError || `Một số dữ liệu trên dashboard chưa t
         setError((currentError) => currentError || `Một số dữ liệu trên dashboard chưa tải được: ${errorMessage(firstFailure.reason)}`);
       }
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
       setLoading(false);
     }
+    // Gọi/thực thi load với đối số để cập nhật logic/giao diện: void load()
     void load();
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => { active = false; }.
     return () => { active = false; };
   }, [period]);
 
   // Hàm xử lý xóa bình luận thật qua API.
+  /**
+   * Hàm/thành phần handleDeleteComment: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: commentId.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: confirm, deleteBookComment, setComments, filter, alert, errorMessage.
+   */
   async function handleDeleteComment(commentId: string) {
+    // if chỉ chạy nhánh này khi điều kiện !window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?') đúng.
     if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này không?')) return;
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await deleteBookComment(commentId)
       await deleteBookComment(commentId);
+      // Gọi/thực thi setComments với đối số để cập nhật logic/giao diện: setComments((prev) => prev.filter((comment) => comment._id !== commentId))
       setComments((prev) => prev.filter((comment) => comment._id !== commentId));
     } catch (err: unknown) {
+      // Gọi/thực thi window.alert với đối số để cập nhật logic/giao diện: window.alert(errorMessage(err) || 'Không thể xóa bình luận.')
       window.alert(errorMessage(err) || 'Không thể xóa bình luận.');
     }
   }
 
   /* ── Stat cards config ── */
+  // Biến stats nhận giá trị từ [ { label: 'Tổng số sách', value: counts.books, icon: B. const không gán lại; let có thể cập nhật.
   const stats = [
     { label: 'Tổng số sách', value: counts.books, icon: BookOpen, color: '#24795C', href: '/admin/books' },
     { label: 'Người dùng', value: counts.users, icon: Users, color: '#5DAEFF', href: '/admin/users' },
@@ -122,6 +192,7 @@ export function AdminDashboard() {
   ];
 
   /* ── Quick actions ── */
+  // Biến quickActions nhận giá trị từ [ { title: 'Thêm sách mới', desc: 'Tạo đầu sách và tải . const không gán lại; let có thể cập nhật.
   const quickActions = [
     { title: 'Thêm sách mới', desc: 'Tạo đầu sách và tải file PDF', href: '/admin/books?action=create', icon: Plus },
     { title: 'Quản lý người dùng', desc: 'Xem và chỉnh sửa tài khoản', href: '/admin/users', icon: Users },
@@ -129,12 +200,14 @@ export function AdminDashboard() {
     { title: 'Xem báo cáo', desc: 'Thống kê và phản hồi', href: '/admin/reports', icon: FileText },
   ];
 
+  // Biến categoryLabel nhận giá trị từ { van_hoc_viet_nam: 'Văn học Việt Nam', truyen_ngan_vie. const không gán lại; let có thể cập nhật.
   const categoryLabel: Record<string, string> = {
     van_hoc_viet_nam: 'Văn học Việt Nam', truyen_ngan_viet_nam: 'Truyện ngắn Việt Nam',
     tho_viet_nam: 'Thơ Việt Nam', van_hoc_dan_gian: 'Văn học dân gian', van_hoc_the_gioi: 'Văn học thế giới',
     kinh_doanh: 'Kinh doanh', phat_trien_ban_than: 'Phát triển bản thân', tam_ly_hoc: 'Tâm lý học',
     lich_su: 'Lịch sử', khoa_hoc: 'Khoa học',
   };
+  // Biến categoryColor nhận giá trị từ { van_hoc_viet_nam: '#24795C', truyen_ngan_viet_nam: '#. const không gán lại; let có thể cập nhật.
   const categoryColor: Record<string, string> = {
     van_hoc_viet_nam: '#24795C', truyen_ngan_viet_nam: '#5DAEFF', tho_viet_nam: '#8B5CF6',
     van_hoc_dan_gian: '#F59E0B', van_hoc_the_gioi: '#16A6A0', kinh_doanh: '#D97706',
@@ -142,9 +215,13 @@ export function AdminDashboard() {
   };
 
   /* Genre counts come from a MongoDB aggregation over all books, not only recent rows. */
+  // Biến genreDist nhận giá trị từ useMemo(() => { const categories = summary?.categories . const không gán lại; let có thể cập nhật.
   const genreDist = useMemo(() => {
+    // Biến categories nhận giá trị từ summary?.categories ?? []. const không gán lại; let có thể cập nhật.
     const categories = summary?.categories ?? [];
+    // Biến total nhận giá trị từ categories.reduce((sum, item) => sum + item.count, 0) |. const không gán lại; let có thể cập nhật.
     const total = categories.reduce((sum, item) => sum + item.count, 0) || 1;
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: categories.map(({ category, count }) => ({ category, label: categoryLabel[catego.
     return categories.map(({ category, count }) => ({
       category,
       label: categoryLabel[category.toLowerCase()] || category.replaceAll('_', ' '),
@@ -154,7 +231,9 @@ export function AdminDashboard() {
     }));
   }, [summary]);
 
+  // Biến recentActivity nhận giá trị từ useMemo(() => { const activities = [ ...recentUsers.map. const không gán lại; let có thể cập nhật.
   const recentActivity = useMemo(() => {
+    // Biến activities nhận giá trị từ [ ...recentUsers.map((item) => ({ id: `user-${item._id . const không gán lại; let có thể cập nhật.
     const activities = [
       ...recentUsers.map((item) => ({
         id: `user-${item._id ?? item.id}`, type: 'user' as const, title: 'Người dùng mới đăng ký',
@@ -174,21 +253,33 @@ export function AdminDashboard() {
         date: item.createdAt, icon: CreditCard, href: '/admin/subscriptions',
       })),
     ];
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: activities .filter((item) => item.date && !Number.isNaN(new Date(item.date).getT.
     return activities
       .filter((item) => item.date && !Number.isNaN(new Date(item.date).getTime()))
       .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
       .slice(0, 5);
   }, [recentBooks, recentUsers, recentReports, recentSubscriptions]);
 
+  // Biến readingActivity nhận giá trị từ summary?.readingActivity ?? []. const không gán lại; let có thể cập nhật.
   const readingActivity = summary?.readingActivity ?? [];
+  // Biến maxReads nhận giá trị từ Math.max(1, ...readingActivity.map((item) => item.count. const không gán lại; let có thể cập nhật.
   const maxReads = Math.max(1, ...readingActivity.map((item) => item.count));
+  // Biến totalReads nhận giá trị từ summary?.readingActivityTotal ?? 0. const không gán lại; let có thể cập nhật.
   const totalReads = summary?.readingActivityTotal ?? 0;
 
+  /**
+   * Hàm/thành phần statusBadge: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: status.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   */
   const statusBadge = (status: string) => {
+    // if chỉ chạy nhánh này khi điều kiện status === 'published' đúng.
     if (status === 'published') return 'border-[#C3E5D0] bg-[#EAFAF0] text-[#24795C]';
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: 'border-[#F5DDB0] bg-[#FFF9ED] text-[#B8860B]'.
     return 'border-[#F5DDB0] bg-[#FFF9ED] text-[#B8860B]';
   };
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <AdminLayout> {} {error && ( <div className="mb-5 flex items-start gap-2 round.
   return (
     <AdminLayout>
       {/* ─── Error banner ─── */}
@@ -275,8 +366,11 @@ export function AdminDashboard() {
               </div>
               <div className="flex h-[160px] items-end gap-1 border-b border-[#EEF3F0] pt-2 sm:gap-1.5">
                 {readingActivity.map((item, index) => {
+                  // Biến height nhận giá trị từ item.count > 0 ? Math.max(5, (item.count / maxReads) * . const không gán lại; let có thể cập nhật.
                   const height = item.count > 0 ? Math.max(5, (item.count / maxReads) * 100) : 0;
+                  // Biến isLatest nhận giá trị từ index === readingActivity.length - 1. const không gán lại; let có thể cập nhật.
                   const isLatest = index === readingActivity.length - 1;
+                  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div key={item.date} className="flex h-full min-w-0 flex-1 items-end" title={`.
                   return (
                     <div key={item.date} className="flex h-full min-w-0 flex-1 items-end" title={`${item.date}: ${item.count} lượt đọc`}>
                       <div
@@ -289,8 +383,11 @@ export function AdminDashboard() {
               </div>
               <div className="mt-2 flex justify-between text-[10px] text-[#526B86]">
                 {readingActivity.filter((_, index) => {
+                  // if chỉ chạy nhánh này khi điều kiện period === 7 đúng.
                   if (period === 7) return true;
+                  // Biến step nhận giá trị từ period === 30 ? 5 : 15. const không gán lại; let có thể cập nhật.
                   const step = period === 30 ? 5 : 15;
+                  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: index % step === 0 || index === readingActivity.length - 1.
                   return index % step === 0 || index === readingActivity.length - 1;
                 }).map((item) => (
                   <span key={item.date}>{new Date(`${item.date}T12:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}</span>
@@ -309,10 +406,15 @@ export function AdminDashboard() {
                 <div className="relative h-[140px] w-[140px] shrink-0">
                   <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
                     {(() => {
+                      // Biến offset nhận giá trị từ 0. const không gán lại; let có thể cập nhật.
                       let offset = 0;
+                      // Biến total nhận giá trị từ genreDist.reduce((s, g) => s + g.count, 0) || 1. const không gán lại; let có thể cập nhật.
                       const total = genreDist.reduce((s, g) => s + g.count, 0) || 1;
+                      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: genreDist.map((g) => { const pct = (g.count / total) * 100; const el = ( <circle.
                       return genreDist.map((g) => {
+                        // Biến pct nhận giá trị từ (g.count / total) * 100. const không gán lại; let có thể cập nhật.
                         const pct = (g.count / total) * 100;
+                        // Biến el nhận giá trị từ ( <circle key={g.category} cx="18" cy="18" r="15.9155" . const không gán lại; let có thể cập nhật.
                         const el = (
                           <circle
                             key={g.category}
@@ -325,7 +427,9 @@ export function AdminDashboard() {
                             strokeLinecap="round"
                           />
                         );
+                        // Gọi/thực thi biểu thức để cập nhật logic/giao diện: offset += pct
                         offset += pct;
+                        // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: el.
                         return el;
                       });
                     })()}
@@ -590,7 +694,9 @@ export function AdminDashboard() {
             </div>
             <div className="divide-y divide-[#EEF3F0]">
               {recentActivity.length > 0 ? recentActivity.map((activity) => {
+                // Biến ActivityIcon nhận giá trị từ activity.icon. const không gán lại; let có thể cập nhật.
                 const ActivityIcon = activity.icon;
+                // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <Link key={activity.id} to={activity.href} className="flex items-start gap-3 p.
                 return (
                   <Link key={activity.id} to={activity.href} className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-[#F8FBF9]">
                     <span className="mt-0.5 grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full bg-[#E3F4EB] text-[#24795C]">

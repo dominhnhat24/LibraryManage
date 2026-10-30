@@ -1,128 +1,253 @@
+// Import { useCallback, useEffect, useState } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/SubscriptionManagement.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useCallback, useEffect, useState } from 'react';
+// Import { AlertCircle, Check, CreditCard, Eye, LoaderCircle, Save, ShieldCheck, Trash2,  từ lucide-react để dùng trong giao diện.
 import { AlertCircle, Check, CreditCard, Eye, LoaderCircle, Save, ShieldCheck, Trash2, X } from 'lucide-react';
+// Import { AdminLayout } từ ../components/AdminLayout để dùng trong giao diện.
 import { AdminLayout } from '../components/AdminLayout';
+// Import { Pagination } từ ../components/Pagination để dùng trong giao diện.
 import { Pagination } from '../components/Pagination';
+// Import { deleteSubscription, errorMessage, fetchSubscription, fetchSubscriptions, revie từ ../api/client để dùng trong giao diện.
 import {
   deleteSubscription, errorMessage, fetchSubscription, fetchSubscriptions, reviewSubscription,
   updateSubscriptionPaymentReference,
 } from '../api/client';
+// Import type { PaginationData, Subscription } từ ../types để dùng trong giao diện.
 import type { PaginationData, Subscription } from '../types';
 
+// Biến emptyPagination nhận giá trị từ { total: 0, page: 1, limit: 20, totalPages: 0 }. const không gán lại; let có thể cập nhật.
 const emptyPagination: PaginationData = { total: 0, page: 1, limit: 20, totalPages: 0 };
 
+/**
+ * Hàm/thành phần subscriberName: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: user.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: slice.
+ */
 function subscriberName(user: Subscription['user']): string {
+  // if chỉ chạy nhánh này khi điều kiện !user đúng.
   if (!user) return 'Chưa cập nhật';
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: typeof user === 'string' ? `Tài khoản ${user.slice(-6)}` : (user.name || 'Không .
   return typeof user === 'string' ? `Tài khoản ${user.slice(-6)}` : (user.name || 'Không rõ tên');
 }
 
+/**
+ * Hàm/thành phần subscriberEmail: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: user.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 function subscriberEmail(user: Subscription['user']): string {
+  // if chỉ chạy nhánh này khi điều kiện !user đúng.
   if (!user) return 'Chưa có email';
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: typeof user === 'string' ? user : (user.email || 'Không có email').
   return typeof user === 'string' ? user : (user.email || 'Không có email');
 }
 
+/**
+ * Hàm/thành phần formatDate: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: value optional.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: Date, isNaN, getTime, DateTimeFormat, format.
+ * Được tham chiếu tại: admin-web/src/pages/UserManagement.tsx, admin-web/src/pages/ReportManagement.tsx, admin-web/src/pages/ReaderBookPage.tsx, admin-web/src/pages/ReaderAccountPage.tsx.
+ */
 function formatDate(value?: string | null): string {
+  // if chỉ chạy nhánh này khi điều kiện !value đúng.
   if (!value) return '—';
+  // Biến date nhận giá trị từ new Date(value). const không gán lại; let có thể cập nhật.
   const date = new Date(value);
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('vi-VN', { dateStyl.
   return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
+/**
+ * Hàm/thành phần SubscriptionManagement: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, useCallback, async, setLoading, setError, fetchSubscriptions, setSubscriptions, setPagination.
+ */
 export function SubscriptionManagement() {
+  // Biến [subscriptions, setSubscriptions] nhận giá trị từ useState<Subscription[]>([]). const không gán lại; let có thể cập nhật.
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  // Biến [pagination, setPagination] nhận giá trị từ useState(emptyPagination). const không gán lại; let có thể cập nhật.
   const [pagination, setPagination] = useState(emptyPagination);
+  // Biến [status, setStatus] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [status, setStatus] = useState('');
+  // Biến [plan, setPlan] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [plan, setPlan] = useState('');
+  // Biến [page, setPage] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [page, setPage] = useState(1);
+  // Biến [loading, setLoading] nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [loading, setLoading] = useState(true);
+  // Biến [saving, setSaving] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [saving, setSaving] = useState(false);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
+  // Biến [notice, setNotice] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [notice, setNotice] = useState('');
+  // Biến [selectedSubscription, setSelectedS nhận giá trị từ useState<Subscription | null>(null). const không gán lại; let có thể cập nhật.
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  // Biến [detailLoading, setDetailLoading] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [detailLoading, setDetailLoading] = useState(false);
+  // Biến [paymentReference, setPaymentRefere nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [paymentReference, setPaymentReference] = useState('');
+  // Biến [pendingAction, setPendingAction] nhận giá trị từ useState<{ subscription: Subscription; action: 'approve. const không gán lại; let có thể cập nhật.
   const [pendingAction, setPendingAction] = useState<{ subscription: Subscription; action: 'approve' | 'reject' | 'delete' } | null>(null);
 
+  // Biến loadSubscriptions nhận giá trị từ useCallback(async () => { setLoading(true); setError(''. const không gán lại; let có thể cập nhật.
   const loadSubscriptions = useCallback(async () => {
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
     setLoading(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến result nhận giá trị từ await fetchSubscriptions({ page, limit: pagination.limi. const không gán lại; let có thể cập nhật.
       const result = await fetchSubscriptions({
         page,
         limit: pagination.limit,
         ...(status ? { status } : {}),
         ...(plan ? { plan } : {}),
       });
+      // Gọi/thực thi setSubscriptions với đối số để cập nhật logic/giao diện: setSubscriptions(result.subscriptions)
       setSubscriptions(result.subscriptions);
+      // Gọi/thực thi setPagination với đối số để cập nhật logic/giao diện: setPagination(result.pagination)
       setPagination(result.pagination);
     } catch (loadError) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(loadError))
       setError(errorMessage(loadError));
     } finally {
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
       setLoading(false);
     }
   }, [page, pagination.limit, status, plan]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { void loadSubscriptions(); }, [loadSubscriptions])
   useEffect(() => { void loadSubscriptions(); }, [loadSubscriptions]);
 
+  /**
+   * Hàm/thành phần openSubscription: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: subscription.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSelectedSubscription, setPaymentReference, setDetailLoading, setError, fetchSubscription, errorMessage.
+   */
   async function openSubscription(subscription: Subscription) {
+    // Gọi/thực thi setSelectedSubscription với đối số để cập nhật logic/giao diện: setSelectedSubscription(subscription)
     setSelectedSubscription(subscription);
+    // Gọi/thực thi setPaymentReference với đối số để cập nhật logic/giao diện: setPaymentReference(subscription.payment_reference ?? '')
     setPaymentReference(subscription.payment_reference ?? '');
+    // Gọi/thực thi setDetailLoading với đối số để cập nhật logic/giao diện: setDetailLoading(true)
     setDetailLoading(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến detail nhận giá trị từ await fetchSubscription(subscription._id). const không gán lại; let có thể cập nhật.
       const detail = await fetchSubscription(subscription._id);
+      // Gọi/thực thi setSelectedSubscription với đối số để cập nhật logic/giao diện: setSelectedSubscription(detail)
       setSelectedSubscription(detail);
+      // Gọi/thực thi setPaymentReference với đối số để cập nhật logic/giao diện: setPaymentReference(detail.payment_reference ?? '')
       setPaymentReference(detail.payment_reference ?? '');
     } catch (loadError: unknown) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(loadError))
       setError(errorMessage(loadError));
     } finally {
+      // Gọi/thực thi setDetailLoading với đối số để cập nhật logic/giao diện: setDetailLoading(false)
       setDetailLoading(false);
     }
   }
 
+  /**
+   * Hàm/thành phần savePaymentReference: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSaving, setError, updateSubscriptionPaymentReference, trim, setSelectedSubscription, setSubscriptions, map, setNotice.
+   */
   async function savePaymentReference() {
+    // if chỉ chạy nhánh này khi điều kiện !selectedSubscription đúng.
     if (!selectedSubscription) return;
+    // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(true)
     setSaving(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến updated nhận giá trị từ await updateSubscriptionPaymentReference(selectedSubscr. const không gán lại; let có thể cập nhật.
       const updated = await updateSubscriptionPaymentReference(selectedSubscription._id, paymentReference.trim());
+      // Gọi/thực thi setSelectedSubscription với đối số để cập nhật logic/giao diện: setSelectedSubscription(updated)
       setSelectedSubscription(updated);
+      // Gọi/thực thi setSubscriptions với đối số để cập nhật logic/giao diện: setSubscriptions((current) => current.map((item) => item._id === updated._id ? u
       setSubscriptions((current) => current.map((item) => item._id === updated._id ? updated : item));
+      // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice('Đã cập nhật mã giao dịch.')
       setNotice('Đã cập nhật mã giao dịch.');
     } catch (saveError: unknown) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(saveError))
       setError(errorMessage(saveError));
     } finally {
+      // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(false)
       setSaving(false);
     }
   }
 
+  /**
+   * Hàm/thành phần confirmAction: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSaving, setError, deleteSubscription, setNotice, reviewSubscription, setPendingAction, setPage, loadSubscriptions.
+   */
   async function confirmAction() {
+    // if chỉ chạy nhánh này khi điều kiện !pendingAction đúng.
     if (!pendingAction) return;
+    // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(true)
     setSaving(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // if chỉ chạy nhánh này khi điều kiện pendingAction.action === 'delete' đúng.
       if (pendingAction.action === 'delete') {
+        // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await deleteSubscription(pendingAction.subscription._id)
         await deleteSubscription(pendingAction.subscription._id);
+        // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice('Đã xóa yêu cầu thuê bao đang chờ.')
         setNotice('Đã xóa yêu cầu thuê bao đang chờ.');
       } else {
+        // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await reviewSubscription(pendingAction.subscription._id, pendingAction.action)
         await reviewSubscription(pendingAction.subscription._id, pendingAction.action);
+        // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(pendingAction.action === 'approve' ? 'Đã duyệt thuê bao và kích hoạt q
         setNotice(pendingAction.action === 'approve'
           ? 'Đã duyệt thuê bao và kích hoạt quyền đọc.'
           : 'Đã từ chối yêu cầu thuê bao.');
       }
+      // Gọi/thực thi setPendingAction với đối số để cập nhật logic/giao diện: setPendingAction(null)
       setPendingAction(null);
+      // if chỉ chạy nhánh này khi điều kiện subscriptions.length === 1 && page > 1 đúng.
       if (subscriptions.length === 1 && page > 1) setPage((current) => current - 1);
       else await loadSubscriptions();
     } catch (actionError) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(actionError))
       setError(errorMessage(actionError));
+      // Gọi/thực thi setPendingAction với đối số để cập nhật logic/giao diện: setPendingAction(null)
       setPendingAction(null);
     } finally {
+      // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(false)
       setSaving(false);
     }
   }
 
+  /**
+   * Hàm/thành phần dismissNotice: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setNotice.
+   * Được tham chiếu tại: admin-web/src/pages/BookManagement.tsx, admin-web/src/pages/ChapterManagement.tsx, admin-web/src/pages/UserManagement.tsx, admin-web/src/pages/ReportManagement.tsx.
+   */
   function dismissNotice() {
+    // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice('')
     setNotice('');
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: <AdminLayout> <section className="mb-7 flex flex-col justify-between gap-5 md:fl.
   return <AdminLayout>
     <section className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end w-full">
       <div>
@@ -292,23 +417,54 @@ export function SubscriptionManagement() {
   </AdminLayout>;
 }
 
+/**
+ * Hàm/thành phần statusLabel: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: status.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Được tham chiếu tại: admin-web/src/pages/ReportManagement.tsx, admin-web/src/pages/ReaderAccountPage.tsx.
+ */
 function statusLabel(status: Subscription['status']): string {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: { pending: 'Chờ duyệt', active: 'Đã kích hoạt', rejected: 'Đã từ chối', expired:.
   return { pending: 'Chờ duyệt', active: 'Đã kích hoạt', rejected: 'Đã từ chối', expired: 'Hết hạn' }[status];
 }
 
+/**
+ * Hàm/thành phần reviewName: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: reviewer optional.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: slice.
+ */
 function reviewName(reviewer?: Subscription['reviewed_by']): string {
+  // if chỉ chạy nhánh này khi điều kiện !reviewer đúng.
   if (!reviewer) return '—';
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: typeof reviewer === 'string' ? `ID ${reviewer.slice(-6)}` : reviewer.name.
   return typeof reviewer === 'string' ? `ID ${reviewer.slice(-6)}` : reviewer.name;
 }
 
+/**
+ * Hàm/thành phần actionTitle: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: action.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 function actionTitle(action: 'approve' | 'reject' | 'delete'): string {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: action === 'approve' ? 'Duyệt yêu cầu thuê bao?' : action === 'reject' ? 'Từ chố.
   return action === 'approve' ? 'Duyệt yêu cầu thuê bao?'
     : action === 'reject' ? 'Từ chối yêu cầu thuê bao?' : 'Xóa yêu cầu đang chờ?';
 }
 
+/**
+ * Hàm/thành phần actionDescription: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: action, subscription.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: subscriberName.
+ */
 function actionDescription(action: 'approve' | 'reject' | 'delete', subscription: Subscription): string {
+  // Biến user nhận giá trị từ subscriberName(subscription.user). const không gán lại; let có thể cập nhật.
   const user = subscriberName(subscription.user);
+  // if chỉ chạy nhánh này khi điều kiện action === 'approve' đúng.
   if (action === 'approve') return `Duyệt gói ${subscription.plan === 'vip_monthly' ? 'VIP' : 'Premium'} của ${user}; backend sẽ kích hoạt quyền một tháng trong transaction.`;
+  // if chỉ chạy nhánh này khi điều kiện action === 'reject' đúng.
   if (action === 'reject') return `Từ chối yêu cầu thanh toán của ${user}. Quyền đọc hiện tại của tài khoản không bị thay đổi.`;
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: `Xóa yêu cầu chuyển khoản ${subscription.transfer_note} của ${user}.`.
   return `Xóa yêu cầu chuyển khoản ${subscription.transfer_note} của ${user}.`;
 }

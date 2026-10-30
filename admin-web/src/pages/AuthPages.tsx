@@ -1,84 +1,167 @@
+// Import { useEffect, useRef, useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/AuthPages.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+// Import { useNavigate, useLocation, useSearchParams, Navigate } từ react-router-dom để dùng trong giao diện.
 import { useNavigate, useLocation, useSearchParams, Navigate } from 'react-router-dom';
+// Import { Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound, LoaderCircle, ArrowRight } từ lucide-react để dùng trong giao diện.
 import { 
   Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound,
   LoaderCircle, ArrowRight 
 } from 'lucide-react';
+// Import { useAuth } từ ../auth/AuthContext để dùng trong giao diện.
 import { useAuth } from '../auth/AuthContext';
+// Import { errorMessage, requestRegistrationCode, resendRegistrationCode, verifyRegistrat từ ../api/client để dùng trong giao diện.
 import { 
   errorMessage, requestRegistrationCode, resendRegistrationCode, 
   verifyRegistrationEmail 
 } from '../api/client';
 
+/**
+ * Hàm/thành phần safeReturnPath: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: value, fallback, allowedPrefix.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: URL, startsWith.
+ */
 function safeReturnPath(value: unknown, fallback: string, allowedPrefix: '/admin' | '/'): string {
+  // if chỉ chạy nhánh này khi điều kiện typeof value !== 'string' || !value đúng.
   if (typeof value !== 'string' || !value) return fallback;
+  // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
   try {
+    // Biến destination nhận giá trị từ new URL(value, window.location.origin). const không gán lại; let có thể cập nhật.
     const destination = new URL(value, window.location.origin);
+    // Biến path nhận giá trị từ destination.pathname. const không gán lại; let có thể cập nhật.
     const path = destination.pathname;
+    // Biến allowed nhận giá trị từ allowedPrefix === '/admin' ? path === '/admin' || path.. const không gán lại; let có thể cập nhật.
     const allowed = allowedPrefix === '/admin'
       ? path === '/admin' || path.startsWith('/admin/')
       : !path.startsWith('/admin');
+    // if chỉ chạy nhánh này khi điều kiện destination.origin !== window.location.origin || !allowed || path === '/login' | đúng.
     if (destination.origin !== window.location.origin || !allowed || path === '/login' || path === '/register') return fallback;
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: `${path}${destination.search}${destination.hash}`.
     return `${path}${destination.search}${destination.hash}`;
   } catch {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: fallback.
     return fallback;
   }
 }
  
 
+/**
+ * Hàm/thành phần LoginPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { admin = false }.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 export function LoginPage({ admin = false }: { admin?: boolean }) {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: <AuthPage admin={admin} />.
   return <AuthPage admin={admin} />;
 }
 
+/**
+ * Hàm/thành phần RegisterPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 export function RegisterPage() {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: <AuthPage admin={false} />.
   return <AuthPage admin={false} />;
 }
 
+/**
+ * Hàm/thành phần AuthPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { admin = false }.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useAuth, useNavigate, useLocation, useSearchParams, useState, useEffect, setIsRightPanelActive, clearTimeout.
+ */
 export function AuthPage({ admin = false }: { admin?: boolean }) {
+  // Biến { user, login, loginAdmin, logout } nhận giá trị từ useAuth(). const không gán lại; let có thể cập nhật.
   const { user, login, loginAdmin, logout } = useAuth();
+  // Biến navigate nhận giá trị từ useNavigate(). const không gán lại; let có thể cập nhật.
   const navigate = useNavigate();
+  // Biến location nhận giá trị từ useLocation(). const không gán lại; let có thể cập nhật.
   const location = useLocation();
+  // Biến [searchParams] nhận giá trị từ useSearchParams(). const không gán lại; let có thể cập nhật.
   const [searchParams] = useSearchParams();
 
+  // Biến [isRightPanelActive, setIsRightPane nhận giá trị từ useState(location.pathname === '/register'). const không gán lại; let có thể cập nhật.
   const [isRightPanelActive, setIsRightPanelActive] = useState(location.pathname === '/register');
+  // Biến authNavigationTimer nhận giá trị từ useRef<ReturnType<typeof setTimeout> | null>(null). const không gán lại; let có thể cập nhật.
   const authNavigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { setIsRightPanelActive(location.pathname === '/register'); }, [
   useEffect(() => {
+    // Gọi/thực thi setIsRightPanelActive với đối số để cập nhật logic/giao diện: setIsRightPanelActive(location.pathname === '/register')
     setIsRightPanelActive(location.pathname === '/register');
   }, [location.pathname]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => () => { if (authNavigationTimer.current) clearTimeout(authNaviga
   useEffect(() => () => {
+    // if chỉ chạy nhánh này khi điều kiện authNavigationTimer.current đúng.
     if (authNavigationTimer.current) clearTimeout(authNavigationTimer.current);
   }, []);
 
+  /**
+   * Hàm/thành phần switchAuthMode: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: register.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setIsRightPanelActive, clearTimeout, setTimeout, navigate.
+   */
   function switchAuthMode(register: boolean) {
+    // Gọi/thực thi setIsRightPanelActive với đối số để cập nhật logic/giao diện: setIsRightPanelActive(register)
     setIsRightPanelActive(register);
+    // if chỉ chạy nhánh này khi điều kiện authNavigationTimer.current đúng.
     if (authNavigationTimer.current) clearTimeout(authNavigationTimer.current);
+    // Gọi/thực thi setTimeout với đối số để cập nhật logic/giao diện: authNavigationTimer.current = setTimeout(() => { authNavigationTimer.current = n
     authNavigationTimer.current = setTimeout(() => {
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: authNavigationTimer.current = null
       authNavigationTimer.current = null;
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(register ? '/register' : '/login', { state: location.state })
       navigate(register ? '/register' : '/login', { state: location.state });
     }, 720);
   }
 
   // ================= 1. LOGIC ĐĂNG NHẬP & VALIDATION =================
+  // Biến [loginEmail, setLoginEmail] nhận giá trị từ useState(searchParams.get('email') ?? ''). const không gán lại; let có thể cập nhật.
   const [loginEmail, setLoginEmail] = useState(searchParams.get('email') ?? '');
+  // Biến [loginPassword, setLoginPassword] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [loginPassword, setLoginPassword] = useState('');
+  // Biến [showLoginPassword, setShowLoginPas nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  // Biến [loginError, setLoginError] nhận giá trị từ useState( searchParams.get('forbidden') ? 'Tài khoản nà. const không gán lại; let có thể cập nhật.
   const [loginError, setLoginError] = useState(
     searchParams.get('forbidden') ? 'Tài khoản này không có quyền quản trị.' : ''
   );
+  // Biến [loginSubmitting, setLoginSubmittin nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [loginSubmitting, setLoginSubmitting] = useState(false);
+  // Biến emailVerified nhận giá trị từ searchParams.get('verified') === '1'. const không gán lại; let có thể cập nhật.
   const emailVerified = searchParams.get('verified') === '1';
 
   // Validation lỗi cho ô đăng nhập
+  // Biến [loginEmailError, setLoginEmailErro nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [loginEmailError, setLoginEmailError] = useState('');
+  // Biến [loginPasswordError, setLoginPasswo nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [loginPasswordError, setLoginPasswordError] = useState('');
 
+/**
+ * Hàm/thành phần SocialAuthButtons: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: alert, return, handleSocialClick.
+ */
 function SocialAuthButtons() {
+  /**
+   * Hàm/thành phần handleSocialClick: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: provider.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: alert.
+   */
   const handleSocialClick = (provider: string) => {
+    // Gọi/thực thi alert với đối số để cập nhật logic/giao diện: alert(`Chức năng đăng nhập bằng ${provider} đang được phát triển.`)
     alert(`Chức năng đăng nhập bằng ${provider} đang được phát triển.`);
   };
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="pt-2"> <p className="text-[11px] font-semibold text-slate-400 .
   return (
     <div className="pt-2">
       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -125,173 +208,306 @@ function SocialAuthButtons() {
   );
 }
 
+  /**
+   * Hàm/thành phần validateLoginForm: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setLoginEmailError, setLoginPasswordError, trim, test.
+   */
   function validateLoginForm(): boolean {
+    // Biến isValid nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let isValid = true;
+    // Gọi/thực thi setLoginEmailError với đối số để cập nhật logic/giao diện: setLoginEmailError('')
     setLoginEmailError('');
+    // Gọi/thực thi setLoginPasswordError với đối số để cập nhật logic/giao diện: setLoginPasswordError('')
     setLoginPasswordError('');
 
+    // if chỉ chạy nhánh này khi điều kiện !loginEmail.trim() đúng.
     if (!loginEmail.trim()) {
+      // Gọi/thực thi setLoginEmailError với đối số để cập nhật logic/giao diện: setLoginEmailError('Vui lòng nhập Email')
       setLoginEmailError('Vui lòng nhập Email');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail.trim())) {
+      // Gọi/thực thi setLoginEmailError với đối số để cập nhật logic/giao diện: setLoginEmailError('Email không hợp lệ')
       setLoginEmailError('Email không hợp lệ');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // if chỉ chạy nhánh này khi điều kiện !loginPassword đúng.
     if (!loginPassword) {
+      // Gọi/thực thi setLoginPasswordError với đối số để cập nhật logic/giao diện: setLoginPasswordError('Vui lòng nhập Mật khẩu')
       setLoginPasswordError('Vui lòng nhập Mật khẩu');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: isValid.
     return isValid;
   }
 
+  /**
+   * Hàm/thành phần handleLoginSubmit: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setLoginError, validateLoginForm, setLoginSubmitting, loginAdmin, trim, toLowerCase, login.
+   */
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi setLoginError với đối số để cập nhật logic/giao diện: setLoginError('')
     setLoginError('');
 
+    // if chỉ chạy nhánh này khi điều kiện !validateLoginForm() đúng.
     if (!validateLoginForm()) return;
 
+    // Gọi/thực thi setLoginSubmitting với đối số để cập nhật logic/giao diện: setLoginSubmitting(true)
     setLoginSubmitting(true);
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến account nhận giá trị từ admin ? await loginAdmin(loginEmail.trim().toLowerCase(. const không gán lại; let có thể cập nhật.
       const account = admin
         ? await loginAdmin(loginEmail.trim().toLowerCase(), loginPassword)
         : await login(loginEmail.trim().toLowerCase(), loginPassword);
 
+      // if chỉ chạy nhánh này khi điều kiện account && account.role !== (admin ? 'ADMIN' : 'USER') đúng.
       if (account && account.role !== (admin ? 'ADMIN' : 'USER')) {
+        // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await logout()
         await logout();
+        // Gọi/thực thi setLoginError với đối số để cập nhật logic/giao diện: setLoginError( admin ? 'Tài khoản chưa được cấp quyền ADMIN.' : 'Vui lòng đăng n
         setLoginError(
           admin ? 'Tài khoản chưa được cấp quyền ADMIN.' : 'Vui lòng đăng nhập tài khoản độc giả.'
         );
+        // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
         return;
       }
 
+      // Biến target nhận giá trị từ admin ? safeReturnPath((location.state as { from?: stri. const không gán lại; let có thể cập nhật.
       const target = admin
         ? safeReturnPath((location.state as { from?: string } | null)?.from, '/admin/dashboard', '/admin')
         : safeReturnPath((location.state as { from?: string } | null)?.from, '/', '/');
+      // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(target, { replace: true })
       navigate(target, { replace: true });
     } catch (err: unknown) {
+      // Gọi/thực thi setLoginError với đối số để cập nhật logic/giao diện: setLoginError(errorMessage(err) || 'Đăng nhập thất bại.')
       setLoginError(errorMessage(err) || 'Đăng nhập thất bại.');
     } finally {
+      // Gọi/thực thi setLoginSubmitting với đối số để cập nhật logic/giao diện: setLoginSubmitting(false)
       setLoginSubmitting(false);
     }
   }
 
   // ================= 2. LOGIC ĐĂNG KÝ, OTP & VALIDATION =================
+  // Biến [regName, setRegName] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regName, setRegName] = useState('');
+  // Biến [regPhone, setRegPhone] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regPhone, setRegPhone] = useState('');
+  // Biến [regEmail, setRegEmail] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regEmail, setRegEmail] = useState('');
+  // Biến [regPassword, setRegPassword] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regPassword, setRegPassword] = useState('');
+  // Biến [showRegPassword, setShowRegPasswor nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [showRegPassword, setShowRegPassword] = useState(false);
+  // Biến [regError, setRegError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regError, setRegError] = useState('');
+  // Biến [stepOtp, setStepOtp] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [stepOtp, setStepOtp] = useState(false);
+  // Biến [verified, setVerified] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [verified, setVerified] = useState(false);
+  // Biến [otp, setOtp] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [otp, setOtp] = useState('');
+  // Biến [regSubmitting, setRegSubmitting] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [regSubmitting, setRegSubmitting] = useState(false);
 
   // Validation lỗi cho ô đăng ký
+  // Biến [regNameError, setRegNameError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regNameError, setRegNameError] = useState('');
+  // Biến [regPhoneError, setRegPhoneError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regPhoneError, setRegPhoneError] = useState('');
+  // Biến [regEmailError, setRegEmailError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regEmailError, setRegEmailError] = useState('');
+  // Biến [regPasswordError, setRegPasswordEr nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [regPasswordError, setRegPasswordError] = useState('');
+  // Biến [otpError, setOtpError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [otpError, setOtpError] = useState('');
 
+  /**
+   * Hàm/thành phần validateRegisterForm: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setRegNameError, setRegPhoneError, setRegEmailError, setRegPasswordError, trim, test.
+   */
   function validateRegisterForm(): boolean {
+    // Biến isValid nhận giá trị từ true. const không gán lại; let có thể cập nhật.
     let isValid = true;
+    // Gọi/thực thi setRegNameError với đối số để cập nhật logic/giao diện: setRegNameError('')
     setRegNameError('');
+    // Gọi/thực thi setRegPhoneError với đối số để cập nhật logic/giao diện: setRegPhoneError('')
     setRegPhoneError('');
+    // Gọi/thực thi setRegEmailError với đối số để cập nhật logic/giao diện: setRegEmailError('')
     setRegEmailError('');
+    // Gọi/thực thi setRegPasswordError với đối số để cập nhật logic/giao diện: setRegPasswordError('')
     setRegPasswordError('');
 
+    // if chỉ chạy nhánh này khi điều kiện !regName.trim() đúng.
     if (!regName.trim()) {
+      // Gọi/thực thi setRegNameError với đối số để cập nhật logic/giao diện: setRegNameError('Vui lòng nhập Họ và tên')
       setRegNameError('Vui lòng nhập Họ và tên');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // if chỉ chạy nhánh này khi điều kiện regPhone.trim() && !/^\+?[0-9()\s-]{7,12}$/.test(regPhone.trim()) đúng.
     if (regPhone.trim() && !/^\+?[0-9()\s-]{7,12}$/.test(regPhone.trim())) {
+      // Gọi/thực thi setRegPhoneError với đối số để cập nhật logic/giao diện: setRegPhoneError('Số điện thoại không hợp lệ (7–12 ký tự số)')
       setRegPhoneError('Số điện thoại không hợp lệ (7–12 ký tự số)');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // if chỉ chạy nhánh này khi điều kiện !regEmail.trim() đúng.
     if (!regEmail.trim()) {
+      // Gọi/thực thi setRegEmailError với đối số để cập nhật logic/giao diện: setRegEmailError('Vui lòng nhập Email')
       setRegEmailError('Vui lòng nhập Email');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.trim())) {
+      // Gọi/thực thi setRegEmailError với đối số để cập nhật logic/giao diện: setRegEmailError('Email không đúng định dạng')
       setRegEmailError('Email không đúng định dạng');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // if chỉ chạy nhánh này khi điều kiện !regPassword đúng.
     if (!regPassword) {
+      // Gọi/thực thi setRegPasswordError với đối số để cập nhật logic/giao diện: setRegPasswordError('Vui lòng nhập Mật khẩu')
       setRegPasswordError('Vui lòng nhập Mật khẩu');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     } else if (regPassword.length < 8 || regPassword.length > 128) {
+      // Gọi/thực thi setRegPasswordError với đối số để cập nhật logic/giao diện: setRegPasswordError('Mật khẩu cần từ 8 đến 128 ký tự')
       setRegPasswordError('Mật khẩu cần từ 8 đến 128 ký tự');
+      // Gọi/thực thi biểu thức để cập nhật logic/giao diện: isValid = false
       isValid = false;
     }
 
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: isValid.
     return isValid;
   }
 
+  /**
+   * Hàm/thành phần handleRegisterSubmit: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setRegError, validateRegisterForm, setRegSubmitting, requestRegistrationCode, trim, toLowerCase, setStepOtp.
+   */
   async function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError('')
     setRegError('');
 
+    // if chỉ chạy nhánh này khi điều kiện !validateRegisterForm() đúng.
     if (!validateRegisterForm()) return;
 
+    // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(true)
     setRegSubmitting(true);
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await requestRegistrationCode(regName.trim(), regPhone.trim(), regEmail.trim().t
       await requestRegistrationCode(regName.trim(), regPhone.trim(), regEmail.trim().toLowerCase(), regPassword);
+      // Gọi/thực thi setStepOtp với đối số để cập nhật logic/giao diện: setStepOtp(true)
       setStepOtp(true);
     } catch (err: unknown) {
+      // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError(errorMessage(err) || 'Gửi mã xác nhận thất bại.')
       setRegError(errorMessage(err) || 'Gửi mã xác nhận thất bại.');
     } finally {
+      // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(false)
       setRegSubmitting(false);
     }
   }
 
+  /**
+   * Hàm/thành phần handleVerificationSubmit: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setRegError, setOtpError, trim, setRegSubmitting, verifyRegistrationEmail, toLowerCase, setVerified.
+   */
   async function handleVerificationSubmit(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError('')
     setRegError('');
+    // Gọi/thực thi setOtpError với đối số để cập nhật logic/giao diện: setOtpError('')
     setOtpError('');
 
+    // if chỉ chạy nhánh này khi điều kiện !otp.trim() || otp.length !== 6 đúng.
     if (!otp.trim() || otp.length !== 6) {
+      // Gọi/thực thi setOtpError với đối số để cập nhật logic/giao diện: setOtpError('Vui lòng nhập đủ 6 số OTP')
       setOtpError('Vui lòng nhập đủ 6 số OTP');
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
 
+    // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(true)
     setRegSubmitting(true);
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await verifyRegistrationEmail(regEmail.trim().toLowerCase(), otp.trim())
       await verifyRegistrationEmail(regEmail.trim().toLowerCase(), otp.trim());
+      // Gọi/thực thi setVerified với đối số để cập nhật logic/giao diện: setVerified(true)
       setVerified(true);
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await logout()
       await logout();
     } catch (err: unknown) {
+      // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError(errorMessage(err) || 'Xác thực OTP thất bại.')
       setRegError(errorMessage(err) || 'Xác thực OTP thất bại.');
     } finally {
+      // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(false)
       setRegSubmitting(false);
     }
   }
 
+  /**
+   * Hàm/thành phần handleResendCode: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setRegError, setRegSubmitting, resendRegistrationCode, trim, toLowerCase, alert, errorMessage.
+   */
   async function handleResendCode() {
+    // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError('')
     setRegError('');
+    // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(true)
     setRegSubmitting(true);
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await resendRegistrationCode(regEmail.trim().toLowerCase())
       await resendRegistrationCode(regEmail.trim().toLowerCase());
+      // Gọi/thực thi alert với đối số để cập nhật logic/giao diện: alert('Đã gửi lại mã OTP!')
       alert('Đã gửi lại mã OTP!');
     } catch (err: unknown) {
+      // Gọi/thực thi setRegError với đối số để cập nhật logic/giao diện: setRegError(errorMessage(err) || 'Không thể gửi lại OTP.')
       setRegError(errorMessage(err) || 'Không thể gửi lại OTP.');
     } finally {
+      // Gọi/thực thi setRegSubmitting với đối số để cập nhật logic/giao diện: setRegSubmitting(false)
       setRegSubmitting(false);
     }
   }
 
   // Redirect only after all hooks have been initialized on every render.
+  // if chỉ chạy nhánh này khi điều kiện admin && user?.role === 'ADMIN' đúng.
   if (admin && user?.role === 'ADMIN') {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: <Navigate to="/admin/dashboard" replace />.
     return <Navigate to="/admin/dashboard" replace />;
   }
+  // if chỉ chạy nhánh này khi điều kiện !admin && user?.role === 'USER' đúng.
   if (!admin && user?.role === 'USER') {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: <Navigate to="/" replace />.
     return <Navigate to="/" replace />;
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <main className="min-h-screen bg-[#f4f3ef] flex items-center justify-center p-.
   return (
     <main className="min-h-screen bg-[#f4f3ef] flex items-center justify-center p-4">
       <div 
@@ -330,7 +546,9 @@ function SocialAuthButtons() {
                     placeholder="••••••" 
                     value={otp} 
                     onChange={(e) => {
+                      // Gọi/thực thi setOtp với đối số để cập nhật logic/giao diện: setOtp(e.target.value.replace(/\D/g, ''))
                       setOtp(e.target.value.replace(/\D/g, ''));
+                      // Gọi/thực thi setOtpError với đối số để cập nhật logic/giao diện: setOtpError('')
                       setOtpError('');
                     }} 
                     className={`form-input text-center text-xl tracking-[0.3em] font-bold h-12 ${

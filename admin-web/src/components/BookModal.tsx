@@ -1,8 +1,16 @@
+// Import { useEffect, useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/components/BookModal.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useEffect, useState, type FormEvent } from 'react';
+// Import { BookOpen, ImagePlus, X } từ lucide-react để dùng trong giao diện.
 import { BookOpen, ImagePlus, X } from 'lucide-react';
+// Import type { Book } từ ../types để dùng trong giao diện.
 import type { Book } from '../types';
+// Import type { BookFormPayload } từ ../api/client để dùng trong giao diện.
 import type { BookFormPayload } from '../api/client';
 
+// Biến initialForm nhận giá trị từ { title: '', author_name: '', category: 'ebook', genre:. const không gán lại; let có thể cập nhật.
 const initialForm: BookFormPayload = {
   title: '',
   author_name: '',
@@ -16,6 +24,12 @@ const initialForm: BookFormPayload = {
 };
 
 // Hàm BookModal: Hiển thị form tạo/sửa metadata đúng với Book model và không nhận trường giá chưa được backend hỗ trợ.
+/**
+ * Hàm/thành phần BookModal: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { book, saving, uploadProgress = 0, onCl.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, useEffect, setForm, setPdfFile, setFormError, submitForm, preventDefault, onSave.
+ */
 export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }: {
   book: Book | null;
   saving: boolean;
@@ -23,12 +37,18 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
   onClose: () => void;
   onSave: (payload: BookFormPayload, pdfFile: File | null) => Promise<void>;
 }) {
+  // Biến [form, setForm] nhận giá trị từ useState<BookFormPayload>(initialForm). const không gán lại; let có thể cập nhật.
   const [form, setForm] = useState<BookFormPayload>(initialForm);
+  // Biến [pdfFile, setPdfFile] nhận giá trị từ useState<File | null>(null). const không gán lại; let có thể cập nhật.
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  // Biến [formError, setFormError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [formError, setFormError] = useState('');
+  // Biến pdfSupported nhận giá trị từ form.category !== 'audiobook'. const không gán lại; let có thể cập nhật.
   const pdfSupported = form.category !== 'audiobook';
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { setForm(book ? { title: book.title, author_name: book.author_n
   useEffect(() => {
+    // Gọi/thực thi setForm với đối số để cập nhật logic/giao diện: setForm(book ? { title: book.title, author_name: book.author_name, category: boo
     setForm(book ? {
       title: book.title,
       author_name: book.author_name,
@@ -40,20 +60,40 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
       access_level: book.access_level,
       status: book.status,
     } : initialForm);
+    // Gọi/thực thi setPdfFile với đối số để cập nhật logic/giao diện: setPdfFile(null)
     setPdfFile(null);
+    // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError('')
     setFormError('');
   }, [book]);
 
   // Hàm updateField: Cập nhật một thuộc tính form theo kiểu dữ liệu của payload API.
+  /**
+   * Hàm/thành phần updateField: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: field, value.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setForm.
+   */
   function updateField<K extends keyof BookFormPayload>(field: K, value: BookFormPayload[K]) {
+    // Gọi/thực thi setForm với đối số để cập nhật logic/giao diện: setForm((current) => ({ ...current, [field]: value }))
     setForm((current) => ({ ...current, [field]: value }));
   }
 
   // Hàm submitForm: Kiểm tra trường bắt buộc, chuyển năm xuất bản sang number và gửi payload tới callback lưu.
+  /**
+   * Hàm/thành phần submitForm: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setFormError, onSave, trim.
+   * Được tham chiếu tại: admin-web/src/components/ChapterModal.tsx.
+   */
   async function submitForm(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError('')
     setFormError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await onSave({ ...form, title: form.title.trim(), author_name: form.author_name.
       await onSave({
         ...form,
         title: form.title.trim(),
@@ -61,12 +101,15 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
         publication_year: form.publication_year || null,
       }, pdfFile);
     } catch (error) {
+      // Gọi/thực thi setFormError với đối số để cập nhật logic/giao diện: setFormError(error instanceof Error ? error.message : 'Không thể lưu thông tin s
       setFormError(error instanceof Error ? error.message : 'Không thể lưu thông tin sách.');
     }
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { .
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+      // if chỉ chạy nhánh này khi điều kiện event.target === event.currentTarget && !saving đúng.
       if (event.target === event.currentTarget && !saving) onClose();
     }}>
       <section aria-labelledby="book-modal-title" aria-modal="true" className="modal-panel" role="dialog">
@@ -98,8 +141,11 @@ export function BookModal({ book, saving, uploadProgress = 0, onClose, onSave }:
             <label className="field-label">
               Hình thức nội dung <span className="text-rose-600">*</span>
               <select className="form-input mt-2" onChange={(event) => {
+                // Biến nextCategory nhận giá trị từ event.target.value as BookFormPayload['category']. const không gán lại; let có thể cập nhật.
                 const nextCategory = event.target.value as BookFormPayload['category'];
+                // Gọi/thực thi updateField với đối số để cập nhật logic/giao diện: updateField('category', nextCategory)
                 updateField('category', nextCategory);
+                // if chỉ chạy nhánh này khi điều kiện nextCategory === 'audiobook' đúng.
                 if (nextCategory === 'audiobook') setPdfFile(null);
               }} value={form.category}>
                 <option value="ebook">E-book</option>

@@ -1,86 +1,158 @@
+// Import { useCallback, useEffect, useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/BookManagement.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+// Import { AlertCircle, ArrowDownWideNarrow, BookPlus, Check, FileUp, Filter, LoaderCircl từ lucide-react để dùng trong giao diện.
 import { AlertCircle, ArrowDownWideNarrow, BookPlus, Check, FileUp, Filter, LoaderCircle, Search, Trash2, X } from 'lucide-react';
+// Import { BookModal } từ ../components/BookModal để dùng trong giao diện.
 import { BookModal } from '../components/BookModal';
+// Import { BookTable } từ ../components/BookTable để dùng trong giao diện.
 import { BookTable } from '../components/BookTable';
+// Import { Pagination } từ ../components/Pagination để dùng trong giao diện.
 import { Pagination } from '../components/Pagination';
+// Import { AdminLayout } từ ../components/AdminLayout để dùng trong giao diện.
 import { AdminLayout } from '../components/AdminLayout';
+// Import { api, createBook, deleteBook, errorMessage, fetchBooks, updateBook, uploadBookF từ ../api/client để dùng trong giao diện.
 import {
   api, createBook, deleteBook, errorMessage, fetchBooks, updateBook, uploadBookFile, 
   type BookFormPayload,
 } from '../api/client';
+// Import type { Book, PaginationData } từ ../types để dùng trong giao diện.
 import type { Book, PaginationData } from '../types';
+// Import { useNavigate, useSearchParams } từ react-router-dom để dùng trong giao diện.
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+// Biến token nhận giá trị từ localStorage.getItem('openbook.access_token') ?? ''. const không gán lại; let có thể cập nhật.
 const token = localStorage.getItem('openbook.access_token') ?? '';
+// Biến emptyPagination nhận giá trị từ { total: 0, page: 1, limit: 20, totalPages: 0 }. const không gán lại; let có thể cập nhật.
 const emptyPagination: PaginationData = { total: 0, page: 1, limit: 20, totalPages: 0 };
 
 // Hàm BookManagement: Quản lý tìm kiếm, lọc, phân trang và CRUD danh sách sách dùng API admin.
+/**
+ * Hàm/thành phần BookManagement: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, useNavigate, useSearchParams, get, useEffect, setSearchInput, setSearch, setPage.
+ */
 export function BookManagement() {
+  // Biến [books, setBooks] nhận giá trị từ useState<Book[]>([]). const không gán lại; let có thể cập nhật.
   const [books, setBooks] = useState<Book[]>([]);
+  // Biến [pagination, setPagination] nhận giá trị từ useState(emptyPagination). const không gán lại; let có thể cập nhật.
   const [pagination, setPagination] = useState(emptyPagination);
+  // Biến [searchInput, setSearchInput] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [searchInput, setSearchInput] = useState('');
+  // Biến [search, setSearch] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [search, setSearch] = useState('');
+  // Biến [category, setCategory] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [category, setCategory] = useState('');
+  // Biến [status, setStatus] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [status, setStatus] = useState('');
+  // Biến [page, setPage] nhận giá trị từ useState(1). const không gán lại; let có thể cập nhật.
   const [page, setPage] = useState(1);
+  // Biến [loading, setLoading] nhận giá trị từ useState(true). const không gán lại; let có thể cập nhật.
   const [loading, setLoading] = useState(true);
+  // Biến [saving, setSaving] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [saving, setSaving] = useState(false);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
+  // Biến [notice, setNotice] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [notice, setNotice] = useState('');
+  // Biến [selectedBook, setSelectedBook] nhận giá trị từ useState<Book | null>(null). const không gán lại; let có thể cập nhật.
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  // Biến [modalOpen, setModalOpen] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [modalOpen, setModalOpen] = useState(false);
+  // Biến [pendingDelete, setPendingDelete] nhận giá trị từ useState<Book | null>(null). const không gán lại; let có thể cập nhật.
   const [pendingDelete, setPendingDelete] = useState<Book | null>(null);
+  // Biến [uploadBook, setUploadBook] nhận giá trị từ useState<Book | null>(null). const không gán lại; let có thể cập nhật.
   const [uploadBook, setUploadBook] = useState<Book | null>(null);
+  // Biến [uploadFile, setUploadFile] nhận giá trị từ useState<File | null>(null). const không gán lại; let có thể cập nhật.
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  // Biến [uploadProgress, setUploadProgress] nhận giá trị từ useState(0). const không gán lại; let có thể cập nhật.
   const [uploadProgress, setUploadProgress] = useState(0);
+  // Biến navigate nhận giá trị từ useNavigate(). const không gán lại; let có thể cập nhật.
   const navigate = useNavigate();
+  // Biến [searchParams, setSearchParams] nhận giá trị từ useSearchParams(). const không gán lại; let có thể cập nhật.
   const [searchParams, setSearchParams] = useSearchParams();
+  // Biến urlSearch nhận giá trị từ searchParams.get('search') ?? ''. const không gán lại; let có thể cập nhật.
   const urlSearch = searchParams.get('search') ?? '';
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { setSearchInput(urlSearch); setSearch(urlSearch); setPage(1); }
   useEffect(() => {
+    // Gọi/thực thi setSearchInput với đối số để cập nhật logic/giao diện: setSearchInput(urlSearch)
     setSearchInput(urlSearch);
+    // Gọi/thực thi setSearch với đối số để cập nhật logic/giao diện: setSearch(urlSearch)
     setSearch(urlSearch);
+    // Gọi/thực thi setPage với đối số để cập nhật logic/giao diện: setPage(1)
     setPage(1);
   }, [urlSearch]);
 
   // Hỗ trợ điều hướng từ thanh tìm kiếm toàn cục và thao tác nhanh trên dashboard.
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { const action = searchParams.get('action'); if (action === 'cre
   useEffect(() => {
+    // Biến action nhận giá trị từ searchParams.get('action'). const không gán lại; let có thể cập nhật.
     const action = searchParams.get('action');
+    // if chỉ chạy nhánh này khi điều kiện action === 'create' đúng.
     if (action === 'create') {
+      // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(null)
       setSelectedBook(null);
+      // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(true)
       setModalOpen(true);
+      // Biến nextParams nhận giá trị từ new URLSearchParams(searchParams). const không gán lại; let có thể cập nhật.
       const nextParams = new URLSearchParams(searchParams);
+      // Gọi/thực thi nextParams.delete với đối số để cập nhật logic/giao diện: nextParams.delete('action')
       nextParams.delete('action');
+      // Gọi/thực thi setSearchParams với đối số để cập nhật logic/giao diện: setSearchParams(nextParams, { replace: true })
       setSearchParams(nextParams, { replace: true });
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
 
+    // Biến editId nhận giá trị từ searchParams.get('edit'). const không gán lại; let có thể cập nhật.
     const editId = searchParams.get('edit');
+    // if chỉ chạy nhánh này khi điều kiện editId && books.length > 0 đúng.
     if (editId && books.length > 0) {
+      // Biến bookToEdit nhận giá trị từ books.find((book) => book._id === editId). const không gán lại; let có thể cập nhật.
       const bookToEdit = books.find((book) => book._id === editId);
+      // if chỉ chạy nhánh này khi điều kiện bookToEdit đúng.
       if (bookToEdit) {
+        // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(bookToEdit)
         setSelectedBook(bookToEdit);
+        // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(true)
         setModalOpen(true);
+        // Biến nextParams nhận giá trị từ new URLSearchParams(searchParams). const không gán lại; let có thể cập nhật.
         const nextParams = new URLSearchParams(searchParams);
+        // Gọi/thực thi nextParams.delete với đối số để cập nhật logic/giao diện: nextParams.delete('edit')
         nextParams.delete('edit');
+        // Gọi/thực thi setSearchParams với đối số để cập nhật logic/giao diện: setSearchParams(nextParams, { replace: true })
         setSearchParams(nextParams, { replace: true });
       }
     }
   }, [searchParams, setSearchParams, books]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { const timeout = window.setTimeout(() => { setPage(1); setSearc
   useEffect(() => {
+    // Biến timeout nhận giá trị từ window.setTimeout(() => { setPage(1); setSearch(searchI. const không gán lại; let có thể cập nhật.
     const timeout = window.setTimeout(() => {
+      // Gọi/thực thi setPage với đối số để cập nhật logic/giao diện: setPage(1)
       setPage(1);
+      // Gọi/thực thi setSearch với đối số để cập nhật logic/giao diện: setSearch(searchInput.trim())
       setSearch(searchInput.trim());
     }, 250);
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: () => window.clearTimeout(timeout).
     return () => window.clearTimeout(timeout);
   }, [searchInput]);
 
   // Hàm loadBooks: Tải dữ liệu trang hiện tại, đồng bộ filter và phân trang trả từ backend.
+  // Biến loadBooks nhận giá trị từ useCallback(async () => { setLoading(true); setError(''. const không gán lại; let có thể cập nhật.
   const loadBooks = useCallback(async () => {
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
     setLoading(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến result nhận giá trị từ await fetchBooks({ page, limit: pagination.limit, ...(s. const không gán lại; let có thể cập nhật.
       const result = await fetchBooks({
         page,
         limit: pagination.limit,
@@ -88,77 +160,133 @@ export function BookManagement() {
         ...(category ? { category } : {}),
         ...(status ? { status } : {}),
       });
+      // Gọi/thực thi setBooks với đối số để cập nhật logic/giao diện: setBooks(result.books)
       setBooks(result.books);
+      // Gọi/thực thi setPagination với đối số để cập nhật logic/giao diện: setPagination(result.pagination)
       setPagination(result.pagination);
     } catch (loadError) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(loadError))
       setError(errorMessage(loadError));
     } finally {
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
       setLoading(false);
     }
   }, [page, pagination.limit, search, category, status]);
 
+  // Gọi/thực thi useEffect với đối số để cập nhật logic/giao diện: useEffect(() => { void loadBooks(); }, [loadBooks])
   useEffect(() => { void loadBooks(); }, [loadBooks]);
 
   // Hàm saveBook: Tạo sách mới kèm PDF trong một multipart request; sách hiện có cập nhật rồi tải file riêng.
+  /**
+   * Hàm/thành phần saveBook: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: payload, pdfFile.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSaving, setError, toLowerCase, endsWith, Error, updateBook, setModalOpen, setSelectedBook.
+   */
   async function saveBook(payload: BookFormPayload, pdfFile: File | null) {
+    // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(true)
     setSaving(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // if chỉ chạy nhánh này khi điều kiện pdfFile && (pdfFile.type !== 'application/pdf' || !pdfFile.name.toLowerCase().en đúng.
       if (pdfFile && (pdfFile.type !== 'application/pdf' || !pdfFile.name.toLowerCase().endsWith('.pdf'))) {
+        // throw phát sinh lỗi để hàm gọi phía trên xử lý.
         throw new Error('Chỉ chấp nhận file PDF.');
       }
+      // if chỉ chạy nhánh này khi điều kiện pdfFile && pdfFile.size > 100 * 1024 * 1024 đúng.
       if (pdfFile && pdfFile.size > 100 * 1024 * 1024) {
+        // throw phát sinh lỗi để hàm gọi phía trên xử lý.
         throw new Error('File PDF vượt quá giới hạn 100 MiB.');
       }
+      // if chỉ chạy nhánh này khi điều kiện selectedBook đúng.
       if (selectedBook) {
+        // Biến savedBook nhận giá trị từ await updateBook(selectedBook._id, payload). const không gán lại; let có thể cập nhật.
         const savedBook = await updateBook(selectedBook._id, payload);
+        // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(false)
         setModalOpen(false);
+        // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(null)
         setSelectedBook(null);
+        // if chỉ chạy nhánh này khi điều kiện pdfFile đúng.
         if (pdfFile) {
+          // Gọi/thực thi setUploadBook với đối số để cập nhật logic/giao diện: setUploadBook(savedBook)
           setUploadBook(savedBook);
+          // Gọi/thực thi setUploadFile với đối số để cập nhật logic/giao diện: setUploadFile(pdfFile)
           setUploadFile(pdfFile);
+          // Gọi/thực thi setUploadProgress với đối số để cập nhật logic/giao diện: setUploadProgress(0)
           setUploadProgress(0);
+          // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
           try {
+            // Biến result nhận giá trị từ await uploadBookFile(savedBook._id, pdfFile, setUploadP. const không gán lại; let có thể cập nhật.
             const result = await uploadBookFile(savedBook._id, pdfFile, setUploadProgress);
+            // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(`Đã cập nhật sách và tải lên file PDF “${result.original_name}”.`)
             setNotice(`Đã cập nhật sách và tải lên file PDF “${result.original_name}”.`);
+            // Gọi/thực thi setUploadBook với đối số để cập nhật logic/giao diện: setUploadBook(null)
             setUploadBook(null);
+            // Gọi/thực thi setUploadFile với đối số để cập nhật logic/giao diện: setUploadFile(null)
             setUploadFile(null);
           } catch (uploadError) {
+            // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(`Thông tin sách đã lưu nhưng PDF chưa được tải lên: ${errorMessage(uplo
             setError(`Thông tin sách đã lưu nhưng PDF chưa được tải lên: ${errorMessage(uploadError)}`);
           }
         } else {
+          // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice('Đã cập nhật thông tin sách.')
           setNotice('Đã cập nhật thông tin sách.');
         }
       } else {
+        // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await createBook(payload, pdfFile, setUploadProgress)
         await createBook(payload, pdfFile, setUploadProgress);
+        // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(false)
         setModalOpen(false);
+        // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(pdfFile ? 'Đã tạo đầu sách và tải lên file PDF.' : 'Đã thêm đầu sách m
         setNotice(pdfFile ? 'Đã tạo đầu sách và tải lên file PDF.' : 'Đã thêm đầu sách mới.');
       }
+      // if chỉ chạy nhánh này khi điều kiện !selectedBook && page > 1 đúng.
       if (!selectedBook && page > 1) {
+        // Gọi/thực thi setPage với đối số để cập nhật logic/giao diện: setPage(1)
         setPage(1);
+        // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
         return;
       }
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await loadBooks()
       await loadBooks();
     } catch (saveError) {
+      // throw phát sinh lỗi để hàm gọi phía trên xử lý.
       throw new Error(errorMessage(saveError));
     } finally {
+      // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(false)
       setSaving(false);
     }
   }
 
+/**
+ * Hàm/thành phần handleImportExcel: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: e.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: FormData, append, setLoading, localStorage, getItem, post, setNotice, loadBooks.
+ */
 async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
+  // Biến file nhận giá trị từ e.target.files?.[0]. const không gán lại; let có thể cập nhật.
   const file = e.target.files?.[0];
+  // if chỉ chạy nhánh này khi điều kiện !file đúng.
   if (!file) return;
 
+  // Biến formData nhận giá trị từ new FormData(). const không gán lại; let có thể cập nhật.
   const formData = new FormData();
+  // Gọi/thực thi formData.append với đối số để cập nhật logic/giao diện: formData.append('file', file)
   formData.append('file', file);
 
+  // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
   try {
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
     setLoading(true);
 
     // Lấy token xác thực của admin từ localStorage (khóa 'openbook.access_token' được thấy trong code của bạn)
+    // Biến token nhận giá trị từ localStorage.getItem('openbook.access_token'). const không gán lại; let có thể cập nhật.
     const token = localStorage.getItem('openbook.access_token');
 
+    // Biến response nhận giá trị từ await api.post('/books/import-excel', formData, { heade. const không gán lại; let có thể cập nhật.
     const response = await api.post('/books/import-excel', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -166,76 +294,148 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
       },
     });
 
+    // Biến result nhận giá trị từ response.data. const không gán lại; let có thể cập nhật.
     const result = response.data;
+    // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(result.message || 'Đã nhập dữ liệu sách thành công.')
     setNotice(result.message || 'Đã nhập dữ liệu sách thành công.');
+    // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await loadBooks()
     await loadBooks();
   } catch (err) {
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(err))
     setError(errorMessage(err));
   } finally {
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
     setLoading(false);
+    // Gọi/thực thi biểu thức để cập nhật logic/giao diện: e.target.value = ''
     e.target.value = '';
   }
 }
 
   // Hàm confirmDelete: Gửi lệnh xóa sau xác nhận và tải lại danh sách hiện tại.
+  /**
+   * Hàm/thành phần confirmDelete: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSaving, setError, deleteBook, setNotice, setPendingDelete, setPage, loadBooks, errorMessage.
+   * Được tham chiếu tại: admin-web/src/pages/ChapterManagement.tsx, admin-web/src/pages/UserManagement.tsx, admin-web/src/pages/ReportManagement.tsx.
+   */
   async function confirmDelete() {
+    // if chỉ chạy nhánh này khi điều kiện !pendingDelete đúng.
     if (!pendingDelete) return;
+    // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(true)
     setSaving(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // await chờ tác vụ bất đồng bộ hoàn tất rồi mới cập nhật giao diện/trạng thái: await deleteBook(pendingDelete._id)
       await deleteBook(pendingDelete._id);
+      // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(`Đã xóa “${pendingDelete.title}” và dữ liệu liên quan.`)
       setNotice(`Đã xóa “${pendingDelete.title}” và dữ liệu liên quan.`);
+      // Gọi/thực thi setPendingDelete với đối số để cập nhật logic/giao diện: setPendingDelete(null)
       setPendingDelete(null);
+      // if chỉ chạy nhánh này khi điều kiện books.length === 1 && page > 1 đúng.
       if (books.length === 1 && page > 1) setPage((current) => current - 1);
       else await loadBooks();
     } catch (deleteError) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(deleteError))
       setError(errorMessage(deleteError));
+      // Gọi/thực thi setPendingDelete với đối số để cập nhật logic/giao diện: setPendingDelete(null)
       setPendingDelete(null);
     } finally {
+      // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(false)
       setSaving(false);
     }
   }
 
   // Hàm submitBookFile: Gửi file riêng tư theo loại sách và hiển thị tiến độ upload.
+  /**
+   * Hàm/thành phần submitBookFile: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, setError, setSaving, setUploadProgress, uploadBookFile, setNotice, setUploadBook, setUploadFile.
+   */
   async function submitBookFile(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // if chỉ chạy nhánh này khi điều kiện !uploadBook || !uploadFile đúng.
     if (!uploadBook || !uploadFile) return;
+    // if chỉ chạy nhánh này khi điều kiện uploadFile.size > 100 * 1024 * 1024 đúng.
     if (uploadFile.size > 100 * 1024 * 1024) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('File vượt quá giới hạn 100 MiB.')
       setError('File vượt quá giới hạn 100 MiB.');
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: undefined.
       return;
     }
+    // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(true)
     setSaving(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // Gọi/thực thi setUploadProgress với đối số để cập nhật logic/giao diện: setUploadProgress(0)
     setUploadProgress(0);
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến result nhận giá trị từ await uploadBookFile(uploadBook._id, uploadFile, setUpl. const không gán lại; let có thể cập nhật.
       const result = await uploadBookFile(uploadBook._id, uploadFile, setUploadProgress);
+      // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice(`Đã tải lên file “${result.original_name}” cho sách “${uploadBook.titl
       setNotice(`Đã tải lên file “${result.original_name}” cho sách “${uploadBook.title}”.`);
+      // Gọi/thực thi setUploadBook với đối số để cập nhật logic/giao diện: setUploadBook(null)
       setUploadBook(null);
+      // Gọi/thực thi setUploadFile với đối số để cập nhật logic/giao diện: setUploadFile(null)
       setUploadFile(null);
     } catch (uploadError) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(uploadError))
       setError(errorMessage(uploadError));
     } finally {
+      // Gọi/thực thi setSaving với đối số để cập nhật logic/giao diện: setSaving(false)
       setSaving(false);
     }
   }
 
   // Hàm openCreateModal: Chuẩn bị form trống để tạo một đầu sách mới.
+  /**
+   * Hàm/thành phần openCreateModal: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSelectedBook, setModalOpen.
+   * Được tham chiếu tại: admin-web/src/pages/ChapterManagement.tsx.
+   */
   function openCreateModal() {
+    // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(null)
     setSelectedBook(null);
+    // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(true)
     setModalOpen(true);
   }
 
   // Hàm openEditModal: Nạp sách đã chọn vào form chỉnh sửa.
+  /**
+   * Hàm/thành phần openEditModal: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: book.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSelectedBook, setModalOpen.
+   * Được tham chiếu tại: admin-web/src/pages/ChapterManagement.tsx.
+   */
   function openEditModal(book: Book) {
+    // Gọi/thực thi setSelectedBook với đối số để cập nhật logic/giao diện: setSelectedBook(book)
     setSelectedBook(book);
+    // Gọi/thực thi setModalOpen với đối số để cập nhật logic/giao diện: setModalOpen(true)
     setModalOpen(true);
   }
 
   // Hàm dismissNotice: Ẩn thông báo thành công khi người dùng chủ động đóng.
+  /**
+   * Hàm/thành phần dismissNotice: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setNotice.
+   * Được tham chiếu tại: admin-web/src/pages/ChapterManagement.tsx, admin-web/src/pages/UserManagement.tsx, admin-web/src/pages/SubscriptionManagement.tsx, admin-web/src/pages/ReportManagement.tsx.
+   */
   function dismissNotice() {
+    // Gọi/thực thi setNotice với đối số để cập nhật logic/giao diện: setNotice('')
     setNotice('');
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <AdminLayout> <section className="mb-7 flex flex-col justify-between gap-5 md:.
   return (
     <AdminLayout>
       <section className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
@@ -353,11 +553,15 @@ async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
           onDelete={setPendingDelete}
           onEdit={openEditModal}
           onUpload={(book) => {
+            // Gọi/thực thi setUploadBook với đối số để cập nhật logic/giao diện: setUploadBook(book)
             setUploadBook(book);
+            // Gọi/thực thi setUploadFile với đối số để cập nhật logic/giao diện: setUploadFile(null)
             setUploadFile(null);
+            // Gọi/thực thi setUploadProgress với đối số để cập nhật logic/giao diện: setUploadProgress(0)
             setUploadProgress(0);
           }}
           onRead={(book) => {
+            // Gọi/thực thi navigate với đối số để cập nhật logic/giao diện: navigate(`/books/${book._id}/read`)
             navigate(`/books/${book._id}/read`);
           }}
         />

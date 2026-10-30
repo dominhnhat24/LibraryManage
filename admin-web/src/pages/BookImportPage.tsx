@@ -1,104 +1,200 @@
+// Import { useState, type FormEvent } từ react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/pages/BookImportPage.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { useState, type FormEvent } from 'react';
+// Import { AlertCircle, BookDown, Check, ExternalLink, FileCheck2, Image, LoaderCircle, S từ lucide-react để dùng trong giao diện.
 import { AlertCircle, BookDown, Check, ExternalLink, FileCheck2, Image, LoaderCircle, Search } from 'lucide-react';
+// Import { AdminLayout } từ ../components/AdminLayout để dùng trong giao diện.
 import { AdminLayout } from '../components/AdminLayout';
+// Import { errorMessage, importBookCandidate, searchBookImportCandidates, type BookImport từ ../api/client để dùng trong giao diện.
 import {
   errorMessage, importBookCandidate, searchBookImportCandidates,
   type BookImportCandidate, type BookImportSearchResult,
 } from '../api/client';
 
+// Kiểu ImportState mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 type ImportState = 'importing' | 'imported' | 'already_imported' | 'duplicate' | 'failed';
+// Kiểu Confirmation mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 type Confirmation = { license: boolean; cover: boolean };
 
 // Trang import ebook thật từ Wikisource; chỉ hiển thị ứng viên backend đã kiểm tra license, nội dung và bìa.
+/**
+ * Hàm/thành phần BookImportPage: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: không có tham số.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: useState, Set, search, preventDefault, trim, setLoading, setError, setSummary.
+ */
 export function BookImportPage() {
+  // Biến [query, setQuery] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [query, setQuery] = useState('');
+  // Biến [result, setResult] nhận giá trị từ useState<BookImportSearchResult | null>(null). const không gán lại; let có thể cập nhật.
   const [result, setResult] = useState<BookImportSearchResult | null>(null);
+  // Biến [selected, setSelected] nhận giá trị từ useState<Set<string>>(new Set()). const không gán lại; let có thể cập nhật.
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Biến [confirmations, setConfirmations] nhận giá trị từ useState<Record<string, Confirmation>>({}). const không gán lại; let có thể cập nhật.
   const [confirmations, setConfirmations] = useState<Record<string, Confirmation>>({});
+  // Biến [states, setStates] nhận giá trị từ useState<Record<string, ImportState>>({}). const không gán lại; let có thể cập nhật.
   const [states, setStates] = useState<Record<string, ImportState>>({});
+  // Biến [failures, setFailures] nhận giá trị từ useState<Record<string, string>>({}). const không gán lại; let có thể cập nhật.
   const [failures, setFailures] = useState<Record<string, string>>({});
+  // Biến [loading, setLoading] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [loading, setLoading] = useState(false);
+  // Biến [importing, setImporting] nhận giá trị từ useState(false). const không gán lại; let có thể cập nhật.
   const [importing, setImporting] = useState(false);
+  // Biến [error, setError] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [error, setError] = useState('');
+  // Biến [summary, setSummary] nhận giá trị từ useState(''). const không gán lại; let có thể cập nhật.
   const [summary, setSummary] = useState('');
 
+  /**
+   * Hàm/thành phần search: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: event.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: preventDefault, trim, setLoading, setError, setSummary, setResult, setSelected, Set.
+   */
   async function search(event: FormEvent<HTMLFormElement>) {
+    // Gọi/thực thi event.preventDefault với đối số để cập nhật logic/giao diện: event.preventDefault()
     event.preventDefault();
+    // Biến term nhận giá trị từ query.trim(). const không gán lại; let có thể cập nhật.
     const term = query.trim();
+    // if chỉ chạy nhánh này khi điều kiện term.length < 2 || loading || importing đúng.
     if (term.length < 2 || loading || importing) return;
+    // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(true)
     setLoading(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // Gọi/thực thi setSummary với đối số để cập nhật logic/giao diện: setSummary('')
     setSummary('');
+    // Gọi/thực thi setResult với đối số để cập nhật logic/giao diện: setResult(null)
     setResult(null);
+    // Gọi/thực thi setSelected với đối số để cập nhật logic/giao diện: setSelected(new Set())
     setSelected(new Set());
+    // Gọi/thực thi setConfirmations với đối số để cập nhật logic/giao diện: setConfirmations({})
     setConfirmations({});
+    // Gọi/thực thi setStates với đối số để cập nhật logic/giao diện: setStates({})
     setStates({});
+    // Gọi/thực thi setFailures với đối số để cập nhật logic/giao diện: setFailures({})
     setFailures({});
+    // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
     try {
+      // Biến response nhận giá trị từ await searchBookImportCandidates(term). const không gán lại; let có thể cập nhật.
       const response = await searchBookImportCandidates(term);
+      // Gọi/thực thi setResult với đối số để cập nhật logic/giao diện: setResult(response)
       setResult(response);
     } catch (searchError: unknown) {
+      // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError(errorMessage(searchError))
       setError(errorMessage(searchError));
     } finally {
+      // Gọi/thực thi setLoading với đối số để cập nhật logic/giao diện: setLoading(false)
       setLoading(false);
     }
   }
 
+  /**
+   * Hàm/thành phần toggleSelected: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: id.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setSelected, Set, has, delete, add.
+   */
   function toggleSelected(id: string) {
+    // Gọi/thực thi setSelected với đối số để cập nhật logic/giao diện: setSelected((current) => { const next = new Set(current); if (next.has(id)) next
     setSelected((current) => {
+      // Biến next nhận giá trị từ new Set(current). const không gán lại; let có thể cập nhật.
       const next = new Set(current);
+      // if chỉ chạy nhánh này khi điều kiện next.has(id) đúng.
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: next.
       return next;
     });
   }
 
+  /**
+   * Hàm/thành phần confirm: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: id, key, value.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: setConfirmations.
+   */
   function confirm(id: string, key: keyof Confirmation, value: boolean) {
+    // Gọi/thực thi setConfirmations với đối số để cập nhật logic/giao diện: setConfirmations((current) => ({ ...current, [id]: { ...(current[id] || { licens
     setConfirmations((current) => ({
       ...current,
       [id]: { ...(current[id] || { license: false, cover: false }), [key]: value },
     }));
   }
 
+  /**
+   * Hàm/thành phần importSelected: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+   * Tham số/props: không có tham số.
+   * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+   * Gọi tiếp: filter, has, setImporting, setError, setSummary, setStates, setFailures, importBookCandidate.
+   */
   async function importSelected() {
+    // if chỉ chạy nhánh này khi điều kiện !result || importing đúng.
     if (!result || importing) return;
+    // Biến queue nhận giá trị từ result.candidates.filter((candidate) => selected.has(ca. const không gán lại; let có thể cập nhật.
     const queue = result.candidates.filter((candidate) => selected.has(candidate.id)
       && confirmations[candidate.id]?.license && confirmations[candidate.id]?.cover
       && states[candidate.id] !== 'imported' && states[candidate.id] !== 'already_imported'
       && states[candidate.id] !== 'duplicate');
+    // if chỉ chạy nhánh này khi điều kiện queue.length === 0 đúng.
     if (queue.length === 0) return;
+    // Gọi/thực thi setImporting với đối số để cập nhật logic/giao diện: setImporting(true)
     setImporting(true);
+    // Gọi/thực thi setError với đối số để cập nhật logic/giao diện: setError('')
     setError('');
+    // Gọi/thực thi setSummary với đối số để cập nhật logic/giao diện: setSummary('')
     setSummary('');
+    // Biến importedCount nhận giá trị từ 0. const không gán lại; let có thể cập nhật.
     let importedCount = 0;
+    // Biến duplicateCount nhận giá trị từ 0. const không gán lại; let có thể cập nhật.
     let duplicateCount = 0;
+    // Biến failedCount nhận giá trị từ 0. const không gán lại; let có thể cập nhật.
     let failedCount = 0;
+    // Vòng lặp duyệt dữ liệu hoặc lặp theo điều kiện để tạo/cập nhật kết quả.
     for (const candidate of queue) {
+      // Gọi/thực thi setStates với đối số để cập nhật logic/giao diện: setStates((current) => ({ ...current, [candidate.id]: 'importing' }))
       setStates((current) => ({ ...current, [candidate.id]: 'importing' }));
+      // Gọi/thực thi setFailures với đối số để cập nhật logic/giao diện: setFailures((current) => ({ ...current, [candidate.id]: '' }))
       setFailures((current) => ({ ...current, [candidate.id]: '' }));
+      // try gom thao tác có thể lỗi; catch/finally xử lý lỗi hoặc dọn trạng thái.
       try {
+        // Biến response nhận giá trị từ await importBookCandidate(candidate.id, true, true). const không gán lại; let có thể cập nhật.
         const response = await importBookCandidate(candidate.id, true, true);
+        // Gọi/thực thi setStates với đối số để cập nhật logic/giao diện: setStates((current) => ({ ...current, [candidate.id]: response.status }))
         setStates((current) => ({ ...current, [candidate.id]: response.status }));
+        // if chỉ chạy nhánh này khi điều kiện response.status === 'imported' đúng.
         if (response.status === 'imported') importedCount += 1;
         else duplicateCount += 1;
       } catch (importError: unknown) {
+        // Gọi/thực thi biểu thức để cập nhật logic/giao diện: failedCount += 1
         failedCount += 1;
+        // Biến message nhận giá trị từ errorMessage(importError). const không gán lại; let có thể cập nhật.
         const message = errorMessage(importError);
+        // Gọi/thực thi setStates với đối số để cập nhật logic/giao diện: setStates((current) => ({ ...current, [candidate.id]: 'failed' }))
         setStates((current) => ({ ...current, [candidate.id]: 'failed' }));
+        // Gọi/thực thi setFailures với đối số để cập nhật logic/giao diện: setFailures((current) => ({ ...current, [candidate.id]: message }))
         setFailures((current) => ({ ...current, [candidate.id]: message }));
       }
     }
+    // Gọi/thực thi setSummary với đối số để cập nhật logic/giao diện: setSummary(`Hoàn tất: ${importedCount} mới, ${duplicateCount} đã có, ${failedCou
     setSummary(`Hoàn tất: ${importedCount} mới, ${duplicateCount} đã có, ${failedCount} lỗi.`);
+    // Gọi/thực thi setImporting với đối số để cập nhật logic/giao diện: setImporting(false)
     setImporting(false);
   }
 
+  // Biến readyCount nhận giá trị từ result?.candidates.filter((candidate) => selected.has(c. const không gán lại; let có thể cập nhật.
   const readyCount = result?.candidates.filter((candidate) => selected.has(candidate.id)
     && confirmations[candidate.id]?.license && confirmations[candidate.id]?.cover
     && states[candidate.id] !== 'imported' && states[candidate.id] !== 'already_imported'
     && states[candidate.id] !== 'duplicate').length || 0;
+  // Biến completedCount nhận giá trị từ Object.values(states).filter((state) => state !== 'impo. const không gán lại; let có thể cập nhật.
   const completedCount = Object.values(states).filter((state) => state !== 'importing').length;
+  // Biến queueCount nhận giá trị từ Object.values(states).filter((state) => state === 'impo. const không gán lại; let có thể cập nhật.
   const queueCount = Object.values(states).filter((state) => state === 'importing').length;
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <AdminLayout> <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg.
   return (
     <AdminLayout>
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -198,6 +294,12 @@ export function BookImportPage() {
   );
 }
 
+/**
+ * Hàm/thành phần CandidateCard: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { candidate, selected, confirmation, sta.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: return, Boolean, toLocaleString, onConfirm.
+ */
 function CandidateCard({
   candidate, selected, confirmation, state, failure, onSelect, onConfirm,
 }: {
@@ -209,10 +311,12 @@ function CandidateCard({
   onSelect: () => void;
   onConfirm: (key: keyof Confirmation, checked: boolean) => void;
 }) {
+  // Biến statusText nhận giá trị từ state === 'importing' ? 'Đang tải và xác minh PDF…' : s. const không gán lại; let có thể cập nhật.
   const statusText = state === 'importing' ? 'Đang tải và xác minh PDF…'
     : state === 'imported' ? 'Đã import thành công'
       : state === 'already_imported' || state === 'duplicate' ? 'Đã tồn tại — không tạo trùng'
         : state === 'failed' ? `Import thất bại: ${failure}` : '';
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <article className="overflow-hidden rounded-2xl border border-[#DDE9E6] bg-whi.
   return (
     <article className="overflow-hidden rounded-2xl border border-[#DDE9E6] bg-white shadow-sm">
       <div className="flex gap-4 p-4 sm:p-5">

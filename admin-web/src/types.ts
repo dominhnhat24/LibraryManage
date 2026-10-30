@@ -1,10 +1,20 @@
+// Kiểu UserRole mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
+/**
+ * Tệp admin-web/src/types.ts: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 export type UserRole = 'ADMIN' | 'USER';
+// Kiểu BookCategory mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 export type BookCategory = 'ebook' | 'audiobook' | 'comic' | 'webnovel';
+// Kiểu BookGenre mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 export type BookGenre = 'van_hoc_viet_nam' | 'truyen_ngan_viet_nam' | 'tho_viet_nam' | 'van_hoc_dan_gian' | 'van_hoc_the_gioi' | 'kinh_doanh' | 'phat_trien_ban_than' | 'tam_ly_hoc' | 'lich_su' | 'khoa_hoc';
+// Kiểu BookAccess mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 export type BookAccess = 'free' | 'premium' | 'vip';
+// Kiểu BookStatus mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 export type BookStatus = 'draft' | 'published';
+// Kiểu BookReaderMode mô tả hình dạng dữ liệu để TypeScript kiểm tra lúc biên dịch.
 export type BookReaderMode = 'chapters' | 'pdf' | 'unsupported' | 'unavailable';
 
+// Interface User quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface User {
   _id?: string;
   id: string;
@@ -20,6 +30,7 @@ export interface User {
   createdAt?: string;
 }
 
+// Interface UserReference quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface UserReference {
   _id?: string;
   id?: string;
@@ -28,6 +39,7 @@ export interface UserReference {
   role?: UserRole;
 }
 
+// Interface Comment quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Comment {
   _id: string;
   id?: string;
@@ -39,6 +51,7 @@ export interface Comment {
   updatedAt: string;
 }
 
+// Interface Bookmark quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Bookmark {
   _id: string;
   id?: string;
@@ -48,6 +61,7 @@ export interface Bookmark {
   updatedAt: string;
 }
 
+// Interface ReadingProgress quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface ReadingProgress {
   _id: string;
   id?: string;
@@ -61,6 +75,7 @@ export interface ReadingProgress {
   updatedAt: string;
 }
 
+// Interface Subscription quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Subscription {
   _id: string;
   id?: string;
@@ -90,6 +105,7 @@ export interface Subscription {
   updatedAt: string;
 }
 
+// Interface Report quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Report {
   _id: string;
   id?: string;
@@ -103,6 +119,7 @@ export interface Report {
   updatedAt: string;
 }
 
+// Interface Book quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Book {
   _id: string;
   id?: string;
@@ -134,6 +151,7 @@ export interface Book {
   reader_mode?: BookReaderMode;
 }
 
+// Interface ChapterBookReference quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface ChapterBookReference {
   _id?: string;
   id?: string;
@@ -144,6 +162,7 @@ export interface ChapterBookReference {
 }
 
 // Gộp chung thành một interface Chapter duy nhất, tránh khai báo đè gây lỗi trùng lặp
+// Interface Chapter quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface Chapter {
   _id: string;
   id?: string;
@@ -159,11 +178,13 @@ export interface Chapter {
   updatedAt?: string;
 }
 
+// Interface ReadChapterResult quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface ReadChapterResult {
   book_id: string;
   chapter: { id: string; title: string; order: number; content: string };
 }
 
+// Interface PaginationData quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface PaginationData {
   total: number;
   page: number;
@@ -171,6 +192,7 @@ export interface PaginationData {
   totalPages: number;
 }
 
+// Interface ApiEnvelope quy định các trường và kiểu dữ liệu mà object/thành phần cần tuân theo.
 export interface ApiEnvelope<T> {
   status: 'success' | 'error';
   message?: string;

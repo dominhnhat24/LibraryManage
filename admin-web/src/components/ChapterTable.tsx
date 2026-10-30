@@ -1,6 +1,12 @@
+// Import { BookOpen, Pencil, Trash2 } từ lucide-react để dùng trong giao diện.
+/**
+ * Tệp admin-web/src/components/ChapterTable.tsx: thành phần/module của ứng dụng React. Chú thích giải thích phụ thuộc, state/biến, điều kiện và luồng gọi.
+ */
 import { BookOpen, Pencil, Trash2 } from 'lucide-react';
+// Import type { Chapter, ChapterBookReference } từ ../types để dùng trong giao diện.
 import type { Chapter, ChapterBookReference } from '../types';
 
+// Biến accessLabels nhận giá trị từ { free: 'Miễn phí', premium: 'Premium', vip: 'VIP', }. const không gán lại; let có thể cập nhật.
 const accessLabels: Record<Chapter['access_level'], string> = {
   free: 'Miễn phí',
   premium: 'Premium',
@@ -8,23 +14,44 @@ const accessLabels: Record<Chapter['access_level'], string> = {
 };
 
 // Hàm getBookTitle: Hiển thị tên sách cha đã populate hoặc mã sách nếu API chỉ trả ID.
+/**
+ * Hàm/thành phần getBookTitle: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: book.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: slice.
+ */
 function getBookTitle(book: Chapter['book_id']): string {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: typeof book === 'string' ? `Sách ${book.slice(-6)}` : book.title.
   return typeof book === 'string' ? `Sách ${book.slice(-6)}` : book.title;
 }
 
 // Hàm getChapterBook: Lấy thông tin sách cha đã populate để hiển thị ảnh bìa và danh mục.
+/**
+ * Hàm/thành phần getChapterBook: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: book.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ */
 function getChapterBook(book: Chapter['book_id']): ChapterBookReference | null {
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: typeof book === 'string' ? null : book.
   return typeof book === 'string' ? null : book;
 }
 
 // Hàm ChapterTable: Hiển thị danh sách chương responsive, sách cha, số thứ tự, quyền đọc và thao tác CRUD.
+/**
+ * Hàm/thành phần ChapterTable: xử lý phần giao diện hoặc logic theo tên và trách nhiệm của nó.
+ * Tham số/props: { chapters, loading, onEdit, onDelete }.
+ * Kết quả: trả giá trị hoặc giao diện cho thành phần/nơi gọi.
+ * Gọi tiếp: return, map, getChapterBook, getBookTitle, DateTimeFormat, format, Date, onEdit.
+ */
 export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
   chapters: Chapter[];
   loading: boolean;
   onEdit: (chapter: Chapter) => void;
   onDelete: (chapter: Chapter) => void;
 }) {
+  // if chỉ chạy nhánh này khi điều kiện loading đúng.
   if (loading) {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="grid min-h-64 place-items-center"> <div className="flex items-.
     return (
       <div className="grid min-h-64 place-items-center">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
@@ -35,7 +62,9 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
     );
   }
 
+  // if chỉ chạy nhánh này khi điều kiện chapters.length === 0 đúng.
   if (chapters.length === 0) {
+    // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="flex min-h-64 flex-col items-center justify-center px-6 text-c.
     return (
       <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
         <span className="grid h-14 w-14 place-items-center border border-[#e6e4dc] bg-[#faf9f6] text-[#78837c]">
@@ -47,6 +76,7 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
     );
   }
 
+  // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <div className="overflow-x-auto"> <table className="w-full min-w-[760px] borde.
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[760px] border-collapse text-left">
@@ -61,7 +91,9 @@ export function ChapterTable({ chapters, loading, onEdit, onDelete }: {
         </thead>
         <tbody className="divide-y divide-[#EEF3F0]">
           {chapters.map((chapter) => {
+            // Biến book nhận giá trị từ getChapterBook(chapter.book_id). const không gán lại; let có thể cập nhật.
             const book = getChapterBook(chapter.book_id);
+            // return kết thúc hàm và gửi giá trị về thành phần/nơi gọi: ( <tr className="group transition-colors hover:bg-[#FFFFFF]" key={chapter._id}> .
             return (
               <tr className="group transition-colors hover:bg-[#FFFFFF]" key={chapter._id}>
                 <td className="px-5 py-3.5">
